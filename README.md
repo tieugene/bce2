@@ -1,13 +1,6 @@
 # bce
 Blockchain export.
 CLI utility to export blockchain data into plain text format
-Note: leveldb _may_ requires libkyotocabinet-devel for benchmarks
-
-## build
-Required:
-- CMakeFile.txt
-src/main.cpp
-src/config/bitcoin-config.h
 
 ## Resurces:
 - [blk* structure](https://en.bitcoin.it/wiki/Bitcoin_Core_0.11_(ch_2):_Data_Storage):
