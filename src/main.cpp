@@ -5,6 +5,8 @@ Options:
 -q[ty]
 -noout
 -v (debug)
+
+FIXME: b outs after tx/vin/vout
 */
 
 #include "misc.h"
@@ -114,11 +116,9 @@ bool    parse_bk(uint32_t bk_no)
 
 bool    parse_file(void)
 {
-    for (uint32_t i =  0; i < 200; i++) {
+    for (uint32_t i =  0; i < 200; i++, CUR_BK.no++)
         if (!parse_bk(i))
             return false;
-        CUR_BK.no++;
-    }
     return true;
 }
 

@@ -42,9 +42,9 @@ uint8_t *read_u8_ptr(uint32_t size)
     return retvalue;
 }
 
-void    out_vin(void)
+void    out_vin(void)   // FIXME: compare w/ COINBASE_txid too
 {
-    if (CUR_VIN.vout != COINBASE_vout)
+    if (CUR_VIN.vout != COINBASE_vout)  // skip coinbase
         cout << "i" << TAB << "..." << TAB << CUR_VIN.vout << endl;
 }
 
@@ -55,7 +55,7 @@ void    out_vout(void)
 
 void    out_tx(void)
 {
-    cout << "t" << TAB << CUR_TX.no << TAB << endl;
+    cout << "t" << TAB << CUR_BK.no << TAB << CUR_TX.no << TAB << endl;
 }
 
 void    out_bk(void)    ///< Output bk data for DB
