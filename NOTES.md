@@ -1,62 +1,60 @@
+# Notes
+
 ## Plan:
-1. +Alpha walk (200506):
-  - +light parse bk, tx, vin, vout
-2. Correct walk:
-  - +refactoring source (split by modules)
-  - ?outputs (1. bk, 2. tx)
+1. &check;Alpha (simple walk): _200506_
+  - &check;light parse bk, tx, vin, vout
+1. &check;Tuning: _200507_
+  - &check;refactoring source (split by modules)
+  - &check;output (bk, tx (w/o hash), vout)
+  - &check;options (parse)
+  - &check;options (use num, quiet, debug, __file_):
+1. Beta (correct walk):
   - stop file on EOF
-  - options (from, qty, noout, -v, <files>) // getopt, getoptpp, boost::program_options
-  - debug outputs
+  - _fileS_
+  - bk.hash
   - tx.hash
-3. Scripts:
+  - output (tx (w/ hash))
+1. RC1 (scripts):
   - decode addr
-  - outputs (3. vout)
-4. K-v
-  - tx
-  - addr
-  - outputs (4. addr, 5. vin, 6. x)
-5. chk bk
-6. Mempool
+  - ~~outputs (addr)~~
+1. RC3 (k-v storages):
+  - k-v:
+     - tx
+     - addr
+  - output (addr, vin, x)
+1. Release (mempool)
+1. Bugfix (chk bk on longest chain)
 
-## hash
-- bk hash = sha256(sha256(bk.header))
-- tx hash = sha256(sha256(tx.ver..tx.locktime))
+## misc:
+- options libs:
+  - [getopt](https://www.gnu.org/software/libc/manual/html_node/Using-Getopt.html) (unistd.h)
+  - popt
+  - [getoptpp](https://bitbucket.org/fudepan/getoptpp)
+  - [getoptpp](https://github.com/cgloeckner/getoptpp)
+  - [cxxopts](https://github.com/jarro2783/cxxopts)
+  - boost::program_options
+- commands:
+  - info/check
+  - export
+- params (export):
+  - f[rom] block
+  - q[ty] blocks
+  - k[eep]
+- intermediates:
+  - tx hashes
+  - address hashes
+- [coinbase](https://learnmeabitcoin.com/guide/coinbase-transaction):
+  - txid = 0x00....00
+  - vout = 0xFFFFFFFF
+- hash:
+  - bk.hash = sha256(sha256(bk.header))
+  - tx.hash = sha256(sha256(tx.ver..tx.locktime))
+  - check(s:str):
 
-## coinbase
-- txid = 0x00....00
-- vout = 0xFFFFFFFF
-[Pruf](https://learnmeabitcoin.com/guide/coinbase-transaction)
-
-## misc
-
-need - params, bc container
-
-commands:
-
-- info/check
-- export
-params (export):
--f[rom] block
--q[ty] blocks
--k[eep]
-intermediates:
-- tx hashes
-- address hashes
-== each block:
-- assign sig+len+header
-- get txins; for each:
--- assign ver
--- get vcount; for each:
---- assign txid
---- assign vout
---- get ssize
---- assign script
---- assign seq
--- get vcount; for each:
---- assign satoshi
---- get ssize
---- assign script
--- assign locktime
+```python
+import hashlib
+print(hashlib.sha256(hashlib.sha256(bytes.fromhex(s)).digest()).hexdigest())
+```
 
 ## find:
 - bk height - check by p_hash?

@@ -12,6 +12,16 @@ using namespace std;
 typedef array<uint8_t, 32> uint256_t;   ///< hash representation
 //typedef uint8_t[32] uint256_t;   ///< hash representation
 
+struct  OPT_T
+{
+    uint32_t    from;
+    uint32_t    num;
+    bool        quiet;
+    int         verbose;
+    string      bkdir;
+    string      cache;
+};
+
 union UNIPTR_T   ///< Universal ptr
 {
     void        *v_ptr;
@@ -69,6 +79,7 @@ struct  VOUT_T
     uint8_t     *script;
 };
 
+extern OPT_T    OPTS;
 extern char
     *buffer,    ///< whole of file buffer
     *curptr,    ///< cursor

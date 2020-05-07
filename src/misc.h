@@ -3,14 +3,17 @@
 
 #include "bce.h"
 
+int         cli(int, char *[]); ///< Handle CLI. Return 0 if error, argv's index of 1st filename on success.
+
 uint32_t    read_v(void);
 uint32_t    read_32(void);
 uint64_t    read_64(void);
 uint8_t *   read_u8_ptr(uint32_t);
 uint256_t * read_256_ptr(void);
 
-void    mk_hash(void *, uint32_t, uint256_t &);
-string  hash2str(uint256_t &);
+void        mk_hash(void *, uint32_t, uint256_t &);
+uint256_t   hash256(void *, uint32_t);
+string      hash2str(uint256_t &);
 
 void    out_vin(void);
 void    out_vout(void);

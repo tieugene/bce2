@@ -1,7 +1,85 @@
 #include "misc.h"
 
 #include <stdio.h>
+#include <unistd.h>
 #include <openssl/sha.h>
+
+string  help_txt = "\
+Usage: [options] file[ file[...]]\n\
+Options:\n\
+-f n      - block starts from (default=0)\n\
+-n n      - blocks to process (default=1)\n\
+-q        - quiet (disable output result to stdout)\n\
+-v[n]     - verbose (debug info to stderr)\n\
+-b <path> - blk*.dat folder (default='.')\n\
+-c <path> - cache data folder (default='.')\n\
+-h        - help\n\
+";
+
+void    __prn_opts(void)
+{
+    cerr
+        << "Options:" << endl
+        << TAB << "From:" << TAB << OPTS.from << endl
+        << TAB << "Num:" << TAB << OPTS.num << endl
+        << TAB << "Quiet:" << TAB << OPTS.quiet << endl
+        << TAB << "Debug:" << TAB << OPTS.verbose << endl
+        << TAB << "BkDir:" << TAB << OPTS.bkdir << endl
+        << TAB << "Cache:" << TAB << OPTS.cache << endl
+    ;
+}
+
+int cli(int argc, char *argv[])
+{
+    int opt;
+    int retvalue = 0;
+
+    OPTS.from = 0;
+    OPTS.num = 1;
+    OPTS.quiet = false;
+    OPTS.verbose = 0;
+    OPTS.bkdir = ".";
+    OPTS.cache = ".";
+    while ((opt = getopt(argc, argv, "f:n:qv::b:c:")) != -1)
+    {
+        switch (opt) {
+            case 'f':   // FIXME: optarg<0
+                OPTS.from = atoi(optarg);
+                break;
+            case 'n':   // FIXME: optarg<1
+                OPTS.num = atoi(optarg);
+                break;
+            case 'q':
+                OPTS.quiet = true;
+                break;
+            case 'v':
+                OPTS.verbose = (optarg) ? atoi(optarg) : 1;
+                break;
+            case 'b':
+                OPTS.bkdir = optarg;
+                break;
+            case 'c':
+                OPTS.cache = optarg;
+                break;
+            //case 'h':
+            //    cerr << help_txt;
+            //    break;
+            case '?':   // can handle optopt
+                cerr << "Use '" << argv[0] << " -h' for help." << endl;
+                break;
+        }
+    }
+    // opterr - allways 1
+    // optind - 1st file argv's no (if argc > optind)
+    if (argc > optind)  {
+        retvalue = optind;
+        if (OPTS.verbose)   // TODO: up v-level
+            __prn_opts();
+    }
+    else
+        cerr << "Error: blk*.dat filename[s] required." << endl << help_txt;
+    return retvalue;
+}
 
 uint32_t    read_v(void)   ///<read 1..4-byte int and forward;
 {
@@ -45,6 +123,7 @@ uint8_t *   read_u8_ptr(uint32_t size)
     return retvalue;
 }
 
+// 1.
 void    sha256(void *src, uint32_t size, uint256_t &dst)
 {
     SHA256_CTX context;
@@ -58,6 +137,33 @@ void    mk_hash(void *src, uint32_t size, uint256_t &dst)
     uint256_t tmp;
     sha256(src, size, tmp);
     sha256(&tmp, sizeof(uint256_t), dst);
+}
+
+// 2.
+uint256_t    sha256(void *src, uint32_t size)
+{
+    uint256_t result;
+    SHA256_CTX context;
+    SHA256_Init(&context);
+    SHA256_Update(&context, src, size);
+    SHA256_Final(result.begin(), &context);
+    return result;
+}
+
+uint256_t    sha256(uint256_t &src)
+{
+    uint256_t result;
+    SHA256_CTX context;
+    SHA256_Init(&context);
+    SHA256_Update(&context, src.begin(), src.size());
+    SHA256_Final(result.begin(), &context);
+    return result;
+}
+
+uint256_t    hash256(void *src, uint32_t size)
+{
+    auto result = sha256(src, size);
+    return sha256(result);
 }
 
 string    hash2str(uint256_t &h)

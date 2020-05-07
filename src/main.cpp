@@ -1,16 +1,20 @@
 /*
 Usage: [options] file[ file[...]]
 Options:
--f[rom]
--q[ty]
--noout
--v (debug)
-
-FIXME: b outs after tx/vin/vout
+-f[rom]     - start block
+-n[um]      - blocks to process
+-q[uiet]    - no output result (stdout)
+-v[erbose]  - debug info (stderr)
+-c[ache]    - helping data folder
+-h[elp]     - subj
 */
 
 #include "misc.h"
+#include <filesystem>
 
+namespace fs = std::filesystem;
+
+OPT_T OPTS;
 char
     *buffer,    ///< whole of file buffer
     *curptr,    ///< cursor
@@ -22,11 +26,6 @@ BK_T        CUR_BK;
 TX_T        CUR_TX;
 VIN_T       CUR_VIN;
 VOUT_T      CUR_VOUT;
-
-bool        out_prn = true;
-bool        out_debug = false;
-
-string      sBCDir = "/mnt/shares/home/eugene/ftp/VCS/my/GIT/bce";   //"/mnt/sdb2/bitcoin/blocks";
 
 bool    read_file(string &fn)
 {
@@ -54,9 +53,9 @@ bool    parse_vin(uint32_t) // FIXME: <= int16
     CUR_VIN.ssize = read_v();
     CUR_VIN.script = read_u8_ptr(CUR_VIN.ssize);
     CUR_VIN.seq = read_32();
-    if (out_prn)
+    if (!OPTS.quiet)
         out_vin();
-    if (out_debug)
+    if (OPTS.verbose)
         __prn_vin();
     return true;
 }
@@ -68,9 +67,9 @@ bool    parse_vout(uint32_t no) // FIXME: <= int16
     CUR_VOUT.satoshi = read_64();
     CUR_VOUT.ssize = read_v();
     CUR_VOUT.script = read_u8_ptr(CUR_VOUT.ssize);
-    if (out_prn)
+    if (!OPTS.quiet)
         out_vout();
-    if (out_debug)
+    if (OPTS.verbose)
         __prn_vout();
     return true;
 }
@@ -78,7 +77,7 @@ bool    parse_vout(uint32_t no) // FIXME: <= int16
 bool    parse_tx(uint32_t bk_tx_no) // FIXME: <= int16
 {
     CUR_TX.ver = read_32();
-    if (out_prn)
+    if (!OPTS.quiet)
         out_tx();
     CUR_TX.vins = read_v();
     for (uint32_t i =  0; i < CUR_TX.vins; i++)
@@ -89,7 +88,7 @@ bool    parse_tx(uint32_t bk_tx_no) // FIXME: <= int16
         if (!parse_vout(i))
             return false;
     CUR_TX.locktime = read_32();
-    if (out_debug)
+    if (OPTS.verbose)
         __prn_tx();
     return true;
 }
@@ -104,10 +103,11 @@ bool    parse_bk(uint32_t bk_no)
     }
     CUR_PTR.u8_ptr += sizeof (BK_HEAD_T);
     CUR_BK.txs = read_v();
-    mk_hash(CUR_BK.head_ptr, sizeof(BK_HEAD_T), CUR_BK.hash);
-    if (out_prn)
+    //mk_hash(CUR_BK.head_ptr, sizeof(BK_HEAD_T), CUR_BK.hash);
+    CUR_BK.hash = hash256(CUR_BK.head_ptr, sizeof(BK_HEAD_T));
+    if (!OPTS.quiet)
         out_bk();
-    if (out_debug)
+    if (OPTS.verbose)
         __prn_bk();
     for (uint32_t i = 0; i < CUR_BK.txs; i++, CUR_TX.no++)
         if (!parse_tx(i))
@@ -117,7 +117,7 @@ bool    parse_bk(uint32_t bk_no)
 
 bool    parse_file(void)
 {
-    for (uint32_t i =  0; i < 5; i++, CUR_BK.no++)
+    for (uint32_t i =  0; i < OPTS.num; i++, CUR_BK.no++)
         if (!parse_bk(i))
             return false;
     return true;
@@ -125,18 +125,30 @@ bool    parse_file(void)
 
 int main(int argc, char *argv[])
 {
-    auto sDatName = sBCDir + "/blk00000.dat";
+    string  sDatName;
+
+    // -1. handle CLI
+    int file1idx = cli(argc, argv);
+    if (!file1idx)
+        return 1;
+    sDatName = OPTS.bkdir + "/" + argv[file1idx];   // FIXME: all of files
     // 0. init
     CUR_BK.no = 0;
     CUR_TX.no = 0;
     // 1. read
     if (!read_file(sDatName))
         return 1;
-    cerr << "File size: " << bsize << endl;
+    if (OPTS.verbose)
+        cerr << "File size: " << bsize << endl;
     // 2. parse
     auto result = parse_file();
-    cerr << "File parsing: " << (result ? "OK" : "ERROR!")  << endl;
-    //cerr << "BK header size: " << sizeof(BK_HEAD_T) << endl;
+    if (OPTS.verbose)
+        cerr << "File parsing: " << (result ? "OK" : "ERROR!")  << endl;
     // FIXME: delete buffer;
     return 0;
 }
+
+//fs::path sDatName = OPTS.bkdir + "/" + argv[file1idx];
+//cerr << dir << TAB << file << endl;
+//auto sDatPAth = dir.append(file);
+//auto sDatPAth = std::filesystem::path(OPTS.bkdir, argv[file1idx]);
