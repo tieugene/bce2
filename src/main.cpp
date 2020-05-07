@@ -104,6 +104,7 @@ bool    parse_bk(uint32_t bk_no)
     }
     CUR_PTR.u8_ptr += sizeof (BK_HEAD_T);
     CUR_BK.txs = read_v();
+    mk_hash(CUR_BK.head_ptr, sizeof(BK_HEAD_T), CUR_BK.hash);
     if (out_prn)
         out_bk();
     if (out_debug)
@@ -116,7 +117,7 @@ bool    parse_bk(uint32_t bk_no)
 
 bool    parse_file(void)
 {
-    for (uint32_t i =  0; i < 200; i++, CUR_BK.no++)
+    for (uint32_t i =  0; i < 5; i++, CUR_BK.no++)
         if (!parse_bk(i))
             return false;
     return true;

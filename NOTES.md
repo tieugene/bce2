@@ -18,6 +18,10 @@
 5. chk bk
 6. Mempool
 
+## hash
+- bk hash = sha256(sha256(bk.header))
+- tx hash = sha256(sha256(tx.ver..tx.locktime))
+
 ## coinbase
 - txid = 0x00....00
 - vout = 0xFFFFFFFF

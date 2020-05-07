@@ -10,6 +10,7 @@
 using namespace std;
 
 typedef array<uint8_t, 32> uint256_t;   ///< hash representation
+//typedef uint8_t[32] uint256_t;   ///< hash representation
 
 union UNIPTR_T   ///< Universal ptr
 {
@@ -38,6 +39,7 @@ struct  BK_T
     uint32_t    no;
     BK_HEAD_T   *head_ptr;
     uint32_t    txs;
+    uint256_t   hash;
 };
 
 struct TX_T         ///< transaction variables w/o vins/vouts
@@ -47,6 +49,7 @@ struct TX_T         ///< transaction variables w/o vins/vouts
     uint32_t    vins;
     uint32_t    vouts;
     uint32_t    locktime;
+    uint256_t   hash;
 };
 
 struct  VIN_T
