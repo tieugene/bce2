@@ -24,5 +24,7 @@ void    __prn_vin(void);
 void    __prn_vout(void);
 void    __prn_tx(void);
 void    __prn_bk(void);
-
+void    __prn_file(string &);
+void    __prn_summary(void);
+string  __prn_hex(void *, size_t);
 #endif // MISC_H

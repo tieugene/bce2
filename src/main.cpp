@@ -23,6 +23,8 @@ TX_T        CUR_TX;
 VIN_T       CUR_VIN;
 VOUT_T      CUR_VOUT;
 
+static uint32_t bk_no_upto;
+
 bool    parse_vin(uint32_t no)
 {
     // FIXME: coinbase = 32x00 + 4xFF (txid+vout)
@@ -33,7 +35,7 @@ bool    parse_vin(uint32_t no)
     CUR_VIN.seq = read_32();
     if (!OPTS.quiet)
         out_vin();
-    if (OPTS.verbose > 2)
+    if (OPTS.verbose >= 4)
         __prn_vin();
     return true;
 }
@@ -47,7 +49,7 @@ bool    parse_vout(uint32_t no)
     CUR_VOUT.script = read_u8_ptr(CUR_VOUT.ssize);
     if (!OPTS.quiet)
         out_vout();
-    if (OPTS.verbose > 2)
+    if (OPTS.verbose >= 4)
         __prn_vout();
     return true;
 }
@@ -66,7 +68,7 @@ bool    parse_tx(uint32_t bk_tx_no)
         if (!parse_vout(i))
             return false;
     CUR_TX.locktime = read_32();
-    if (OPTS.verbose > 1)
+    if (OPTS.verbose >= 3)
         __prn_tx();
     STAT.vins += CUR_TX.vins;
     STAT.vouts += CUR_TX.vouts;
@@ -84,8 +86,8 @@ bool    parse_bk(bool skip)
         return false;
     }
     if (skip) {
-        if (OPTS.verbose > 1)
-            cerr << "Block № " << CUR_BK.no << " skipped" << endl;
+        if (OPTS.verbose >= 3)
+            cerr << "Block: " << CUR_BK.no << " <skipped>" << endl;
         CUR_PTR.u8_ptr += (CUR_BK.head_ptr->size + 8);  // including sig and size
         return true;
     }
@@ -95,7 +97,7 @@ bool    parse_bk(bool skip)
     CUR_BK.hash = hash256(CUR_BK.head_ptr, sizeof(BK_HEAD_T));
     if (!OPTS.quiet)
         out_bk();
-    if (OPTS.verbose)
+    if (OPTS.verbose >= 2)
         __prn_bk();
     for (uint32_t i = 0; i < CUR_BK.txs; i++, CUR_TX.no++)
         if (!parse_tx(i))
@@ -103,10 +105,8 @@ bool    parse_bk(bool skip)
     return true;
 }
 
-bool    parse_file(void)
+bool    parse_file(void)    // TODO: err | EOF | -n exceeded
 {
-    // TODO: skip from 0 to 'from'; from 'from' to 'from'+'num' or EOF
-    auto bk_no_upto = OPTS.from + OPTS.num;
     while (CUR_BK.no < bk_no_upto and CUR_PTR.v_ptr < BUFFER.end) {
         bool skip = (CUR_BK.no < OPTS.from);
         if (!parse_bk(skip))
@@ -131,7 +131,7 @@ bool    read_file(string &fn)
         return false;
     }
     auto udata_size = uint32_t(data_size);
-    if (OPTS.verbose)
+    if (OPTS.verbose > 1)
         cerr << fn << " ("<< udata_size << " bytes):" << endl;
     if (BUFFER.size_real < udata_size) {
         if (BUFFER.beg)
@@ -152,44 +152,35 @@ bool    read_file(string &fn)
 
 int     main(int argc, char *argv[])
 {
-    string  sDatName;
-
-    // 0. init
     // 1. handle CLI
     int file1idx = cli(argc, argv);
-    if (!file1idx)  // no file
+    if (!file1idx)  // no file[s] defined
         return 1;
-    // TODO: <loop>
-    if (OPTS.bkdir.length())
-        sDatName = OPTS.bkdir + "/" + argv[file1idx];   // TODO: merge path
-    else
-        sDatName = argv[file1idx];
-    // 2. read
-    if (!read_file(sDatName))
-        return 1;
-    // 3. parse
-    auto result = parse_file();
-    if (not result) {
-        cerr << "Error in file '" << (result ? "OK" : "ERROR!")  << endl;
-    } else
+    bk_no_upto = OPTS.from + OPTS.num;
+    if (!OPTS.bkdir.empty() and OPTS.bkdir.back() != '!')
+        OPTS.bkdir += '/';  // FIXME: path separator
+    for (auto i = file1idx; i < argc; i++)
+    {
+        auto sDatName = OPTS.bkdir + argv[i];   // TODO: merge path
+        // 2. read
+        if (!read_file(sDatName))
+            break;
+        // 3. parse
+        auto result = parse_file();
+        STAT.files++;
+        if (not result) {
+            cerr << "Error in file '" << sDatName << "' offset " << hex << (static_cast<char *>(CUR_PTR.v_ptr) - BUFFER.beg) << endl;
+            break;
+        }
         if (OPTS.verbose)
-            cerr << "File parsing: OK" << endl;
-    // </loop>
-    // x. The end
-    if (OPTS.verbose) {
-        cerr << "= Summary =" << endl
-            << "Files:" << TAB << argc - file1idx << endl
-            << "Blocks:" << TAB << CUR_BK.no << endl;
-        if (OPTS.verbose > 1)
-            cerr
-                << "Tx:" << TAB << CUR_TX.no << endl
-                << "Vins:" << TAB << STAT.vins << endl
-                << "Vouts:" << TAB << STAT.vouts << endl
-                << "Addrs:" << TAB << STAT.addrs << endl
-                << "Vins/tx max:" << TAB << STAT.max_vins << endl
-                << "Vouts/tx max:" << TAB << STAT.max_vouts << endl
-                << "Addrs/vout max:" << TAB << STAT.max_addrs << endl;
+            __prn_file(sDatName);
+            //cerr << "File parsing: OK" << endl;
+        if (CUR_BK.no >= bk_no_upto)    // -n exceeded
+            break;
     }
+    // x. The end
+    if (OPTS.verbose)
+        __prn_summary();
     if (BUFFER.beg)
         delete BUFFER.beg;
     return 0;

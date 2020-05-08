@@ -8,14 +8,14 @@
   - &check;output (bk, tx (w/o hash), vout)
   - &check;options (parse)
   - &check;options (use)
-1. &#9744; Beta (_correct walk_):
+1. &#9745; Beta (_correct walk_): _200508_
   - &check;stop on EOF
-  - multifile
-  - tune debug levels
+  - &check;multifile
 2. &#9744; RC1 (_hashes_):
   - bk.hash
   - tx.hash
   - output (tx.hash)
+  - debug levels
 1. &#9744; RC2 (_scripts_):
   - decode addr
   - ~~outputs (addr)~~
@@ -68,10 +68,10 @@ print(hashlib.sha256(hashlib.sha256(bytes.fromhex(s)).digest()).hexdigest())
   - file: name, size
   - summary
 - 2 - mid
-  - bk skipped:
-  - bk: no, txs
+  - bk no, txs
 - 3 - semi:
-  - tx: no
+  - bk: skipped
+  - tx: no, vins, vouts
 - 4 - max:
   - vin:
   - vout:
@@ -81,7 +81,7 @@ print(hashlib.sha256(hashlib.sha256(bytes.fromhex(s)).digest()).hexdigest())
 - 0+1 - ok
 - 0+3 - ok
 - 3+5 - ok
-- 0,\* - ok
-- 3,\* - ok
-- 200k,1
-- 200k,*
+- 0,0 - ok
+- 3,0 - ok
+- 200k,1 - ok
+- 200k,0 - ok

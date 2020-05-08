@@ -19,7 +19,7 @@ Options:\n\
     3 - full debug\n\
 ";
 
-void    __prn_opts(void)
+void        __prn_opts(void)
 {
     cerr
         << "Options:" << endl
@@ -32,7 +32,7 @@ void    __prn_opts(void)
     ;
 }
 
-int cli(int argc, char *argv[])
+int         cli(int argc, char *argv[])
 {
     int opt;
     int retvalue = 0;
@@ -76,7 +76,7 @@ int cli(int argc, char *argv[])
     // optind - 1st file argv's no (if argc > optind)
     if (argc > optind)  {
         retvalue = optind;
-        if (OPTS.verbose)   // TODO: up v-level
+        if (OPTS.verbose > 1)   // TODO: up v-level
             __prn_opts();
     }
     else
@@ -114,12 +114,12 @@ uint64_t    read_64(void)  ///< Read 8-byte int and go forward
     return *CUR_PTR.u64_ptr++;
 }
 
-uint256_t * read_256_ptr(void)
+uint256_t   *read_256_ptr(void)
 {
     return CUR_PTR.u256_ptr++;
 }
 
-uint8_t *   read_u8_ptr(uint32_t size)
+uint8_t     *read_u8_ptr(uint32_t size)
 {
     auto retvalue = CUR_PTR.u8_ptr;
     CUR_PTR.u8_ptr += size;
@@ -127,7 +127,7 @@ uint8_t *   read_u8_ptr(uint32_t size)
 }
 
 // 1.
-void    sha256(void *src, uint32_t size, uint256_t &dst)
+void        sha256(void *src, uint32_t size, uint256_t &dst)
 {
     SHA256_CTX context;
     SHA256_Init(&context);
@@ -135,7 +135,7 @@ void    sha256(void *src, uint32_t size, uint256_t &dst)
     SHA256_Final(dst.begin(), &context);
 }
 
-void    mk_hash(void *src, uint32_t size, uint256_t &dst)
+void        mk_hash(void *src, uint32_t size, uint256_t &dst)
 {
     uint256_t tmp;
     sha256(src, size, tmp);
@@ -143,7 +143,7 @@ void    mk_hash(void *src, uint32_t size, uint256_t &dst)
 }
 
 // 2.
-uint256_t    sha256(void *src, uint32_t size)
+uint256_t   sha256(void *src, uint32_t size)
 {
     uint256_t result;
     SHA256_CTX context;
@@ -153,7 +153,7 @@ uint256_t    sha256(void *src, uint32_t size)
     return result;
 }
 
-uint256_t    sha256(uint256_t &src)
+uint256_t   sha256(uint256_t &src)
 {
     uint256_t result;
     SHA256_CTX context;
@@ -163,13 +163,13 @@ uint256_t    sha256(uint256_t &src)
     return result;
 }
 
-uint256_t    hash256(void *src, uint32_t size)
+uint256_t   hash256(void *src, uint32_t size)
 {
     auto result = sha256(src, size);
     return sha256(result);
 }
 
-string    hash2str(uint256_t &h)
+string      hash2str(uint256_t &h)
 {
     char tmp[257];
     tmp[256] = '\0';
@@ -178,29 +178,29 @@ string    hash2str(uint256_t &h)
     return string(tmp);
 }
 
-void    out_vin(void)   // FIXME: compare w/ COINBASE_txid too
+void        out_vin(void)   // FIXME: compare w/ COINBASE_txid too
 {
     if (CUR_VIN.vout != COINBASE_vout)  // skip coinbase
         cout << "i" << TAB << "..." << TAB << CUR_VIN.vout << endl;
 }
 
-void    out_vout(void)
+void        out_vout(void)
 {
     cout << "o" << TAB << CUR_TX.no << TAB << CUR_VOUT.no << TAB << CUR_VOUT.satoshi << endl;
 }
 
-void    out_tx(void)
+void        out_tx(void)
 {
     cout << "t" << TAB << CUR_BK.no << TAB << CUR_TX.no << TAB << endl;
 }
 
-void    out_bk(void)    ///< Output bk data for DB
+void        out_bk(void)    ///< Output bk data for DB
 {
     time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);
     cout << "b" << TAB << CUR_BK.no << TAB << "'" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << "'" << TAB << hash2str(CUR_BK.hash) << endl;
 }
 
-void    __prn_vin(void)
+void        __prn_vin(void)
 {
     cerr << "\t\tVin:" << endl;
     if (OPTS.verbose > 2) {
@@ -212,7 +212,7 @@ void    __prn_vin(void)
     }
 }
 
-void    __prn_vout(void)
+void        __prn_vout(void)
 {
     cerr << "\t\tVout:" << endl;
     if (OPTS.verbose > 2) {
@@ -222,28 +222,62 @@ void    __prn_vout(void)
     }
 }
 
-void    __prn_tx(void)
+void        __prn_tx(void)
 {
-    cerr << "\tTx: " << CUR_TX.no << endl;
-    if (OPTS.verbose > 2) {
-        cerr
-            << "\t\tVer:\t" << CUR_TX.ver << endl
-            << "\t\tvins:\t" << CUR_TX.vins << endl
-            << "\t\tvouts:\t" << CUR_TX.vouts << endl
-            << "\t\tlock:\t" << CUR_TX.locktime << endl;
-    }
+    cerr << "\tTx: " << CUR_TX.no
+        << ", ver: " << CUR_TX.ver
+        << ", in: "  << CUR_TX.vins
+        << ", out: " << CUR_TX.vouts
+        << endl;
+//            << "\t\tlock:\t" << CUR_TX.locktime << endl;
 }
 
-void    __prn_bk(void)
+void        __prn_bk(void)
 {
     time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);
-    cerr    << "Block: " << CUR_BK.no << endl;
-    if (OPTS.verbose > 1) {
+    cerr
+        << "Block: " << CUR_BK.no
+        << ", time:\t" << CUR_BK.head_ptr->time
+        << " (" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << ")"
+        << ", ver: " << CUR_BK.head_ptr->ver
+        << ", txs: " << CUR_BK.txs
+        << ", size: " << CUR_BK.head_ptr->size
+        << endl;
+}
+
+void        __prn_file(string &fn)
+{
+    cerr << "File: " << fn
+         << ", size: " << (BUFFER.end - BUFFER.beg)
+         << ", bk: " << CUR_BK.no
+         << ", tx: " << CUR_TX.no
+         << endl;
+}
+
+void        __prn_summary(void)
+{
+    cerr << "= Summary =" << endl
+        << "Files:" << TAB << STAT.files << endl
+        << "Blocks:" << TAB << CUR_BK.no << endl;
+    if (OPTS.verbose > 2)
         cerr
-            << "\tSize:\t" << CUR_BK.head_ptr->size << endl
-            << "\tVer:\t" << CUR_BK.head_ptr->ver << endl
-            << "\tTime:\t" << CUR_BK.head_ptr->time << " ("
-            << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << ")" << endl
-            << "\tTxs:\t" << CUR_BK.txs << endl;
+            << "Tx:" << TAB << CUR_TX.no << endl
+            << "Vins:" << TAB << STAT.vins << endl
+            << "Vouts:" << TAB << STAT.vouts << endl
+            << "Addrs:" << TAB << STAT.addrs << endl
+            << "Vins/tx max:" << TAB << STAT.max_vins << endl
+            << "Vouts/tx max:" << TAB << STAT.max_vouts << endl
+            << "Addrs/vout max:" << TAB << STAT.max_addrs << endl;
+}
+
+string      __prn_hex(void *vptr, size_t size)
+{
+    static string hex_chars = "0123456789abcdef";
+    string s;
+    char *cptr = static_cast<char *>(vptr);
+    for (size_t i = 0; i < size; i++, cptr++) {
+        s.push_back(hex_chars[(*cptr & 0xF0) >> 4]);
+        s.push_back(hex_chars[(*cptr & 0x0F)]);
     }
+    return s;
 }

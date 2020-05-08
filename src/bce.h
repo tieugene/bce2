@@ -33,6 +33,7 @@ struct  BUFFER_T
 
 struct  STAT_T
 {
+    uint32_t    files = 0;
     uint32_t    vins = 0;
     uint32_t    max_vins = 0;
     uint32_t    vouts = 0;
