@@ -126,6 +126,16 @@ uint8_t     *read_u8_ptr(uint32_t size)
     return retvalue;
 }
 
+string      hash2str(uint256_t &h)
+{
+    void *v = static_cast<void *>(&h);
+    uint64_t *u = static_cast<uint64_t *>(v);
+    char tmp[257];
+    tmp[256] = '\0';
+    sprintf(tmp, "%016llx%016llx%016llx%016llx", u[3], u[2], u[1], u[0]);
+    return string(tmp);
+}
+
 // 1.
 void        sha256(void *src, uint32_t size, uint256_t &dst)
 {
@@ -140,42 +150,6 @@ void        mk_hash(void *src, uint32_t size, uint256_t &dst)
     uint256_t tmp;
     sha256(src, size, tmp);
     sha256(&tmp, sizeof(uint256_t), dst);
-}
-
-// 2.
-uint256_t   sha256(void *src, uint32_t size)
-{
-    uint256_t result;
-    SHA256_CTX context;
-    SHA256_Init(&context);
-    SHA256_Update(&context, src, size);
-    SHA256_Final(result.begin(), &context);
-    return result;
-}
-
-uint256_t   sha256(uint256_t &src)
-{
-    uint256_t result;
-    SHA256_CTX context;
-    SHA256_Init(&context);
-    SHA256_Update(&context, src.begin(), src.size());
-    SHA256_Final(result.begin(), &context);
-    return result;
-}
-
-uint256_t   hash256(void *src, uint32_t size)
-{
-    auto result = sha256(src, size);
-    return sha256(result);
-}
-
-string      hash2str(uint256_t &h)
-{
-    char tmp[257];
-    tmp[256] = '\0';
-    for (uint_fast8_t i=0; i < 32; i++)
-        sprintf(tmp+(i<<1), "%02x", h[i]);
-    return string(tmp);
 }
 
 void        out_vin(void)   // FIXME: compare w/ COINBASE_txid too
@@ -232,17 +206,18 @@ void        __prn_tx(void)
 //            << "\t\tlock:\t" << CUR_TX.locktime << endl;
 }
 
-void        __prn_bk(void)
+void        __prn_bk(void)  // TODO: hash
 {
     time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);
     cerr
         << "Block: " << CUR_BK.no
-        << ", time:\t" << CUR_BK.head_ptr->time
-        << " (" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << ")"
+        << ", time: " << CUR_BK.head_ptr->time
+        << ", hash: " << hash2str(CUR_BK.hash)
         << ", ver: " << CUR_BK.head_ptr->ver
         << ", txs: " << CUR_BK.txs
         << ", size: " << CUR_BK.head_ptr->size
         << endl;
+        // << " (" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << ")"
 }
 
 void        __prn_file(string &fn)
@@ -270,7 +245,7 @@ void        __prn_summary(void)
             << "Addrs/vout max:" << TAB << STAT.max_addrs << endl;
 }
 
-string      __prn_hex(void *vptr, size_t size)
+string      ptr2hex(void *vptr, size_t size)
 {
     static string hex_chars = "0123456789abcdef";
     string s;
@@ -281,3 +256,32 @@ string      __prn_hex(void *vptr, size_t size)
     }
     return s;
 }
+
+// 2.
+/*
+uint256_t   sha256(void *src, uint32_t size)
+{
+    uint256_t result;
+    SHA256_CTX context;
+    SHA256_Init(&context);
+    SHA256_Update(&context, src, size);
+    SHA256_Final(result.begin(), &context);
+    return result;
+}
+
+uint256_t   sha256(uint256_t &src)
+{
+    uint256_t result;
+    SHA256_CTX context;
+    SHA256_Init(&context);
+    SHA256_Update(&context, src.begin(), src.size());
+    SHA256_Final(result.begin(), &context);
+    return result;
+}
+
+uint256_t   hash256(void *src, uint32_t size)
+{
+    auto result = sha256(src, size);
+    return sha256(result);
+}
+*/

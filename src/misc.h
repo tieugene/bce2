@@ -11,9 +11,9 @@ uint64_t    read_64(void);
 uint8_t *   read_u8_ptr(uint32_t);
 uint256_t * read_256_ptr(void);
 
-void        mk_hash(void *, uint32_t, uint256_t &);
-uint256_t   hash256(void *, uint32_t);
 string      hash2str(uint256_t &);
+void        mk_hash(void *, uint32_t, uint256_t &); // 1.
+//uint256_t   hash256(void *, uint32_t);            // 2.
 
 void    out_vin(void);
 void    out_vout(void);
@@ -26,5 +26,5 @@ void    __prn_tx(void);
 void    __prn_bk(void);
 void    __prn_file(string &);
 void    __prn_summary(void);
-string  __prn_hex(void *, size_t);
+string  ptr2hex(void *, size_t);
 #endif // MISC_H

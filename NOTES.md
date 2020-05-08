@@ -12,8 +12,8 @@
   - &check;stop on EOF
   - &check;multifile
 2. &#9744; RC1 (_hashes_):
-  - bk.hash
-  - tx.hash
+  - &check;bk.hash
+  - &hellip;tx.hash
   - output (tx.hash)
   - debug levels
 1. &#9744; RC2 (_scripts_):

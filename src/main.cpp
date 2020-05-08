@@ -93,12 +93,13 @@ bool    parse_bk(bool skip)
     }
     CUR_PTR.u8_ptr += sizeof (BK_HEAD_T);
     CUR_BK.txs = read_v();
-    //mk_hash(CUR_BK.head_ptr, sizeof(BK_HEAD_T), CUR_BK.hash);
-    CUR_BK.hash = hash256(CUR_BK.head_ptr, sizeof(BK_HEAD_T));
     if (!OPTS.quiet)
         out_bk();
-    if (OPTS.verbose >= 2)
+    if (OPTS.verbose >= 2) {
+        mk_hash(&(CUR_BK.head_ptr->ver), sizeof(BK_HEAD_T)-8, CUR_BK.hash); // on demand
+        //CUR_BK.hash = hash256(&(CUR_BK.head_ptr->ver), sizeof(BK_HEAD_T)-8);
         __prn_bk();
+    }
     for (uint32_t i = 0; i < CUR_BK.txs; i++, CUR_TX.no++)
         if (!parse_tx(i))
             return false;
