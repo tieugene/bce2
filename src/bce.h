@@ -14,15 +14,34 @@ typedef array<uint8_t, 32> uint256_t;   ///< hash representation
 
 struct  OPT_T
 {
-    uint32_t    from;
-    uint32_t    num;
-    bool        quiet;
-    int         verbose;
-    string      bkdir;
-    string      cache;
+    uint32_t    from = 0;
+    uint32_t    num = 1;
+    bool        quiet = false;
+    int         verbose = 0;
+    string      bkdir = "";
+    string      cache = "";
 };
 
-union UNIPTR_T   ///< Universal ptr
+struct  BUFFER_T
+{
+    char        *beg = nullptr;
+    // char        *cur = nullptr;
+    char        *end = nullptr; // end of used space
+    uint32_t    size_used = 0;
+    uint32_t    size_real = 0;
+};
+
+struct  STAT_T
+{
+    uint32_t    vins = 0;
+    uint32_t    max_vins = 0;
+    uint32_t    vouts = 0;
+    uint32_t    max_vouts = 0;
+    uint32_t    addrs = 0;
+    uint32_t    max_addrs = 0;
+};
+
+union   UNIPTR_T    ///< Universal ptr
 {
     void        *v_ptr;
     uint8_t     *u8_ptr;
@@ -32,7 +51,7 @@ union UNIPTR_T   ///< Universal ptr
     uint256_t   *u256_ptr;
 };
 
-struct BK_HEAD_T         ///< bk header, 88 bytes
+struct  BK_HEAD_T   ///< bk header, 88 bytes
 {
     uint32_t    sig;
     uint32_t    size;
@@ -52,7 +71,7 @@ struct  BK_T
     uint256_t   hash;
 };
 
-struct TX_T         ///< transaction variables w/o vins/vouts
+struct  TX_T        ///< transaction variables w/o vins/vouts
 {
     uint32_t    no;
     uint32_t    ver;
@@ -80,12 +99,8 @@ struct  VOUT_T
 };
 
 extern OPT_T    OPTS;
-extern char
-    *buffer,    ///< whole of file buffer
-    *curptr,    ///< cursor
-    *endptr;    ///< EOL
-extern int64_t  bsize;  ///< current block size
-extern uint32_t bk_counter;
+extern STAT_T   STAT;
+extern BUFFER_T BUFFER;
 extern UNIPTR_T CUR_PTR;
 extern BK_T     CUR_BK;
 extern TX_T     CUR_TX;

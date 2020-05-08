@@ -1,19 +1,22 @@
 #include "misc.h"
-
+#include <cstdlib>
 #include <stdio.h>
 #include <unistd.h>
 #include <openssl/sha.h>
 
-string  help_txt = "\
+static string  help_txt = "\
 Usage: [options] file[ file[...]]\n\
 Options:\n\
 -f n      - block starts from (default=0)\n\
--n n      - blocks to process (default=1)\n\
--q        - quiet (disable output result to stdout)\n\
--v[n]     - verbose (debug info to stderr)\n\
--b <path> - blk*.dat folder (default='.')\n\
+-n n      - blocks to process (default=1, 0=all)\n\
+-b <path> - blk*.dat folder (default='' - current folder)\n\
 -c <path> - cache data folder (default='.')\n\
--h        - help\n\
+-q        - quiet (disable output result to stdout)\n\
+-v[n]     - verbose (debug info to stderr):\n\
+    0 - errors only (default)\n\
+    1 - short info (default n)\n\
+    2 - mid\n\
+    3 - full debug\n\
 ";
 
 void    __prn_opts(void)
@@ -38,21 +41,24 @@ int cli(int argc, char *argv[])
     OPTS.num = 1;
     OPTS.quiet = false;
     OPTS.verbose = 0;
-    OPTS.bkdir = ".";
+    OPTS.bkdir = "";
     OPTS.cache = ".";
     while ((opt = getopt(argc, argv, "f:n:qv::b:c:")) != -1)
     {
         switch (opt) {
-            case 'f':   // FIXME: optarg<0
+            case 'f':   // FIXME: optarg < 0 | > 999999
                 OPTS.from = atoi(optarg);
                 break;
-            case 'n':   // FIXME: optarg<1
+            case 'n':   // FIXME: optarg < 1 | > 999999
+                //OPTS.num = *optarg == '*' ? 999999 : atoi(optarg);
                 OPTS.num = atoi(optarg);
+                if (OPTS.num == 0)
+                    OPTS.num = 999999;
                 break;
             case 'q':
                 OPTS.quiet = true;
                 break;
-            case 'v':
+            case 'v':   // FIXME: optarg = 0..5
                 OPTS.verbose = (optarg) ? atoi(optarg) : 1;
                 break;
             case 'b':
@@ -61,11 +67,8 @@ int cli(int argc, char *argv[])
             case 'c':
                 OPTS.cache = optarg;
                 break;
-            //case 'h':
-            //    cerr << help_txt;
-            //    break;
             case '?':   // can handle optopt
-                cerr << "Use '" << argv[0] << " -h' for help." << endl;
+                cerr << help_txt << endl;
                 break;
         }
     }
@@ -199,39 +202,48 @@ void    out_bk(void)    ///< Output bk data for DB
 
 void    __prn_vin(void)
 {
-    cerr << "\t\tVin:" << endl
-         << "\t\t\tVout_n:\t" << CUR_VIN.vout << endl
-         << "\t\t\tSSize:\t" << CUR_VIN.ssize << endl
-         << "\t\t\tSeq:\t" << CUR_VIN.seq << endl
-         ;
+    cerr << "\t\tVin:" << endl;
+    if (OPTS.verbose > 2) {
+        if (CUR_VIN.vout < 0xFFFFFFFF)
+            cerr << "\t\t\tVout_n:\t" << CUR_VIN.vout << endl;
+        cerr
+            << "\t\t\tSSize:\t" << CUR_VIN.ssize << endl
+            << "\t\t\tSeq:\t" << CUR_VIN.seq << endl;
+    }
 }
 
 void    __prn_vout(void)
 {
-    cerr << "\t\tVout:" << endl
-         << "\t\t\t$:\t" << CUR_VOUT.satoshi << endl
-         << "\t\t\tSSize:\t" << CUR_VOUT.ssize << endl
-         ;
+    cerr << "\t\tVout:" << endl;
+    if (OPTS.verbose > 2) {
+        cerr
+            << "\t\t\t$:\t" << CUR_VOUT.satoshi << endl
+            << "\t\t\tSSize:\t" << CUR_VOUT.ssize << endl;
+    }
 }
 
 void    __prn_tx(void)
 {
-    cerr << "\tTx:" << endl
-         << "\t\tVer:\t" << CUR_TX.ver << endl
-         << "\t\tvins:\t" << CUR_TX.vins << endl
-         << "\t\tvouts:\t" << CUR_TX.vouts << endl
-         << "\t\tlock:\t" << CUR_TX.locktime << endl
-         ;
+    cerr << "\tTx: " << CUR_TX.no << endl;
+    if (OPTS.verbose > 2) {
+        cerr
+            << "\t\tVer:\t" << CUR_TX.ver << endl
+            << "\t\tvins:\t" << CUR_TX.vins << endl
+            << "\t\tvouts:\t" << CUR_TX.vouts << endl
+            << "\t\tlock:\t" << CUR_TX.locktime << endl;
+    }
 }
 
 void    __prn_bk(void)
 {
     time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);
-    cerr    << "Block: " << CUR_BK.no << endl
+    cerr    << "Block: " << CUR_BK.no << endl;
+    if (OPTS.verbose > 1) {
+        cerr
             << "\tSize:\t" << CUR_BK.head_ptr->size << endl
             << "\tVer:\t" << CUR_BK.head_ptr->ver << endl
             << "\tTime:\t" << CUR_BK.head_ptr->time << " ("
             << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << ")" << endl
-            << "\tTxs:\t" << CUR_BK.txs << endl
-            ;
+            << "\tTxs:\t" << CUR_BK.txs << endl;
+    }
 }

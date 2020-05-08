@@ -14,38 +14,16 @@ Options:
 
 namespace fs = std::filesystem;
 
-OPT_T OPTS;
-char
-    *buffer,    ///< whole of file buffer
-    *curptr,    ///< cursor
-    *endptr;    ///< EOL
-int64_t     bsize;  ///< current block size
-uint32_t    bk_counter = 0;
+OPT_T       OPTS;
+BUFFER_T    BUFFER;
+STAT_T      STAT;
 UNIPTR_T    CUR_PTR;
 BK_T        CUR_BK;
 TX_T        CUR_TX;
 VIN_T       CUR_VIN;
 VOUT_T      CUR_VOUT;
 
-bool    read_file(string &fn)
-{
-    ///< Read whole of file into mem
-    ifstream file (fn, ios::in|ios::binary|ios::ate);
-    if (file.is_open())
-    {
-        bsize = file.tellg();   // TODO: handle -1; >128M
-        buffer = new char[bsize];
-        file.seekg (0, ios::beg);
-        file.read (buffer, bsize);
-        file.close();
-        CUR_PTR.v_ptr = buffer;
-        endptr = buffer + bsize;
-        return true;
-    }
-    return false;
-}
-
-bool    parse_vin(uint32_t) // FIXME: <= int16
+bool    parse_vin(uint32_t no)
 {
     // FIXME: coinbase = 32x00 + 4xFF (txid+vout)
     CUR_VIN.txid = read_256_ptr();
@@ -55,12 +33,12 @@ bool    parse_vin(uint32_t) // FIXME: <= int16
     CUR_VIN.seq = read_32();
     if (!OPTS.quiet)
         out_vin();
-    if (OPTS.verbose)
+    if (OPTS.verbose > 2)
         __prn_vin();
     return true;
 }
 
-bool    parse_vout(uint32_t no) // FIXME: <= int16
+bool    parse_vout(uint32_t no)
 {
     // TODO: out_addr
     CUR_VOUT.no = no;
@@ -69,12 +47,12 @@ bool    parse_vout(uint32_t no) // FIXME: <= int16
     CUR_VOUT.script = read_u8_ptr(CUR_VOUT.ssize);
     if (!OPTS.quiet)
         out_vout();
-    if (OPTS.verbose)
+    if (OPTS.verbose > 2)
         __prn_vout();
     return true;
 }
 
-bool    parse_tx(uint32_t bk_tx_no) // FIXME: <= int16
+bool    parse_tx(uint32_t bk_tx_no)
 {
     CUR_TX.ver = read_32();
     if (!OPTS.quiet)
@@ -88,18 +66,28 @@ bool    parse_tx(uint32_t bk_tx_no) // FIXME: <= int16
         if (!parse_vout(i))
             return false;
     CUR_TX.locktime = read_32();
-    if (OPTS.verbose)
+    if (OPTS.verbose > 1)
         __prn_tx();
+    STAT.vins += CUR_TX.vins;
+    STAT.vouts += CUR_TX.vouts;
+    STAT.max_vins = max(STAT.max_vins, CUR_TX.vins);
+    STAT.max_vouts = max(STAT.max_vouts, CUR_TX.vouts);
     return true;
 }
 
-bool    parse_bk(uint32_t bk_no)
+bool    parse_bk(bool skip)
 {
     CUR_BK.head_ptr = static_cast<BK_HEAD_T*> (CUR_PTR.v_ptr);
     if (CUR_BK.head_ptr->sig != 0xD9B4BEF9)    // LE
     {
-        cerr << "It's not .dat file: " << hex << CUR_BK.head_ptr->sig << endl;
+        cerr << "Block signature not found: " << hex << CUR_BK.head_ptr->sig << endl;
         return false;
+    }
+    if (skip) {
+        if (OPTS.verbose > 1)
+            cerr << "Block № " << CUR_BK.no << " skipped" << endl;
+        CUR_PTR.u8_ptr += (CUR_BK.head_ptr->size + 8);  // including sig and size
+        return true;
     }
     CUR_PTR.u8_ptr += sizeof (BK_HEAD_T);
     CUR_BK.txs = read_v();
@@ -117,34 +105,93 @@ bool    parse_bk(uint32_t bk_no)
 
 bool    parse_file(void)
 {
-    for (uint32_t i =  0; i < OPTS.num; i++, CUR_BK.no++)
-        if (!parse_bk(i))
+    // TODO: skip from 0 to 'from'; from 'from' to 'from'+'num' or EOF
+    auto bk_no_upto = OPTS.from + OPTS.num;
+    while (CUR_BK.no < bk_no_upto and CUR_PTR.v_ptr < BUFFER.end) {
+        bool skip = (CUR_BK.no < OPTS.from);
+        if (!parse_bk(skip))
             return false;
+        CUR_BK.no++;
+    }
     return true;
 }
 
-int main(int argc, char *argv[])
+bool    read_file(string &fn)
+{
+    // TODO: check path exists, is file
+    ///< Read whole of file into mem
+    ifstream file (fn, ios::in|ios::binary|ios::ate);
+    if (!file) {
+        cerr << "File '" << fn << "' opening failed" << endl;
+        return false;
+    }
+    auto data_size = file.tellg();
+    if (data_size < 0) {
+        cerr << "Can't get size of '" << fn << "'" << endl;
+        return false;
+    }
+    auto udata_size = uint32_t(data_size);
+    if (OPTS.verbose)
+        cerr << fn << " ("<< udata_size << " bytes):" << endl;
+    if (BUFFER.size_real < udata_size) {
+        if (BUFFER.beg)
+            if (OPTS.verbose > 1)
+                cerr << "Reallocating buffer." << endl;
+            delete BUFFER.beg;
+        BUFFER.beg = new char[udata_size];
+        BUFFER.size_real = udata_size;
+    }
+    file.seekg (0, ios::beg);
+    file.read (BUFFER.beg, udata_size);
+    file.close();
+    BUFFER.size_used = udata_size;
+    BUFFER.end = BUFFER.beg + udata_size;
+    CUR_PTR.v_ptr = BUFFER.beg;
+    return true;
+}
+
+int     main(int argc, char *argv[])
 {
     string  sDatName;
 
-    // -1. handle CLI
-    int file1idx = cli(argc, argv);
-    if (!file1idx)
-        return 1;
-    sDatName = OPTS.bkdir + "/" + argv[file1idx];   // FIXME: all of files
     // 0. init
-    CUR_BK.no = 0;
-    CUR_TX.no = 0;
-    // 1. read
+    // 1. handle CLI
+    int file1idx = cli(argc, argv);
+    if (!file1idx)  // no file
+        return 1;
+    // TODO: <loop>
+    if (OPTS.bkdir.length())
+        sDatName = OPTS.bkdir + "/" + argv[file1idx];   // TODO: merge path
+    else
+        sDatName = argv[file1idx];
+    // 2. read
     if (!read_file(sDatName))
         return 1;
-    if (OPTS.verbose)
-        cerr << "File size: " << bsize << endl;
-    // 2. parse
+    // 3. parse
     auto result = parse_file();
-    if (OPTS.verbose)
-        cerr << "File parsing: " << (result ? "OK" : "ERROR!")  << endl;
-    // FIXME: delete buffer;
+    if (not result) {
+        cerr << "Error in file '" << (result ? "OK" : "ERROR!")  << endl;
+    } else
+        if (OPTS.verbose)
+            cerr << "File parsing: OK" << endl;
+    // </loop>
+    // x. The end
+    if (OPTS.verbose) {
+        cerr << "= Summary =" << endl
+            << "Files:" << TAB << argc - file1idx << endl
+            << "Blocks:" << TAB << CUR_BK.no << endl;
+        if (OPTS.verbose > 1)
+            cerr
+                << "Tx:" << TAB << CUR_TX.no << endl
+                << "Vins:" << TAB << STAT.vins << endl
+                << "Vouts:" << TAB << STAT.vouts << endl
+                << "Addrs:" << TAB << STAT.addrs << endl
+                << "Vins/tx max:" << TAB << STAT.max_vins << endl
+                << "Vouts/tx max:" << TAB << STAT.max_vouts << endl
+                << "Addrs/vout max:" << TAB << STAT.max_addrs << endl;
+    }
+    if (BUFFER.beg)
+        delete BUFFER.beg;
     return 0;
 }
 
