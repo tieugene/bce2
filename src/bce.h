@@ -75,10 +75,10 @@ struct  BK_T
 struct  TX_T        ///< transaction variables w/o vins/vouts
 {
     uint32_t    no;
-    uint32_t    ver;
+    uint32_t    *ver;        // FIXME: * (for hash)
     uint32_t    vins;
     uint32_t    vouts;
-    uint32_t    locktime;
+    uint32_t    *locktime;   // FIXME: * (for hash)
     uint256_t   hash;
 };
 

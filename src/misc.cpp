@@ -114,16 +114,21 @@ uint64_t    read_64(void)  ///< Read 8-byte int and go forward
     return *CUR_PTR.u64_ptr++;
 }
 
-uint256_t   *read_256_ptr(void)
-{
-    return CUR_PTR.u256_ptr++;
-}
-
 uint8_t     *read_u8_ptr(uint32_t size)
 {
     auto retvalue = CUR_PTR.u8_ptr;
     CUR_PTR.u8_ptr += size;
     return retvalue;
+}
+
+uint32_t   *read_32_ptr(void)
+{
+    return CUR_PTR.u32_ptr++;
+}
+
+uint256_t   *read_256_ptr(void)
+{
+    return CUR_PTR.u256_ptr++;
 }
 
 string      hash2str(uint256_t &h)
@@ -165,13 +170,13 @@ void        out_vout(void)
 
 void        out_tx(void)
 {
-    cout << "t" << TAB << CUR_BK.no << TAB << CUR_TX.no << TAB << endl;
+    cout << "t" << TAB << CUR_TX.no << TAB << CUR_BK.no << TAB << hash2str(CUR_TX.hash) << endl;
 }
 
 void        out_bk(void)    ///< Output bk data for DB
 {
     time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);
-    cout << "b" << TAB << CUR_BK.no << TAB << "'" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << "'" << TAB << hash2str(CUR_BK.hash) << endl;
+    cout << "b" << TAB << CUR_BK.no << TAB << "'" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << "'" << endl;
 }
 
 void        __prn_vin(void)
@@ -198,12 +203,16 @@ void        __prn_vout(void)
 
 void        __prn_tx(void)
 {
-    cerr << "\tTx: " << CUR_TX.no
-        << ", ver: " << CUR_TX.ver
+    cerr
+        << "\tTx: " << CUR_TX.no
+        << ", hash: " << hash2str(CUR_TX.hash)
         << ", in: "  << CUR_TX.vins
         << ", out: " << CUR_TX.vouts
+        << ", ver: " << *CUR_TX.ver
+        << ", lock: " << *CUR_TX.locktime
         << endl;
-//            << "\t\tlock:\t" << CUR_TX.locktime << endl;
+    // ver
+    //        << "\t\tlock:\t" << CUR_TX.locktime << endl;
 }
 
 void        __prn_bk(void)  // TODO: hash

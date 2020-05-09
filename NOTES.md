@@ -11,30 +11,41 @@
 1. &#9745; Beta (_correct walk_): _200508_
   - &check;stop on EOF
   - &check;multifile
-2. &#9744; RC1 (_hashes_):
+1. &#9745; RC1 (_hashes_): _200508_
   - &check;bk.hash
-  - &hellip;tx.hash
-  - output (tx.hash)
-  - debug levels
+  - &check;tx.hash
+  - &check;output (tx.hash)
 1. &#9744; RC2 (_scripts_):
   - decode addr
-  - ~~outputs (addr)~~
+  - debug levels
 1. &#9744; RC3 (_k-v_):
   - k-v:
      - tx
      - addr
-  - output (addr, vin, x)
+  - output (vin, addr, x)
 1. &#9744; Release (chk bk on longest chain)
 1. &#9766; Extra (_mempool_)
 
-## misc:
+## KB:
 - [coinbase](https://learnmeabitcoin.com/guide/coinbase-transaction):
   - txid = 0x00....00
   - vout = 0xFFFFFFFF
 - hash:
   - bk.hash = sha256(sha256(bk.header (ver..nonce)))
   - tx.hash = sha256(sha256(tx.ver..tx.locktime))
-  - check(s:str):
+- out script:
+  - &hellip;
+- check hash(s:str):
+
+```python
+import hashlib
+print(hashlib.sha256(hashlib.sha256(bytes.fromhex(s)).digest()).hexdigest())
+```
+
+## find:
+- bk height - check by p_hash?
+
+## misc:
 - options libs:
   - [getopt](https://www.gnu.org/software/libc/manual/html_node/Using-Getopt.html) (unistd.h)
   - popt
@@ -53,14 +64,6 @@
   - tx hashes
   - address hashes
 
-```python
-import hashlib
-print(hashlib.sha256(hashlib.sha256(bytes.fromhex(s)).digest()).hexdigest())
-```
-
-## find:
-- bk height - check by p_hash?
-
 ## Verbosity:
 - 0 - errors only
 - 1 - min:
@@ -77,7 +80,7 @@ print(hashlib.sha256(hashlib.sha256(bytes.fromhex(s)).digest()).hexdigest())
   - vout:
   - addr:
 
-## Test EOF:
+## Tests:
 - 0+1 - ok
 - 0+3 - ok
 - 3+5 - ok
