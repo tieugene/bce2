@@ -1,8 +1,8 @@
-#include "misc.h"
 #include <cstdlib>
 #include <stdio.h>
 #include <unistd.h>
-#include <openssl/sha.h>
+#include "bce.h"
+#include "misc.h"
 
 static string  help_txt = "\
 Usage: [options] file[ file[...]]\n\
@@ -121,7 +121,7 @@ uint8_t     *read_u8_ptr(uint32_t size)
     return retvalue;
 }
 
-uint32_t   *read_32_ptr(void)
+uint32_t    *read_32_ptr(void)
 {
     return CUR_PTR.u32_ptr++;
 }
@@ -131,36 +131,22 @@ uint256_t   *read_256_ptr(void)
     return CUR_PTR.u256_ptr++;
 }
 
-string      hash2str(uint256_t &h)
+string      ptr2hex(void *vptr, size_t size)
 {
-    void *v = static_cast<void *>(&h);
-    uint64_t *u = static_cast<uint64_t *>(v);
-    char tmp[257];
-    tmp[256] = '\0';
-    sprintf(tmp, "%016llx%016llx%016llx%016llx", u[3], u[2], u[1], u[0]);
-    return string(tmp);
-}
-
-// 1.
-void        sha256(void *src, uint32_t size, uint256_t &dst)
-{
-    SHA256_CTX context;
-    SHA256_Init(&context);
-    SHA256_Update(&context, src, size);
-    SHA256_Final(dst.begin(), &context);
-}
-
-void        mk_hash(void *src, uint32_t size, uint256_t &dst)
-{
-    uint256_t tmp;
-    sha256(src, size, tmp);
-    sha256(&tmp, sizeof(uint256_t), dst);
+    static string hex_chars = "0123456789abcdef";
+    string s;
+    char *cptr = static_cast<char *>(vptr);
+    for (size_t i = 0; i < size; i++, cptr++) {
+        s.push_back(hex_chars[(*cptr & 0xF0) >> 4]);
+        s.push_back(hex_chars[(*cptr & 0x0F)]);
+    }
+    return s;
 }
 
 void        out_vin(void)   // FIXME: compare w/ COINBASE_txid too
 {
     if (CUR_VIN.vout != COINBASE_vout)  // skip coinbase
-        cout << "i" << TAB << "..." << TAB << CUR_VIN.vout << endl;
+        cout << "i" << TAB << CUR_TX.no << TAB << CUR_VIN.txid << TAB << CUR_VIN.vout << endl;
 }
 
 void        out_vout(void)
@@ -170,7 +156,7 @@ void        out_vout(void)
 
 void        out_tx(void)
 {
-    cout << "t" << TAB << CUR_TX.no << TAB << CUR_BK.no << TAB << hash2str(CUR_TX.hash) << endl;
+    cout << "t" << TAB << CUR_TX.no << TAB << CUR_BK.no << TAB << hash2hex(CUR_TX.hash) << endl;
 }
 
 void        out_bk(void)    ///< Output bk data for DB
@@ -193,6 +179,15 @@ void        __prn_vin(void)
 
 void        __prn_vout(void)
 {
+    cerr
+        << "Vout:"
+        << TAB << CUR_TX.no
+        << " " << CUR_VOUT.no
+        << " " << CUR_VOUT.satoshi
+        << " " << CUR_VOUT.ssize
+        << " " << ptr2hex(CUR_VOUT.script, CUR_VOUT.ssize)
+        << endl;
+    return;
     cerr << "\t\tVout:" << endl;
     if (OPTS.verbose > 2) {
         cerr
@@ -205,11 +200,11 @@ void        __prn_tx(void)
 {
     cerr
         << "\tTx: " << CUR_TX.no
-        << ", hash: " << hash2str(CUR_TX.hash)
+        << ", hash: " << hash2hex(CUR_TX.hash)
         << ", in: "  << CUR_TX.vins
         << ", out: " << CUR_TX.vouts
-        << ", ver: " << *CUR_TX.ver
-        << ", lock: " << *CUR_TX.locktime
+        << ", ver: " << CUR_TX.ver
+        << ", lock: " << CUR_TX.locktime
         << endl;
     // ver
     //        << "\t\tlock:\t" << CUR_TX.locktime << endl;
@@ -221,7 +216,7 @@ void        __prn_bk(void)  // TODO: hash
     cerr
         << "Block: " << CUR_BK.no
         << ", time: " << CUR_BK.head_ptr->time
-        << ", hash: " << hash2str(CUR_BK.hash)
+        << ", hash: " << hash2hex(CUR_BK.hash)
         << ", ver: " << CUR_BK.head_ptr->ver
         << ", txs: " << CUR_BK.txs
         << ", size: " << CUR_BK.head_ptr->size
@@ -252,18 +247,6 @@ void        __prn_summary(void)
             << "Vins/tx max:" << TAB << STAT.max_vins << endl
             << "Vouts/tx max:" << TAB << STAT.max_vouts << endl
             << "Addrs/vout max:" << TAB << STAT.max_addrs << endl;
-}
-
-string      ptr2hex(void *vptr, size_t size)
-{
-    static string hex_chars = "0123456789abcdef";
-    string s;
-    char *cptr = static_cast<char *>(vptr);
-    for (size_t i = 0; i < size; i++, cptr++) {
-        s.push_back(hex_chars[(*cptr & 0xF0) >> 4]);
-        s.push_back(hex_chars[(*cptr & 0x0F)]);
-    }
-    return s;
 }
 
 // 2.

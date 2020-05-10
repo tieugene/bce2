@@ -16,6 +16,7 @@
   - &check;tx.hash
   - &check;output (tx.hash)
 1. &#9744; RC2 (_scripts_):
+  - wrong bk &/| tx
   - decode addr
   - debug levels
 1. &#9744; RC3 (_k-v_):
@@ -27,6 +28,7 @@
 1. &#9766; Extra (_mempool_)
 
 ## KB:
+- bk hash _allways_ starts w/ 0x00000000 (uint32 0)
 - [coinbase](https://learnmeabitcoin.com/guide/coinbase-transaction):
   - txid = 0x00....00
   - vout = 0xFFFFFFFF

@@ -9,8 +9,10 @@ Options:
 -h[elp]     - subj
 */
 
-#include "misc.h"
 #include <filesystem>
+#include "bce.h"
+#include "misc.h"
+#include "script.h"
 
 namespace fs = std::filesystem;
 
@@ -47,9 +49,10 @@ bool    parse_vout(uint32_t no)
     CUR_VOUT.satoshi = read_64();
     CUR_VOUT.ssize = read_v();
     CUR_VOUT.script = read_u8_ptr(CUR_VOUT.ssize);
+    auto addr_qty = script_decode(CUR_VOUT.script, CUR_VOUT.ssize);
     if (!OPTS.quiet)
         out_vout();
-    if (OPTS.verbose >= 4)
+    if (OPTS.verbose >= 4)  // FIXME: >= 4; debug - 1
         __prn_vout();
     return true;
 }
@@ -57,7 +60,7 @@ bool    parse_vout(uint32_t no)
 bool    parse_tx(uint32_t bk_tx_no) // TODO: hash
 {
     auto h_beg = CUR_PTR.u8_ptr;
-    CUR_TX.ver = read_32_ptr();
+    CUR_TX.ver = read_32();
     CUR_TX.vins = read_v();
     for (uint32_t i =  0; i < CUR_TX.vins; i++)
         if (!parse_vin(i))
@@ -66,10 +69,10 @@ bool    parse_tx(uint32_t bk_tx_no) // TODO: hash
     for (uint32_t i =  0; i < CUR_TX.vouts; i++)
         if (!parse_vout(i))
             return false;
-    CUR_TX.locktime = read_32_ptr();
+    CUR_TX.locktime = read_32();
     auto h_end = CUR_PTR.u8_ptr;
     if (!OPTS.quiet or OPTS.verbose >= 3) // on demand
-        mk_hash(h_beg, h_end - h_beg, CUR_TX.hash);
+        hash256(h_beg, h_end - h_beg, CUR_TX.hash);
     if (!OPTS.quiet)
         out_tx();
     if (OPTS.verbose >= 3)
@@ -100,7 +103,7 @@ bool    parse_bk(bool skip)
     if (!OPTS.quiet)
         out_bk();
     if (OPTS.verbose >= 2) {
-        mk_hash(&(CUR_BK.head_ptr->ver), sizeof(BK_HEAD_T)-8, CUR_BK.hash); // on demand
+        hash256(&(CUR_BK.head_ptr->ver), sizeof(BK_HEAD_T)-8, CUR_BK.hash); // on demand
         //CUR_BK.hash = hash256(&(CUR_BK.head_ptr->ver), sizeof(BK_HEAD_T)-8));
         __prn_bk();
     }

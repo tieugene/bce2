@@ -1,16 +1,15 @@
 #ifndef BCE_H
 #define BCE_H
 
+// TODO: stacktrace - file, byte, bk[, tx[, vin+n|vout+n]
+
 #include <iostream>
 #include <iomanip>
 #include <ctime>
 #include <fstream>
 #include <array>
 
-using namespace std;
-
-typedef array<uint8_t, 32> uint256_t;   ///< hash representation
-//typedef uint8_t[32] uint256_t;   ///< hash representation
+#include "uintxxx.h"
 
 struct  OPT_T
 {
@@ -75,10 +74,10 @@ struct  BK_T
 struct  TX_T        ///< transaction variables w/o vins/vouts
 {
     uint32_t    no;
-    uint32_t    *ver;        // FIXME: * (for hash)
+    uint32_t    ver;        // FIXME: * (for hash)
     uint32_t    vins;
     uint32_t    vouts;
-    uint32_t    *locktime;   // FIXME: * (for hash)
+    uint32_t    locktime;   // FIXME: * (for hash)
     uint256_t   hash;
 };
 
@@ -97,6 +96,7 @@ struct  VOUT_T
     uint64_t    satoshi;
     uint32_t    ssize;
     uint8_t     *script;
+
 };
 
 extern OPT_T    OPTS;
