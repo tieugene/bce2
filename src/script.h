@@ -5,7 +5,7 @@
 
 #include "uintxxx.h"
 
-extern uint160_t result;
+extern uint160_t cur_addr;
 
 /** Returns qty of decoded (-1 on error) */
 int     script_decode(uint8_t *, uint32_t);

@@ -50,10 +50,17 @@ bool    parse_vout(uint32_t no)
     CUR_VOUT.ssize = read_v();
     CUR_VOUT.script = read_u8_ptr(CUR_VOUT.ssize);
     auto addr_qty = script_decode(CUR_VOUT.script, CUR_VOUT.ssize);
-    if (!OPTS.quiet)
+    if (addr_qty != 1)  // dirty hack
+        return false;
+    if (!OPTS.quiet) {
         out_vout();
-    if (OPTS.verbose >= 4)  // FIXME: >= 4; debug - 1
+        out_addr();
+    }
+    if (OPTS.verbose >= 4) {  // FIXME: >= 4; debug - 1
         __prn_vout();
+        __prn_addr();
+    }
+    STAT.addrs += 1;    // dirty_hack
     return true;
 }
 
@@ -100,13 +107,12 @@ bool    parse_bk(bool skip)
     }
     CUR_PTR.u8_ptr += sizeof (BK_HEAD_T);
     CUR_BK.txs = read_v();
+    if (!OPTS.quiet or OPTS.verbose >= 2) // on demand
+        hash256(&(CUR_BK.head_ptr->ver), sizeof(BK_HEAD_T)-8, CUR_BK.hash);
     if (!OPTS.quiet)
         out_bk();
-    if (OPTS.verbose >= 2) {
-        hash256(&(CUR_BK.head_ptr->ver), sizeof(BK_HEAD_T)-8, CUR_BK.hash); // on demand
-        //CUR_BK.hash = hash256(&(CUR_BK.head_ptr->ver), sizeof(BK_HEAD_T)-8));
+    if (OPTS.verbose >= 2)
         __prn_bk();
-    }
     for (uint32_t i = 0; i < CUR_BK.txs; i++, CUR_TX.no++)
         if (!parse_tx(i))
             return false;

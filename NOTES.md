@@ -16,9 +16,11 @@
   - &check;tx.hash
   - &check;output (tx.hash)
 1. &#9744; RC2 (_scripts_):
-  - wrong bk &/| tx
   - decode addr
+  - trace state on error
+  - chk bk &/| tx hashes
   - debug levels
+  - _debug as json_
 1. &#9744; RC3 (_k-v_):
   - k-v:
      - tx
@@ -35,13 +37,37 @@
 - hash:
   - bk.hash = sha256(sha256(bk.header (ver..nonce)))
   - tx.hash = sha256(sha256(tx.ver..tx.locktime))
+  - addr.pk2addr = ripe160(sha256())
+- 1sts (bk no my/real):
+  - vin: 170
+  - p2pkh: 723/728
+- blk volumes:
+  - 0: 119968
+  - 1: 
 - out script:
   - &hellip;
-- check hash(s:str):
+
+## py scripts:
+
+- hash256(s:str):
 
 ```python
 import hashlib
 print(hashlib.sha256(hashlib.sha256(bytes.fromhex(s)).digest()).hexdigest())
+```
+
+- hash160(s:str):
+
+```
+import hashlib
+print(hashlib.new('ripemd160', hashlib.sha256(bytes.fromhex(s)).digest()).hexdigest())
+```
+Example (addr #[0](https://www.blockchain.com/btc/block/000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f)):
+
+```
+pk: 04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f
+hash160: 62e907b15cbf27d5425399ebf6f0fb50ebb88f18
+addr: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
 ```
 
 ## find:

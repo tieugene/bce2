@@ -1,7 +1,8 @@
 #include <iostream>
+#include <cstring>
 #include "script.h"
 
-uint160_t   result;
+uint160_t   cur_addr;
 
 static uint8_t  *cur;
 static uint32_t last;
@@ -22,8 +23,10 @@ int     do_P2PK(void) {
         (last = 67) and
         (cur[66] = OP_CHECKSIG)
         )
-        // result = cur+1; // FIXME: 2 x sha256 + ripeme-160
+    {
+        hash160(cur+1, 65, cur_addr);
         return 1;
+    }
     return -1;
 }
 
@@ -35,8 +38,10 @@ int     do_P2PKH(void) {
         (cur[23] == OP_EQUALVERIFY) and
         (cur[24] = OP_CHECKSIG)
         )
-        // result = cur+3;
+    {
+        memcpy(&cur_addr, cur+3, sizeof (uint160_t));
         return 1;
+    }
     return -1;
 }
 
@@ -50,7 +55,8 @@ int     do_P2SH(void) {
         (cur[1] == 20) and
         (cur[22] == OP_EQUAL)
         )
-        // result = cur+2;
+        cout << "P2SH detected" << endl;
+        memcpy(&cur_addr, cur+2, sizeof (uint160_t));
         return 1;
     return -1;
 }

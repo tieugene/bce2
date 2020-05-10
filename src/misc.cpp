@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include "bce.h"
 #include "misc.h"
+#include "script.h" // cur_addr only
 
 static string  help_txt = "\
 Usage: [options] file[ file[...]]\n\
@@ -146,47 +147,83 @@ string      ptr2hex(void *vptr, size_t size)
 void        out_vin(void)   // FIXME: compare w/ COINBASE_txid too
 {
     if (CUR_VIN.vout != COINBASE_vout)  // skip coinbase
-        cout << "i" << TAB << CUR_TX.no << TAB << CUR_VIN.txid << TAB << CUR_VIN.vout << endl;
+        cout
+        << "i" << TAB
+        << CUR_TX.no << TAB
+        << hash2hex(*CUR_VIN.txid) << TAB
+        << CUR_VIN.vout
+        << endl;
 }
 
 void        out_vout(void)
 {
-    cout << "o" << TAB << CUR_TX.no << TAB << CUR_VOUT.no << TAB << CUR_VOUT.satoshi << endl;
+    cout
+        << "o" << TAB
+        << CUR_TX.no << TAB
+        << CUR_VOUT.no << TAB
+        << CUR_VOUT.satoshi
+        << endl;
+}
+
+void        out_addr(void)
+{
+    cout
+        << "a" << TAB
+        << STAT.addrs << TAB
+        << ripe2hex(cur_addr)
+        << endl;
+    cout
+        << "x" << TAB
+        << CUR_TX.no << TAB
+        << CUR_VOUT.no << TAB
+        << STAT.addrs
+        << endl;
 }
 
 void        out_tx(void)
 {
-    cout << "t" << TAB << CUR_TX.no << TAB << CUR_BK.no << TAB << hash2hex(CUR_TX.hash) << endl;
+    cout
+        << "t" << TAB
+        << CUR_TX.no << TAB
+        << CUR_BK.no << TAB
+        << hash2hex(CUR_TX.hash)
+        << endl;
 }
 
 void        out_bk(void)    ///< Output bk data for DB
 {
     time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);
-    cout << "b" << TAB << CUR_BK.no << TAB << "'" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << "'" << endl;
+    cout
+        << "b" << TAB
+        << CUR_BK.no << TAB
+        << "'" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << "'" << TAB
+        << hash2hex(CUR_BK.hash)
+        << endl;
 }
 
 void        __prn_vin(void)
 {
-    cerr << "\t\tVin:" << endl;
-    if (OPTS.verbose > 2) {
-        if (CUR_VIN.vout < 0xFFFFFFFF)
-            cerr << "\t\t\tVout_n:\t" << CUR_VIN.vout << endl;
-        cerr
-            << "\t\t\tSSize:\t" << CUR_VIN.ssize << endl
-            << "\t\t\tSeq:\t" << CUR_VIN.seq << endl;
-    }
+    cerr << TAB << "Vin: ";
+    if (CUR_VIN.vout == 0xFFFFFFFF)
+        cerr << "<coinbase>";
+    else
+        cerr << " vout: " << CUR_VIN.vout;
+    cerr
+        << ", ssize: " << CUR_VIN.ssize
+        << ", seq: " << CUR_VIN.seq
+        << endl;
 }
 
 void        __prn_vout(void)
 {
     cerr
-        << "Vout:"
-        << TAB << CUR_TX.no
-        << " " << CUR_VOUT.no
-        << " " << CUR_VOUT.satoshi
-        << " " << CUR_VOUT.ssize
-        << " " << ptr2hex(CUR_VOUT.script, CUR_VOUT.ssize)
+        << TAB << "Vout: "
+        << "tx: " << CUR_TX.no
+        << ", no: " << CUR_VOUT.no
+        << ", $: " << CUR_VOUT.satoshi
+        << ", ssize: " << CUR_VOUT.ssize
         << endl;
+    //<< " " << ptr2hex(CUR_VOUT.script, CUR_VOUT.ssize)
     return;
     cerr << "\t\tVout:" << endl;
     if (OPTS.verbose > 2) {
@@ -194,6 +231,16 @@ void        __prn_vout(void)
             << "\t\t\t$:\t" << CUR_VOUT.satoshi << endl
             << "\t\t\tSSize:\t" << CUR_VOUT.ssize << endl;
     }
+}
+
+void        __prn_addr(void)
+{
+    cerr
+        << "Addr:"
+        << "tx: " << CUR_TX.no
+        << ", vout: " << CUR_VOUT.no
+        << ", ripe160: " << ripe2hex(cur_addr)
+        << endl;
 }
 
 void        __prn_tx(void)
@@ -249,31 +296,3 @@ void        __prn_summary(void)
             << "Addrs/vout max:" << TAB << STAT.max_addrs << endl;
 }
 
-// 2.
-/*
-uint256_t   sha256(void *src, uint32_t size)
-{
-    uint256_t result;
-    SHA256_CTX context;
-    SHA256_Init(&context);
-    SHA256_Update(&context, src, size);
-    SHA256_Final(result.begin(), &context);
-    return result;
-}
-
-uint256_t   sha256(uint256_t &src)
-{
-    uint256_t result;
-    SHA256_CTX context;
-    SHA256_Init(&context);
-    SHA256_Update(&context, src.begin(), src.size());
-    SHA256_Final(result.begin(), &context);
-    return result;
-}
-
-uint256_t   hash256(void *src, uint32_t size)
-{
-    auto result = sha256(src, size);
-    return sha256(result);
-}
-*/
