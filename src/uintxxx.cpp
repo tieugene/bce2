@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <assert.h>
 //#include <iostream> // cerr
 #include <cstring>
+#include <vector>
 #include <openssl/sha.h>
 #include <openssl/ripemd.h>
 #include "uintxxx.h"
@@ -8,33 +10,46 @@
 
 using namespace std;
 
-const char * const ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
-string      EncodeBase58(uint8_t *src, size_t len) {
-    auto dstlen = len * 137 / 100;
-    char digits[dstlen], result[dstlen];
-    size_t digitslen = 1;
-    for (size_t i = 0; i < len; i++) {
-        size_t carry = src[i];
-        for (size_t j = 0; j < digitslen; j++) {
-            carry += static_cast<size_t> (digits[j]) << 8;
-            digits[j] = static_cast<char> (carry % 58);
-            carry /= 58;
-        }
-        while (carry > 0) {
-            digits[digitslen++] = static_cast<char> (carry % 58);
-            carry /= 58;
-        }
+string EncodeBase58(uint8_t* pbegin, const uint8_t* pend)    // bitcoin-core 0.19.1; pbegin must be const...
+{
+    // Skip & count leading zeroes.
+    int zeroes = 0;
+    int length = 0;
+    while (pbegin != pend && *pbegin == 0) {
+        pbegin++;
+        zeroes++;
     }
-    size_t resultlen = 0;
-    // leading zero bytes
-    for (; resultlen < len && src[resultlen] == 0;)
-        result[resultlen++] = '1';
-    // reverse
-    for (size_t i = 0; i < digitslen; i++)
-        result[resultlen + i] = ALPHABET[digits[digitslen - 1 - i]];
-    result[digitslen + resultlen] = 0;
-    return string(result);
+    // Allocate enough space in big-endian base58 representation.
+    int size = (pend - pbegin) * 138 / 100 + 1; // log(256) / log(58), rounded up.
+    vector<unsigned char> b58(size);
+    // Process the bytes.
+    while (pbegin != pend) {
+        int carry = *pbegin;
+        int i = 0;
+        // Apply "b58 = b58 * 256 + ch".
+        for (std::vector<unsigned char>::reverse_iterator it = b58.rbegin(); (carry != 0 || i < length) && (it != b58.rend()); it++, i++) {
+            carry += 256 * (*it);
+            *it = carry % 58;
+            carry /= 58;
+        }
+
+        assert(carry == 0);
+        length = i;
+        pbegin++;
+    }
+    // Skip leading zeroes in base58 result.
+    vector<unsigned char>::iterator it = b58.begin() + (size - length);
+    while (it != b58.end() && *it == 0)
+        it++;
+    // Translate the result into a string.
+    string str;
+    str.reserve(zeroes + (b58.end() - it));
+    str.assign(zeroes, '1');
+    while (it != b58.end())
+        str += pszBase58[*(it++)];
+    return str;
 }
 
 string      hash2hex(uint256_t &h)
@@ -96,9 +111,8 @@ string      ripe2addr(uint160_t &src) {
     memcpy(tmp1+1, &src, sizeof (uint160_t));   // 1. add leading 0
     uint256_t tmp2;
     hash256(tmp1, sizeof (uint160_t)+1, tmp2);  // 2. 2 x sha256
-    memcpy(tmp1+21, &(tmp2[28]), 4);            // 3. add crc
-    //cerr << "B4: " << ptr2hex(tmp1, 25) << endl;
-    return EncodeBase58(tmp1, 25);
+    memcpy(tmp1+21, &(tmp2[0]), 4);             // 3. add crc
+    return EncodeBase58(tmp1, tmp1+25);
 }
 
 /* 2.
