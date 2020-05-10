@@ -170,7 +170,7 @@ void        out_addr(void)
     cout
         << "a" << TAB
         << STAT.addrs << TAB
-        << ripe2hex(cur_addr)
+        << ripe2addr(cur_addr)
         << endl;
     cout
         << "x" << TAB
@@ -239,7 +239,7 @@ void        __prn_addr(void)
         << "Addr:"
         << "tx: " << CUR_TX.no
         << ", vout: " << CUR_VOUT.no
-        << ", ripe160: " << ripe2hex(cur_addr)
+        << ", ripe160: " << ripe2addr(cur_addr)
         << endl;
 }
 
