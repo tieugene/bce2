@@ -10,6 +10,7 @@
 #include <array>
 
 #include "uintxxx.h"
+#include "kv.h"
 
 struct  OPT_T
 {
@@ -84,8 +85,9 @@ struct  TX_T        ///< transaction variables w/o vins/vouts
 struct  VIN_T
 {
     uint256_t   *txid;
+    uint64_t    txno;
     uint32_t    vout;
-    uint32_t    ssize;
+    uint32_t    ssize;      // vint
     uint8_t     *script;
     uint32_t    seq;
 };
@@ -94,7 +96,7 @@ struct  VOUT_T
 {
     uint32_t    no;
     uint64_t    satoshi;
-    uint32_t    ssize;
+    uint32_t    ssize;      // vint
     uint8_t     *script;
 
 };
@@ -107,6 +109,7 @@ extern BK_T     CUR_BK;
 extern TX_T     CUR_TX;
 extern VIN_T    CUR_VIN;
 extern VOUT_T   CUR_VOUT;
+extern TxDB_T   TxDB;
 
 const string TAB = "\t";
 const uint32_t COINBASE_vout = 0xFFFFFFFF;

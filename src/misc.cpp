@@ -1,3 +1,8 @@
+/*
+ * TODO: options:
+ * - input bk no=>hash table
+ */
+
 #include <cstdlib>
 #include <stdio.h>
 #include <unistd.h>
@@ -150,9 +155,10 @@ void        out_vin(void)   // FIXME: compare w/ COINBASE_txid too
         cout
         << "i" << TAB
         << CUR_TX.no << TAB
-        << hash2hex(*CUR_VIN.txid) << TAB
+        << CUR_VIN.txno << TAB
         << CUR_VIN.vout
         << endl;
+        // hash2hex(*CUR_VIN.txid)
 }
 
 void        out_vout(void)
@@ -207,7 +213,7 @@ void        __prn_vin(void)
     if (CUR_VIN.vout == 0xFFFFFFFF)
         cerr << "<coinbase>";
     else
-        cerr << " vout: " << CUR_VIN.vout;
+        cerr << " vout: " << CUR_VIN.txno << " " << CUR_VIN.vout;
     cerr
         << ", ssize: " << CUR_VIN.ssize
         << ", seq: " << CUR_VIN.seq

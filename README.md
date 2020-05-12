@@ -2,6 +2,24 @@
 Blockchain export.
 CLI utility to export blockchain data into plain text format
 
+## Order:
+1. get bk's hashes (bash, py):
+  - in: int range
+  - out: X x 64-char lines
+2. get bk's positions:
+  - in: #1
+  - out: height=>file+offset[+hash]
+3. get COPY lines
+  - in: #2
+  - out - 1 x txt
+4. sort vins:
+  - in: #3 | grep ^i
+  - out: sorted ^i (by tx>vout; "external sort": sort -T -S --compress-program)
+5. merge vout+vin
+  - in: #3, 4
+  - out: ^o (w/ or w/o vin)
+6. load into DB
+
 ## Resurces:
 - [blk* structure](https://en.bitcoin.it/wiki/Bitcoin_Core_0.11_(ch_2):_Data_Storage):
   - blocks/blk*.dat - main data

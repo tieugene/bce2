@@ -24,6 +24,7 @@ BK_T        CUR_BK;
 TX_T        CUR_TX;
 VIN_T       CUR_VIN;
 VOUT_T      CUR_VOUT;
+TxDB_T      TxDB;
 
 static uint32_t bk_no_upto;
 
@@ -35,6 +36,13 @@ bool    parse_vin(uint32_t no)
     CUR_VIN.ssize = read_v();
     CUR_VIN.script = read_u8_ptr(CUR_VIN.ssize);
     CUR_VIN.seq = read_32();
+    if (CUR_VIN.vout != COINBASE_vout) {
+        CUR_VIN.txno = TxDB.get(*CUR_VIN.txid);
+        if (CUR_VIN.txno == NOT_FOUND_U32) {
+            cerr << "txid " << hash2hex(*CUR_VIN.txid) << " not foud." << endl;
+            return false;
+        }
+    }
     if (!OPTS.quiet)
         out_vin();
     if (OPTS.verbose >= 4)
@@ -78,8 +86,11 @@ bool    parse_tx(uint32_t bk_tx_no) // TODO: hash
             return false;
     CUR_TX.locktime = read_32();
     auto h_end = CUR_PTR.u8_ptr;
-    if (!OPTS.quiet or OPTS.verbose >= 3) // on demand
-        hash256(h_beg, h_end - h_beg, CUR_TX.hash);
+    hash256(h_beg, h_end - h_beg, CUR_TX.hash);
+    if (!TxDB.add(CUR_TX.hash, CUR_TX.no)) {
+            cerr << "Can't add tx " << hash2hex(CUR_TX.hash) << endl;
+            return false;
+    }
     if (!OPTS.quiet)
         out_tx();
     if (OPTS.verbose >= 3)
@@ -170,9 +181,19 @@ int     main(int argc, char *argv[])
     int file1idx = cli(argc, argv);
     if (!file1idx)  // no file[s] defined
         return 1;
-    bk_no_upto = OPTS.from + OPTS.num;
-    if (!OPTS.bkdir.empty() and OPTS.bkdir.back() != '!')
+    // 1.1. prepare dat
+    if (!OPTS.bkdir.empty() and OPTS.bkdir.back() != '!')   // ?'!'
         OPTS.bkdir += '/';  // FIXME: path separator
+    // 1.2. prepare cache
+    if (!OPTS.cache.empty() and OPTS.cache.back() != '/')
+        OPTS.cache += '/';  // FIXME: path separator
+    auto s = OPTS.cache + "tx.kch";
+    if (!TxDB.init(s)) {
+        cerr << "Can't open cache " << s << endl;
+    }
+    // 1.3. etc
+    bk_no_upto = OPTS.from + OPTS.num;
+    // 2. main loop
     for (auto i = file1idx; i < argc; i++)
     {
         auto sDatName = OPTS.bkdir + argv[i];   // TODO: merge path

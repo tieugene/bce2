@@ -15,19 +15,25 @@
   - &check;bk.hash
   - &check;tx.hash
   - &check;output (tx.hash)
-1. &#9744; RC2 (_scripts_):
-  - decode addr
+1. &#9745; RC2 (_scripts_): _200510_
+  - &check;decode addr (pk, pkg)
+  - &check;output (addr, x)
+1. &#9744; RC3 (inmem _k-v_): unordered\_map ~~array, vector, [unordered\_]set, map~~
+  - &check; compare bk hashes (py) - not in right order
+  - tx
+  - addr
+  - output (vin, addr, x) using tx.no
+  - bk
+1. &#9744; Release (_file k-v_)
+1. &#9766; Extra (_mempool_)
+1. &#9744; Bugfixes:
   - trace state on error
   - chk bk &/| tx hashes
   - debug levels
   - _debug as json_
-1. &#9744; RC3 (_k-v_):
-  - k-v:
-     - tx
-     - addr
-  - output (vin, addr, x)
-1. &#9744; Release (chk bk on longest chain)
-1. &#9766; Extra (_mempool_)
+1. &#9744; Feature requests:
+  - options:
+    - 
 
 ## KB:
 - 1"/dat
@@ -49,6 +55,16 @@
 - out script:
   - &hellip;
 
+## Idea:
+- ids: id as material path
+  - bk.id:uint32_t = height
+  - tx.id:uint64_t = bk.id << 4 + tx.no << 2
+  - vout.id:uint_64_t = tx.id | vout.no
+-  use [LevelDB](https://en.bitcoin.it/wiki/Bitcoin_Core_0.11_(ch_2):_Data_Storage#Block_index_.28leveldb.29)
+  - or prescan ldb => bk.no:file+offset[+size] (python3-{leveldb|plyvel})
+- ~~split dat's into blocks~~
+- pre-scan bks: #:32=>file:16|offset:32
+
 ## py scripts:
 
 - hash256(s:str):
@@ -69,7 +85,6 @@ Example (addr #[0](https://www.blockchain.com/btc/block/000000000019d6689c085ae1
 ```
 pk: 04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f
 hash160: 62e907b15cbf27d5425399ebf6f0fb50ebb88f18
-B4_b58: 0062e907b15cbf27d5425399ebf6f0fb50ebb88f189f2d5996
 addr: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
 ```
 
