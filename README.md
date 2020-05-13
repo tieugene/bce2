@@ -21,7 +21,7 @@ CLI utility to export blockchain data into plain text format
 6. load into DB
 
 ## Resurces:
-- [blk* structure](https://en.bitcoin.it/wiki/Bitcoin_Core_0.11_(ch_2):_Data_Storage):
+- [blk* structure]("https://en.bitcoin.it/wiki/Bitcoin_Core_0.11_(ch_2):_Data_Storage"):
   - blocks/blk*.dat - main data
   - blocks/index/* - where blocks are
   - blocks/rev*.dat - undos (?)
@@ -66,9 +66,55 @@ table:str = b/t/a/d--tab--data
 ## Compare:
 - get from bitcoind by py | cut extra | out
 - + decode pubkeys
-- 
 
-## TODO:
-Include bitcoin:
-- uin256
-- crypto/*
+## LevelDB:
+(CBlockTreeDB, src/txdb.h)
+- Path: blocks/index/*
+- Key: 'b' + 32-byte block hash -> block index record.
+- Record (88 bytes; BE:
+  * 80 - block header (bytes 8..88)
+  * 4 - height (int)
+  * 4 - The number of transactions.
+  * ? - To what extent this block is validated.
+  * 8 - In which file (int), and where in that file (int), the block data is stored.
+  * 8 - In which file (int), and where in that file (int), the undo data is stored.
+
+E.g.
+
+- bk #0 (88):
+  - 0x89 0xFE 0x04 - version
+  - 0x00 - nHeight
+  - 0x0B - nStatus	// have data & !undo
+  - 0x01 - nTx (1)
+  - 0x00 - nFile (0)
+  - 0x08 - DOffset (8, after sig_size)
+- bk #1 (90):
+  - 0x89 0xFE 0x04 - version
+  - 0x01 - vHeight (1)
+  - 0x1D - vStatus	// have data & undo
+  - 0x01 - vTx (1)
+  - 0x00 - vFile (0)
+  - 0x81 0x2D == 0x012D - vDatOffset (after sig_size)
+  - 0x08 - vUndoOffset
+- bk #120000 (95):
+  - 0x89 0xFE 0x04 - version
+  - 0x86 0xA8 0x40 - vHeight (120000)
+  - 0x1D - vStatus	// have data & undo
+  - 0x38 - vTx (56)
+  - 0x01 - vFile (1)
+  - 0x82 0xB1 0x00 - vDatOffset
+  - 0x80 0x92 0x40 - vUndoOffset
+- bk #629999 (100):
+  - 0x8A 0xCC 0x14 - version
+  - 0xA5 0xB8 0x6F - vHeight (629999)
+  - 0x80 0x1D - vStatus
+  - 0x92 0x31 - vTx (2481)
+  - 0x8F 0x16 - vFile (2069)
+  - 0x9F 0xC6 0xA2 0x14 - vDatOffset
+  - 0x83 0xA7 0xCC 0x77 - vUndoOffset
+
+* [python-verint](https://github.com/fmoo/python-varint) - wrong
+* [varints](https://github.com/bright-tools/varints) - wrong (!dlugosz)
+* [python-bitcoin](https://github.com/maaku/python-bitcoin) - the best (serialize.VarInt)
+  * VarInt(<int>).serialize() -> bytes
+  * VarInt().deserialize()

@@ -182,7 +182,7 @@ int     main(int argc, char *argv[])
     if (!file1idx)  // no file[s] defined
         return 1;
     // 1.1. prepare dat
-    if (!OPTS.bkdir.empty() and OPTS.bkdir.back() != '!')   // ?'!'
+    if (!OPTS.bkdir.empty() and OPTS.bkdir.back() != '/')   // ?'!'
         OPTS.bkdir += '/';  // FIXME: path separator
     // 1.2. prepare cache
     if (!OPTS.cache.empty() and OPTS.cache.back() != '/')

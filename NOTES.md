@@ -1,30 +1,34 @@
 # Notes
 
 ## Todo:
-1. &#9745; Alpha (_simple walk_): _200506_
+1. &#9745; Pre-Alpha (_simple walk_): _(200506)_
   - &check;light parse bk, tx, vin, vout
-1. &#9745; Pre-Beta (_tuning_): _200507_
+1. &#9745; Alpha (_tuning_): _200507_
   - &check;refactoring source (split by modules)
   - &check;output (bk, tx (w/o hash), vout)
   - &check;options (parse)
   - &check;options (use)
-1. &#9745; Beta (_correct walk_): _200508_
+1. &#9745; Pre-Beta (_correct walk_): _(200508)_
   - &check;stop on EOF
   - &check;multifile
-1. &#9745; RC1 (_hashes_): _200508_
+1. &#9745; Beta (_hashes_): _(200508)_
   - &check;bk.hash
   - &check;tx.hash
   - &check;output (tx.hash)
-1. &#9745; RC2 (_scripts_): _200510_
+1. &#9745; RC1 (_scripts_): _(200510)_
   - &check;decode addr (pk, pkg)
   - &check;output (addr, x)
-1. &#9744; RC3 (inmem _k-v_): unordered\_map ~~array, vector, [unordered\_]set, map~~
-  - &check; compare bk hashes (py) - not in right order
-  - tx
+  - &check;compare bk hashes (py) - not in right order
+1. &#9745; RC2 (_LevelDB_): _(200513)_
+  - &check;bk: height->hashes (tools/get\_bk\_hashes.py)
+  - &check;bk: hashes->file+offset (tools/get\_bk\_locs.py)
+1. &#9744; RC3 (_k-v_):
+  - bk: load by height
+  - &hellip;tx
   - addr
   - output (vin, addr, x) using tx.no
-  - bk
-1. &#9744; Release (_file k-v_)
+  - ~~tx: no = bk.height << 12 | tx.no (in bk)~~
+1. &#9744; Release:
 1. &#9766; Extra (_mempool_)
 1. &#9744; Bugfixes:
   - trace state on error

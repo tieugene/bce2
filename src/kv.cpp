@@ -23,7 +23,7 @@ uint32_t    TxMap_T::get(uint256_t &key) {
 
 // ==== KyotoCabinet
 bool        TxDB_T::init(string &s) {
-    return db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE);
+    return db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE | kyotocabinet::PolyDB::OTRUNCATE); // TODO:
 }
 
 uint64_t    TxDB_T::size(void) {

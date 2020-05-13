@@ -52,16 +52,16 @@ union   UNIPTR_T    ///< Universal ptr
     uint256_t   *u256_ptr;
 };
 
-struct  BK_HEAD_T   ///< bk header, 88 bytes
+struct  BK_HEAD_T   ///< bk x-header, 88 bytes
 {
     uint32_t    sig;
     uint32_t    size;
-    uint32_t    ver;
+    uint32_t    ver;    // real head start (80 bytes)
     uint256_t   p_hash;
     uint256_t   mroot;
     uint32_t    time;
     uint32_t    bits;
-    uint32_t    nonce;
+    uint32_t    nonce;  // real head end
 };
 
 struct  BK_T
