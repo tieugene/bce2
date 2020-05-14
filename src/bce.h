@@ -95,9 +95,9 @@ struct  VOUT_T      ///< vout data
 struct  BUFFER_T
 {
     char        *beg = nullptr;
-    char        *end = nullptr; // end of used space
-    uint32_t    size_used = 0;
-    uint32_t    size_real = 0;
+    //char        *end = nullptr; // end of used space
+    //uint32_t    size_used = 0;
+    //uint32_t    size_real = 0;
 };
 
 extern UNIPTR_T CUR_PTR;
@@ -108,6 +108,7 @@ extern TX_T     CUR_TX;
 extern VIN_T    CUR_VIN;
 extern VOUT_T   CUR_VOUT;
 extern TxDB_T   TxDB;
+extern AddrDB_T AddrDB;
 extern BUFFER_T BUFFER;
 
 const string TAB = "\t";

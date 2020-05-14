@@ -11,14 +11,24 @@ using namespace std;
 
 const uint32_t NOT_FOUND_U32 = 0xFFFFFFFF;
 
-class   TxDB_T {
-private:
+class   KVDB_T {
+protected:
     kyotocabinet::PolyDB     db;
 public:
     bool        init(string &);
-    uint64_t    size(void);
-    bool        add(uint256_t &, uint32_t);
+    uint32_t    size(void);
+};
+
+class   TxDB_T : public KVDB_T {
+public:
+    uint32_t    add(uint256_t &);
     uint32_t    get(uint256_t &);
+};
+
+class   AddrDB_T : public KVDB_T {
+public:
+    uint32_t    add(uint160_t &);
+    uint32_t    get(uint160_t &);
 };
 
 #endif // KV_H

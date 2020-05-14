@@ -170,18 +170,22 @@ void        out_vout(void)
         << endl;
 }
 
-void        out_addr(void)
+void        out_addr(uint32_t id, uint160_t &ripe)
 {
     cout
         << "a" << TAB
-        << STAT.addrs << TAB
-        << ripe2addr(cur_addr)
+        << id << TAB
+        << ripe2addr(ripe)
         << endl;
+}
+
+void        out_xaddr(uint32_t id)
+{
     cout
         << "x" << TAB
         << CUR_TX.no << TAB
         << CUR_VOUT.no << TAB
-        << STAT.addrs
+        << id
         << endl;
 }
 
@@ -273,15 +277,6 @@ void        __prn_bk(void)  // TODO: hash
         << ", txs: " << CUR_BK.txs
         << endl;
         // << " (" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << ")"
-}
-
-void        __prn_file(string &fn)
-{
-    cerr << "File: " << fn
-         << ", size: " << (BUFFER.end - BUFFER.beg)
-         << ", bk: " << CUR_BK.no
-         << ", tx: " << CUR_TX.no
-         << endl;
 }
 
 void        __prn_summary(void)

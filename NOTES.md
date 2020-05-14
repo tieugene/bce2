@@ -24,14 +24,15 @@
   - &check;bk: hashes->file+offset (tools/get\_bk\_locs.py)
 1. &#9744; RC3 (_k-v_):
   - &check;bk: load by height
-  - &hellip;tx k-v
-  - addr k-v
-  - output (vin, addr, x) using tx.no
+  - &check;tx k-v
+  - &check;addr k-v
+  - &check;output: vin, addr, x
+  - multiaddress;
+  - trace state on error
 1. &#9744; Release:
   - -k (continue)
 1. &#9766; Extra (_mempool_)
 1. &#9744; Bugfixes:
-  - trace state on error
   - debug levels
   - __chk bk &/| tx hashes_
   - _debug as json_

@@ -16,7 +16,8 @@ string      ptr2hex(void *, size_t);
 
 void        out_vin(void);
 void        out_vout(void);
-void        out_addr(void);
+void        out_addr(uint32_t, uint160_t &);
+void        out_xaddr(uint32_t);
 void        out_tx(void);
 void        out_bk(void);
 
