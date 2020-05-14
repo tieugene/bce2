@@ -24,23 +24,20 @@
   - &check;bk: hashes->file+offset (tools/get\_bk\_locs.py)
 1. &#9744; RC3 (_k-v_):
   - bk: load by height
-  - &hellip;tx
-  - addr
+  - &hellip;tx k-v
+  - addr k-v
   - output (vin, addr, x) using tx.no
   - ~~tx: no = bk.height << 12 | tx.no (in bk)~~
 1. &#9744; Release:
 1. &#9766; Extra (_mempool_)
 1. &#9744; Bugfixes:
   - trace state on error
-  - chk bk &/| tx hashes
   - debug levels
+  - __chk bk &/| tx hashes_
   - _debug as json_
 1. &#9744; Feature requests:
-  - options:
-    - 
 
 ## KB:
-- 1"/dat
 - bk hash _allways_ starts w/ 0x00000000 (uint32 0)
 - [coinbase](https://learnmeabitcoin.com/guide/coinbase-transaction):
   - txid = 0x00....00
@@ -48,7 +45,7 @@
 - hash:
   - bk.hash = sha256(sha256(bk.header (ver..nonce)))
   - tx.hash = sha256(sha256(tx.ver..tx.locktime))
-  - addr.pk2addr = ripe160(sha256())
+  - addr.pkh2addr = ripe160(sha256())
   - hash160 2 addr: base58(\0+hash160+(sha256(sha256(0+hash160)))[:4])
 - 1sts (bk no my/real):
   - vin: 170
@@ -56,18 +53,12 @@
 - blk volumes (bk/tx, +):
   - 0: 119968	435128
   - 1: 131231	754423
-- out script:
-  - &hellip;
 
 ## Idea:
 - ids: id as material path
   - bk.id:uint32_t = height
   - tx.id:uint64_t = bk.id << 4 + tx.no << 2
   - vout.id:uint_64_t = tx.id | vout.no
--  use [LevelDB](https://en.bitcoin.it/wiki/Bitcoin_Core_0.11_(ch_2):_Data_Storage#Block_index_.28leveldb.29)
-  - or prescan ldb => bk.no:file+offset[+size] (python3-{leveldb|plyvel})
-- ~~split dat's into blocks~~
-- pre-scan bks: #:32=>file:16|offset:32
 
 ## py scripts:
 
@@ -92,17 +83,7 @@ hash160: 62e907b15cbf27d5425399ebf6f0fb50ebb88f18
 addr: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
 ```
 
-## find:
-- bk height - check by p_hash?
-
 ## misc:
-- options libs:
-  - [getopt](https://www.gnu.org/software/libc/manual/html_node/Using-Getopt.html) (unistd.h)
-  - popt
-  - [getoptpp](https://bitbucket.org/fudepan/getoptpp)
-  - [getoptpp](https://github.com/cgloeckner/getoptpp)
-  - [cxxopts](https://github.com/jarro2783/cxxopts)
-  - boost::program_options
 - commands:
   - info/check
   - export
@@ -129,12 +110,3 @@ addr: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
   - vin:
   - vout:
   - addr:
-
-## Tests:
-- 0+1 - ok
-- 0+3 - ok
-- 3+5 - ok
-- 0,0 - ok
-- 3,0 - ok
-- 200k,1 - ok
-- 200k,0 - ok

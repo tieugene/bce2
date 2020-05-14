@@ -11,11 +11,11 @@
 #include "script.h" // cur_addr only
 
 static string  help_txt = "\
-Usage: [options] file[ file[...]]\n\
+Usage: [options] <file-offset_file>\n\
 Options:\n\
 -f n      - block starts from (default=0)\n\
 -n n      - blocks to process (default=1, 0=all)\n\
--b <path> - blk*.dat folder (default='' - current folder)\n\
+-d <path> - *.dat folder (default='' - current folder)\n\
 -c <path> - cache data folder (default='.')\n\
 -q        - quiet (disable output result to stdout)\n\
 -v[n]     - verbose (debug info to stderr):\n\
@@ -33,23 +33,23 @@ void        __prn_opts(void)
         << TAB << "Num:" << TAB << OPTS.num << endl
         << TAB << "Quiet:" << TAB << OPTS.quiet << endl
         << TAB << "Debug:" << TAB << OPTS.verbose << endl
-        << TAB << "BkDir:" << TAB << OPTS.bkdir << endl
-        << TAB << "Cache:" << TAB << OPTS.cache << endl
+        << TAB << "DatDir:" << TAB << OPTS.datdir << endl
+        << TAB << "Cache:" << TAB << OPTS.cachedir << endl
     ;
 }
 
-int         cli(int argc, char *argv[])
+bool        cli(int argc, char *argv[])
 {
     int opt;
-    int retvalue = 0;
+    bool retvalue = false;
 
     OPTS.from = 0;
     OPTS.num = 1;
+    OPTS.datdir = "";
+    OPTS.cachedir = ".";
     OPTS.quiet = false;
     OPTS.verbose = 0;
-    OPTS.bkdir = "";
-    OPTS.cache = ".";
-    while ((opt = getopt(argc, argv, "f:n:qv::b:c:")) != -1)
+    while ((opt = getopt(argc, argv, "f:n:d:c:qv::")) != -1)
     {
         switch (opt) {
             case 'f':   // FIXME: optarg < 0 | > 999999
@@ -61,17 +61,17 @@ int         cli(int argc, char *argv[])
                 if (OPTS.num == 0)
                     OPTS.num = 999999;
                 break;
+            case 'd':
+                OPTS.datdir = optarg;
+                break;
+            case 'c':
+                OPTS.cachedir = optarg;
+                break;
             case 'q':
                 OPTS.quiet = true;
                 break;
             case 'v':   // FIXME: optarg = 0..5
                 OPTS.verbose = (optarg) ? atoi(optarg) : 1;
-                break;
-            case 'b':
-                OPTS.bkdir = optarg;
-                break;
-            case 'c':
-                OPTS.cache = optarg;
                 break;
             case '?':   // can handle optopt
                 cerr << help_txt << endl;
@@ -80,13 +80,12 @@ int         cli(int argc, char *argv[])
     }
     // opterr - allways 1
     // optind - 1st file argv's no (if argc > optind)
-    if (argc > optind)  {
-        retvalue = optind;
+    if (optind == (argc-1))  {
+        retvalue = true;
         if (OPTS.verbose > 1)   // TODO: up v-level
             __prn_opts();
-    }
-    else
-        cerr << "Error: blk*.dat filename[s] required." << endl << help_txt;
+    } else
+        cerr << "Error: file-offset filename required." << endl << help_txt;
     return retvalue;
 }
 
@@ -272,7 +271,6 @@ void        __prn_bk(void)  // TODO: hash
         << ", hash: " << hash2hex(CUR_BK.hash)
         << ", ver: " << CUR_BK.head_ptr->ver
         << ", txs: " << CUR_BK.txs
-        << ", size: " << CUR_BK.head_ptr->size
         << endl;
         // << " (" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << ")"
 }

@@ -1,27 +1,5 @@
 #include "kv.h"
 
-//unordered_map<uint256_t, uint64_t>  map;
-
-/*uint32_t    TxMap_T::size(void) {
-    return map.size();
-}*/
-
-bool        TxMap_T::add(uint256_t &key, uint32_t value) {
-    //auto result = map.emplace(key, value);   // FIXME: emplace() w/ checking retvalue
-    return true;
-}
-
-uint32_t    TxMap_T::get(uint256_t &key) {
-    uint32_t retvalue = NOT_FOUND_U32;
-    /*
-    auto got = map.find(key);
-    if (got != map.end())
-        retvalue = got->second;
-    */
-    return retvalue;
-}
-
-// ==== KyotoCabinet
 bool        TxDB_T::init(string &s) {
     return db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE | kyotocabinet::PolyDB::OTRUNCATE); // TODO:
 }

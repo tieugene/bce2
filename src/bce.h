@@ -12,36 +12,6 @@
 #include "uintxxx.h"
 #include "kv.h"
 
-struct  OPT_T
-{
-    uint32_t    from = 0;
-    uint32_t    num = 1;
-    bool        quiet = false;
-    int         verbose = 0;
-    string      bkdir = "";
-    string      cache = "";
-};
-
-struct  BUFFER_T
-{
-    char        *beg = nullptr;
-    // char        *cur = nullptr;
-    char        *end = nullptr; // end of used space
-    uint32_t    size_used = 0;
-    uint32_t    size_real = 0;
-};
-
-struct  STAT_T
-{
-    uint32_t    files = 0;
-    uint32_t    vins = 0;
-    uint32_t    max_vins = 0;
-    uint32_t    vouts = 0;
-    uint32_t    max_vouts = 0;
-    uint32_t    addrs = 0;
-    uint32_t    max_addrs = 0;
-};
-
 union   UNIPTR_T    ///< Universal ptr
 {
     void        *v_ptr;
@@ -52,10 +22,29 @@ union   UNIPTR_T    ///< Universal ptr
     uint256_t   *u256_ptr;
 };
 
-struct  BK_HEAD_T   ///< bk x-header, 88 bytes
+struct  OPT_T       ///< program CLI options
 {
-    uint32_t    sig;
-    uint32_t    size;
+    string      datdir = "";
+    string      cachedir = "";
+    uint32_t    from = 0;
+    uint32_t    num = 1;
+    bool        quiet = false;
+    int         verbose = 0;
+};
+
+struct  STAT_T      ///< misc bc statistics
+{
+    uint32_t    files = 0;
+    uint32_t    vins = 0;
+    uint32_t    max_vins = 0;
+    uint32_t    vouts = 0;
+    uint32_t    max_vouts = 0;
+    uint32_t    addrs = 0;
+    uint32_t    max_addrs = 0;
+};
+
+struct  BK_HEAD_T   ///< bk header, 80 bytes
+{
     uint32_t    ver;    // real head start (80 bytes)
     uint256_t   p_hash;
     uint256_t   mroot;
@@ -64,7 +53,7 @@ struct  BK_HEAD_T   ///< bk x-header, 88 bytes
     uint32_t    nonce;  // real head end
 };
 
-struct  BK_T
+struct  BK_T        ///< whole of bk data w/o txs
 {
     uint32_t    no;
     BK_HEAD_T   *head_ptr;
@@ -72,7 +61,7 @@ struct  BK_T
     uint256_t   hash;
 };
 
-struct  TX_T        ///< transaction variables w/o vins/vouts
+struct  TX_T        ///< tx variables w/o vins/vouts
 {
     uint32_t    no;
     uint32_t    ver;        // FIXME: * (for hash)
@@ -82,7 +71,7 @@ struct  TX_T        ///< transaction variables w/o vins/vouts
     uint256_t   hash;
 };
 
-struct  VIN_T
+struct  VIN_T       ///< vin data
 {
     uint256_t   *txid;
     uint64_t    txno;
@@ -92,7 +81,7 @@ struct  VIN_T
     uint32_t    seq;
 };
 
-struct  VOUT_T
+struct  VOUT_T      ///< vout data
 {
     uint32_t    no;
     uint64_t    satoshi;
@@ -101,15 +90,23 @@ struct  VOUT_T
 
 };
 
+struct  BUFFER_T
+{
+    char        *beg = nullptr;
+    char        *end = nullptr; // end of used space
+    uint32_t    size_used = 0;
+    uint32_t    size_real = 0;
+};
+
+extern UNIPTR_T CUR_PTR;
 extern OPT_T    OPTS;
 extern STAT_T   STAT;
-extern BUFFER_T BUFFER;
-extern UNIPTR_T CUR_PTR;
 extern BK_T     CUR_BK;
 extern TX_T     CUR_TX;
 extern VIN_T    CUR_VIN;
 extern VOUT_T   CUR_VOUT;
 extern TxDB_T   TxDB;
+extern BUFFER_T BUFFER;
 
 const string TAB = "\t";
 const uint32_t COINBASE_vout = 0xFFFFFFFF;

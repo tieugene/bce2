@@ -1,11 +1,13 @@
 /*
-Usage: [options] file[ file[...]]
+Usage: [options] file
 Options:
 -f[rom]     - start block
 -n[um]      - blocks to process
+-d[atdir]   - *.dat-files folder
+-c[ache]    - helping data folder
 -q[uiet]    - no output result (stdout)
 -v[erbose]  - debug info (stderr)
--c[ache]    - helping data folder
+-k[eep]     - keep existing data
 -h[elp]     - subj
 */
 
@@ -16,16 +18,65 @@ Options:
 
 namespace fs = std::filesystem;
 
-OPT_T       OPTS;
-BUFFER_T    BUFFER;
-STAT_T      STAT;
+struct  FOFF_T      ///< files-offset array
+{
+    uint32_t  fileno;
+    uint32_t  offset;
+};
+
+class   DATFARM_T   ///< represents blk*.dat, opening on demand
+{
+private:
+    ifstream    *file;
+    string      folder;
+    size_t      qty;
+    bool        open(size_t no) {
+        if (no > qty) {
+            cerr << "File # too big: " << no << endl;
+            return false;
+        }
+        if (file[no].is_open())
+            return true;
+        ostringstream ss;
+        ss << setw(5) << setfill('0') << no;
+        string fn = folder + "blk" + ss.str() + ".dat";
+        file[no].open(fn, ios::in|ios::binary);
+        return file[no].is_open();
+    }
+public:
+    DATFARM_T(size_t qty, string &folder)
+        : folder(folder), qty(qty)
+    {
+        file = new ifstream[qty];
+    }
+    bool        read(size_t no, size_t offset, int size, void *dst)
+    {
+        if (!open(no))
+            return false;
+        file[no].seekg(offset, file[no].beg);
+        file[no].read(static_cast<char *>(dst), size);
+        if (file[no].gcount() != size) {
+            cerr << "Can't read from file" << endl;
+            return false;
+        }
+        return true;
+    }
+};
+
+// globals
 UNIPTR_T    CUR_PTR;
+OPT_T       OPTS;
+STAT_T      STAT;
 BK_T        CUR_BK;
 TX_T        CUR_TX;
 VIN_T       CUR_VIN;
 VOUT_T      CUR_VOUT;
 TxDB_T      TxDB;
-
+BUFFER_T    BUFFER;
+// locals
+const uint32_t  MAX_BK_SIZE = 2 << 20;  // 2MB enough
+const uint32_t  BK_SIGN = 0xD9B4BEF9;   // LE
+static FOFF_T   *FOFF;
 static uint32_t bk_no_upto;
 
 bool    parse_vin(uint32_t no)
@@ -102,20 +153,9 @@ bool    parse_tx(uint32_t bk_tx_no) // TODO: hash
     return true;
 }
 
-bool    parse_bk(bool skip)
+bool    parse_bk(void)
 {
     CUR_BK.head_ptr = static_cast<BK_HEAD_T*> (CUR_PTR.v_ptr);
-    if (CUR_BK.head_ptr->sig != 0xD9B4BEF9)    // LE
-    {
-        cerr << "Block signature not found: " << hex << CUR_BK.head_ptr->sig << endl;
-        return false;
-    }
-    if (skip) {
-        if (OPTS.verbose >= 3)
-            cerr << "Block: " << CUR_BK.no << " <skipped>" << endl;
-        CUR_PTR.u8_ptr += (CUR_BK.head_ptr->size + 8);  // including sig and size
-        return true;
-    }
     CUR_PTR.u8_ptr += sizeof (BK_HEAD_T);
     CUR_BK.txs = read_v();
     if (!OPTS.quiet or OPTS.verbose >= 2) // on demand
@@ -130,88 +170,95 @@ bool    parse_bk(bool skip)
     return true;
 }
 
-bool    parse_file(void)    // TODO: err | EOF | -n exceeded
+bool    load_bk(DATFARM_T &datfarm, uint32_t fileno, uint32_t offset)       ///< load bk to buffer
 {
-    while (CUR_BK.no < bk_no_upto and CUR_PTR.v_ptr < BUFFER.end) {
-        bool skip = (CUR_BK.no < OPTS.from);
-        if (!parse_bk(skip))
-            return false;
-        CUR_BK.no++;
+    uint32_t sig, size;
+    if (!datfarm.read(fileno, offset-8, sizeof(sig), &sig)) {
+        cerr << "Can't read bk signature." << endl;
+        return false;
     }
-    return true;
+    if (sig != BK_SIGN) {
+        cerr << "Block signature not found: " << hex << sig << endl;
+        return false;
+    }
+    if (!datfarm.read(fileno, offset-4, sizeof(size), &size)) {
+        cerr << "Can't read bk size." << endl;
+        return false;
+    }
+    if (size > MAX_BK_SIZE) {
+        cerr << "Block too big: " << size << endl;
+        return false;
+    }
+    BUFFER.end = BUFFER.beg + size;
+    CUR_PTR.v_ptr = BUFFER.beg;
+    return datfarm.read(fileno, offset, size, BUFFER.beg);
 }
 
-bool    read_file(string &fn)
+size_t  load_fileoffsets(char *fn)  ///< load file-offset file
 {
-    // TODO: check path exists, is file
-    ///< Read whole of file into mem
     ifstream file (fn, ios::in|ios::binary|ios::ate);
-    if (!file) {
+    if (!file) {            // 1. open
         cerr << "File '" << fn << "' opening failed" << endl;
-        return false;
+        return 0;
     }
     auto data_size = file.tellg();
-    if (data_size < 0) {
-        cerr << "Can't get size of '" << fn << "'" << endl;
-        return false;
+    if ((data_size < 0) or (data_size & 0x7) or (data_size > (8 << 20)))    // 2. chk filesize
+    {
+        cerr << "Wrong file size (<0 or != 8x or >8MB (1M bks)): " << fn << "=" << data_size << endl;
+        return 0;
     }
-    auto udata_size = uint32_t(data_size);
-    if (OPTS.verbose > 1)
-        cerr << fn << " ("<< udata_size << " bytes):" << endl;
-    if (BUFFER.size_real < udata_size) {
-        if (BUFFER.beg)
-            if (OPTS.verbose > 1)
-                cerr << "Reallocating buffer." << endl;
-            delete BUFFER.beg;
-        BUFFER.beg = new char[udata_size];
-        BUFFER.size_real = udata_size;
+    auto blocks = size_t(data_size >> 3);
+    FOFF = new FOFF_T[blocks];
+    if (!FOFF) {
+        cerr << "Can't allocate mem for file-offset list." << endl;
+        return 0;
     }
     file.seekg (0, ios::beg);
-    file.read (BUFFER.beg, udata_size);
+    char *tmp = static_cast<char *>(static_cast<void *>(FOFF));
+    file.read (tmp, data_size);
     file.close();
-    BUFFER.size_used = udata_size;
-    BUFFER.end = BUFFER.beg + udata_size;
-    CUR_PTR.v_ptr = BUFFER.beg;
-    return true;
+    return blocks;
 }
 
 int     main(int argc, char *argv[])
+/* TODO:
+ * - local bk_no_upto
+ * - local BUFFER
+ * [- local FOFF]
+ */
 {
     // 1. handle CLI
-    int file1idx = cli(argc, argv);
-    if (!file1idx)  // no file[s] defined
+    if (!cli(argc, argv))  // no file defined
         return 1;
-    // 1.1. prepare dat
-    if (!OPTS.bkdir.empty() and OPTS.bkdir.back() != '/')   // ?'!'
-        OPTS.bkdir += '/';  // FIXME: path separator
-    // 1.2. prepare cache
-    if (!OPTS.cache.empty() and OPTS.cache.back() != '/')
-        OPTS.cache += '/';  // FIXME: path separator
-    auto s = OPTS.cache + "tx.kch";
+    bk_no_upto = OPTS.from + OPTS.num;
+    // 1.1. prepare bk info
+    auto bk_qty = load_fileoffsets(argv[argc-1]);
+    if (!bk_qty)
+        return 1;
+    if (bk_qty < bk_no_upto) {
+        cerr << "Loaded blocks (" << bk_qty << ") < max wanted " << bk_no_upto << endl;
+        return 1;
+    }
+    // 1.2. prepare dat
+    if (!OPTS.datdir.empty() and OPTS.datdir.back() != '/')
+        OPTS.datdir += '/';  // FIXME: native OS path separator
+    DATFARM_T datfarm(bk_qty, OPTS.datdir);
+    // 1.3. prepare caches
+    if (!OPTS.cachedir.empty() and OPTS.cachedir.back() != '/')
+        OPTS.cachedir += '/';  // FIXME: native path separator
+    auto s = OPTS.cachedir + "tx.kch";
     if (!TxDB.init(s)) {
-        cerr << "Can't open cache " << s << endl;
+        cerr << "Can't open 'TX'tx' cache " << s << endl;
+        return 1;
     }
     // 1.3. etc
-    bk_no_upto = OPTS.from + OPTS.num;
+    BUFFER.beg = new char[MAX_BK_SIZE];
     // 2. main loop
-    for (auto i = file1idx; i < argc; i++)
+    for (auto i = OPTS.from; i < bk_no_upto; i++)
     {
-        auto sDatName = OPTS.bkdir + argv[i];   // TODO: merge path
-        // 2. read
-        if (!read_file(sDatName))
-            break;
-        // 3. parse
-        auto result = parse_file();
-        STAT.files++;
-        if (not result) {
-            cerr << "Error in file '" << sDatName << "' offset " << hex << (static_cast<char *>(CUR_PTR.v_ptr) - BUFFER.beg) << endl;
-            break;
-        }
-        if (OPTS.verbose)
-            __prn_file(sDatName);
-            //cerr << "File parsing: OK" << endl;
-        if (CUR_BK.no >= bk_no_upto)    // -n exceeded
-            break;
+        CUR_BK.no = i;
+        if (load_bk(datfarm, FOFF[i].fileno, FOFF[i].offset))
+            parse_bk();
     }
     // x. The end
     if (OPTS.verbose)
