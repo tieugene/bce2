@@ -81,6 +81,7 @@ BUFFER_T    BUFFER;
 // locals
 const uint32_t  MAX_BK_SIZE = 2 << 20;  // 2MB enough
 const uint32_t  BK_SIGN = 0xD9B4BEF9;   // LE
+static uint32_t BK_GLITCH[] = {91722, 91842};    // dup 91880, 91812
 static FOFF_T   *FOFF;
 
 bool    parse_vin(uint32_t no)
@@ -186,9 +187,9 @@ bool    parse_bk(void)
         out_bk();
     if (OPTS.verbose >= 2)
         __prn_bk();
-    for (uint32_t i = 0; i < CUR_BK.txs; i++, CUR_TX.no++)
-        if (!parse_tx(i))
-            return false;
+    if (!(CUR_BK.no == BK_GLITCH[0] or CUR_BK.no == BK_GLITCH[1]))
+        for (uint32_t i = 0; i < CUR_BK.txs; i++, CUR_TX.no++)
+            parse_tx(i);
     STAT.max_txs = max(STAT.max_txs, CUR_BK.txs);
     STAT.blocks++;
     return true;
