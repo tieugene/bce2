@@ -41,7 +41,11 @@ private:
         ss << setw(5) << setfill('0') << no;
         string fn = folder + "blk" + ss.str() + ".dat";
         file[no].open(fn, ios::in|ios::binary);
-        return file[no].is_open();
+        if (!file[no].is_open()) {
+            cerr << "Can't open file " << fn << endl;
+            return false;
+        }
+        return true;
     }
 public:
     DATFARM_T(size_t qty, string &folder)
@@ -56,7 +60,7 @@ public:
         file[no].seekg(offset, file[no].beg);
         file[no].read(static_cast<char *>(dst), size);
         if (file[no].gcount() != size) {
-            cerr << "Can't read from file" << endl;
+            cerr << "Can't read " << size << " bytes from " << no << "." << offset << endl;
             return false;
         }
         return true;
@@ -150,6 +154,7 @@ bool    parse_tx(uint32_t bk_tx_no) // TODO: hash
     STAT.vouts += CUR_TX.vouts;
     STAT.max_vins = max(STAT.max_vins, CUR_TX.vins);
     STAT.max_vouts = max(STAT.max_vouts, CUR_TX.vouts);
+    STAT.txs++;
     return true;
 }
 
@@ -167,6 +172,8 @@ bool    parse_bk(void)
     for (uint32_t i = 0; i < CUR_BK.txs; i++, CUR_TX.no++)
         if (!parse_tx(i))
             return false;
+    STAT.max_txs = max(STAT.max_txs, CUR_BK.txs);
+    STAT.blocks++;
     return true;
 }
 

@@ -23,12 +23,12 @@
   - &check;bk: height->hashes (tools/get\_bk\_hashes.py)
   - &check;bk: hashes->file+offset (tools/get\_bk\_locs.py)
 1. &#9744; RC3 (_k-v_):
-  - bk: load by height
+  - &check;bk: load by height
   - &hellip;tx k-v
   - addr k-v
   - output (vin, addr, x) using tx.no
-  - ~~tx: no = bk.height << 12 | tx.no (in bk)~~
 1. &#9744; Release:
+  - -k (continue)
 1. &#9766; Extra (_mempool_)
 1. &#9744; Bugfixes:
   - trace state on error
@@ -59,6 +59,7 @@
   - bk.id:uint32_t = height
   - tx.id:uint64_t = bk.id << 4 + tx.no << 2
   - vout.id:uint_64_t = tx.id | vout.no
+  - ~~tx: no = bk.height << 12 | tx.no (in bk)~~
 
 ## py scripts:
 

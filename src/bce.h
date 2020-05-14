@@ -34,7 +34,9 @@ struct  OPT_T       ///< program CLI options
 
 struct  STAT_T      ///< misc bc statistics
 {
-    uint32_t    files = 0;
+    uint32_t    blocks = 0;
+    uint32_t    txs = 0;
+    uint32_t    max_txs = 0;
     uint32_t    vins = 0;
     uint32_t    max_vins = 0;
     uint32_t    vouts = 0;
