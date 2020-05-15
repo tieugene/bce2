@@ -109,6 +109,28 @@ bool    parse_vin(uint32_t no)
     return true;
 }
 
+bool    parse_script(void)
+{
+    if (!script_decode(CUR_VOUT.script, CUR_VOUT.ssize))
+        return false;
+    auto addr_id = AddrDB.get(CUR_ADDR.addr);
+    if (addr_id == NOT_FOUND_U32) {
+        addr_id = AddrDB.add(CUR_ADDR.addr);
+        if (addr_id == NOT_FOUND_U32) {
+            cerr << "Can not find nor add addr " << ripe2hex(CUR_ADDR.addr) << endl;
+            return false;
+        }
+        if (!OPTS.quiet)
+            out_addr(addr_id, CUR_ADDR.addr);
+        STAT.addrs += 1;
+    }
+    if (!OPTS.quiet)
+        out_xaddr(addr_id);
+    if (OPTS.verbose >= 4)
+        __prn_addr();
+    return true;
+}
+
 bool    parse_vout(uint32_t no)
 {
     // TODO: out_addr
@@ -117,30 +139,12 @@ bool    parse_vout(uint32_t no)
     CUR_VOUT.satoshi = read_64();
     CUR_VOUT.ssize = read_v();
     CUR_VOUT.script = read_u8_ptr(CUR_VOUT.ssize);
-    if (!OPTS.quiet) {
-        out_vout();
-    }
-    auto addr_qty = script_decode(CUR_VOUT.script, CUR_VOUT.ssize);
-    if (addr_qty != 1)  // dirty hack
-        return false;
-    auto addr_id = AddrDB.get(cur_addr);
-    if (addr_id == NOT_FOUND_U32) {
-        addr_id = AddrDB.add(cur_addr);
-        if (addr_id == NOT_FOUND_U32) {
-            cerr << "Can not find nor add addr " << ripe2hex(cur_addr) << endl;
-            return false;
-        }
-        if (!OPTS.quiet) {
-            out_addr(addr_id, cur_addr);
-        }
-        STAT.addrs += 1;
-    }
     if (!OPTS.quiet)
-        out_xaddr(addr_id);
-    if (OPTS.verbose >= 4) {  // FIXME: >= 4; debug - 1
+        out_vout();
+    if (OPTS.verbose >= 4)
         __prn_vout();
-        __prn_addr();
-    }
+    if (!parse_script())
+        return false;
     CUR_VOUT.busy = false;
     return true;
 }
@@ -304,7 +308,7 @@ int     main(int argc, char *argv[])
             __prn_trace();
             break;
         }
-        if ((OPTS.verbose) and ((i % 1000) == 0))
+        if ((OPTS.verbose > 3) and ((i % 1000) == 0))
             cerr << i << endl;
         CUR_TX.busy = CUR_VIN.busy = CUR_VOUT.busy = false;
         CUR_BK.busy = false;

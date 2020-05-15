@@ -27,11 +27,17 @@
   - &check;tx k-v
   - &check;addr k-v
   - &check;output: vin, addr, x
-  - trace state on error
-  - multiaddress;
+  - &check;trace state on error
+  - &hellip;extra addresses (incl. multiaddress)
+     - add "2skip" (bk + tx.bkno + vout (uint32?))
+     - or get patch?
 1. &#9744; Release:
+  - merge vout+vin
+  - bk: hash2file_offset.cpp
+  - ubunto pkg
+1. &#9766; Extra:
   - -k (continue)
-1. &#9766; Extra (_mempool_)
+  - 'mempool'
 1. &#9744; Bugfixes:
   - debug levels
   - __chk bk &/| tx hashes_
@@ -50,10 +56,14 @@
   - hash160 2 addr: base58(\0+hash160+(sha256(sha256(0+hash160)))[:4])
 - 1sts (bk no my/real):
   - vin: 170
-  - p2pkh: 723/728
-- blk volumes (bk/tx, +):
-  - 0: 119968	435128
-  - 1: 131231	754423
+  - p2pkh: 728
+  - p2ms:
+     - [1st 164467]()
+     - [2nd 165224]()
+     - [3rd 165227]()
+     - [1-of-1 431077]()
+     - [1-of-2 229517]()
+     - [1-of-3 442241]()
 
 ## Idea:
 - ids: id as material path

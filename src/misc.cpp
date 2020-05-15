@@ -248,7 +248,7 @@ void        __prn_addr(void)
         << "Addr:"
         << "tx: " << CUR_TX.no
         << ", vout: " << CUR_VOUT.no
-        << ", ripe160: " << ripe2addr(cur_addr)
+        << ", ripe160: " << ripe2addr(CUR_ADDR.addr)
         << endl;
 }
 

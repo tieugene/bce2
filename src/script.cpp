@@ -1,98 +1,131 @@
+/* Script decoder
+ * RTFM:
+ * - https://en.bitcoin.it/wiki/Script
+ * - https://learnmeabitcoin.com/guide/script
+ * Excludes (bk tx vout):
+ * - 71036
+ * - 140921 (x3)
+ * - 141460.13.0
+ */
 #include <iostream>
 #include <cstring>
+#include "bce.h"
+#include "misc.h"
 #include "script.h"
+#include "opcode.h"
 
-uint160_t   cur_addr;
+ADDRS_T CUR_ADDR;
 
-static uint8_t  *cur;
-static uint32_t last;
+static uint8_t  *cur;   // ptr to currently decoded opcode
+static uint32_t ssize;  // script size
 
-// opcodes
-enum OPCODE : uint8_t {
-    OP_0            = 0x00,
-    OP_RETURN       = 0x6A,
-    OP_DUP          = 0x76,
-    OP_EQUAL        = 0x87,
-    OP_EQUALVERIFY  = 0x88,
-    OP_HASH160      = 0xA9,
-    OP_CHECKSIG     = 0xAC
-};
-
-int     do_P2PK(void) {
-    if (
-        (last = 67) and
-        (cur[66] = OP_CHECKSIG)
-        )
-    {
-        hash160(cur+1, 65, cur_addr);
-        return 1;
-    }
-    return -1;
-}
-
-int     do_P2PKH(void) {
-    if (
-        (last = 25) and
-        (cur[1] == OP_HASH160) and
-        (cur[2] == 20) and
-        (cur[23] == OP_EQUALVERIFY) and
-        (cur[24] = OP_CHECKSIG)
-        )
-    {
-        memcpy(&cur_addr, cur+3, sizeof (uint160_t));
-        return 1;
-    }
-    return -1;
-}
-
-int     do_P2MS(void) {
-    return -1;
-}
-
-int     do_P2SH(void) {
-    if (
-        (last = 23) and
-        (cur[1] == 20) and
-        (cur[22] == OP_EQUAL)
-        )
-        cout << "P2SH detected" << endl;
-        memcpy(&cur_addr, cur+2, sizeof (uint160_t));
-        return 1;
-    return -1;
-}
-
-int     do_P2ND(void) {
-    return -1;
-}
-
-int     do_P2W(void) {
-    return -1;
-}
-
-int     script_decode(uint8_t *script, uint32_t size)
+void    dump_script(const string s)
 {
-    cur = script;
-    last = size;
-    switch (*cur) {
-        case OP_DUP:            // 2. P2PKH
-            return do_P2PKH();
-            break;
-        // case ???:
-        // return do_P2MS();
-        // break;
-        case OP_HASH160:        // 4. P2SH
-            return do_P2SH();
-            break;
-        case OP_RETURN:         // 5. NULL_DATA
-            return 0;
-            break;
-        case 0:                 // x. witness*
-            return -1;
-            break;
-        default:
-            if (*cur <= 0x46)  // 1. P2PK
-                return do_P2PK();
-            cerr << "Unknown vout type: " << hex << *cur << endl;
-            return -1;
+    cerr
+        << "Script err: " << s << " ("
+        << "bk = " << CUR_BK.no
+        << ", tx = " << CUR_TX.bkno << "(" << CUR_TX.no << ")"
+        << ", vout = " << CUR_VOUT.no
+        << ", script: " << ptr2hex(cur, ssize)
+        << ")" << endl;
+}
+
+bool    do_P2PK(uint8_t opcode) {
+    if (
+        ssize == 67 and
+        opcode == 0x41 and
+        cur[66] == OP_CHECKSIG
+        ) {
+        hash160(cur+1, 65, CUR_ADDR.addr);
+        CUR_ADDR.qty = 1;
+        return true;
     }
+    if (CUR_BK.no == 140921)    // dirty hack (skip "nonstandart")
+        return true;
+    dump_script("Wrong P2PK");
+    return false;
+}
+
+bool    do_P2PKH(void) {
+    if (
+        ssize >= 25 and     // dirty hack against 71036 and w/ OP_NOP @ end
+        cur[1] == OP_HASH160 and
+        cur[2] == 20 and
+        cur[23] == OP_EQUALVERIFY and
+        cur[24] == OP_CHECKSIG
+        ) {
+        memcpy(&CUR_ADDR.addr, cur+3, sizeof (uint160_t));
+        CUR_ADDR.qty = 1;
+        // if (ssize > 25)
+        //    dump_script("P2PKH: Wrong script length");
+        return true;
+    }
+    dump_script("Wrong P2PKH");
+    return false;
+}
+
+bool    do_P2MS(void) {
+    dump_script("P2MS detected");
+    return true;
+}
+
+bool    do_P2SH(void) {
+    if (
+        ssize == 23 and
+        cur[1] == 20 and
+        cur[22] == OP_EQUAL
+        ) {
+        memcpy(&CUR_ADDR.addr, cur+2, sizeof (uint160_t));
+        CUR_ADDR.qty = 1;
+        return true;
+    }
+    dump_script("Wrong P2SH");
+    return false;
+}
+
+bool    do_P2W(void) {
+    dump_script("Witness");
+    return true;
+}
+
+bool    script_decode(uint8_t *script, uint32_t size)
+{
+    CUR_ADDR.qty = 0;
+    cur = script;
+    ssize = size;
+    auto opcode = *cur;
+    bool retvalue = false;
+    switch (opcode) {
+    case 0x01 ... 0x46:     // 1. P2PK (obsolet)
+        retvalue = do_P2PK(opcode);
+        break;
+    case OP_DUP:            // 2. P2PKH
+        retvalue = do_P2PKH();
+        break;
+    case OP_1:              // 3. P2MS
+        retvalue = do_P2MS();
+        break;
+    case OP_HASH160:        // 4. P2SH
+        retvalue = do_P2SH();
+        break;
+    case OP_RETURN:         // 5. NULL_DATA == nothing to do
+        retvalue = true;
+        break;
+    case OP_0:              // x. witness*
+        retvalue = do_P2W();
+        break;
+    default:
+        if (opcode <= 0xB9) { // last defined opcode
+            if (CUR_BK.no == 141460) {    // dirty hack (tx.13, skip "nonstandart")
+                retvalue = true;
+            }  else {
+                dump_script("Not implemented");
+                retvalue = false;
+            }
+        } else {
+            dump_script("Script invalid");
+            retvalue = true;
+        }
+    }
+    return retvalue;
 }

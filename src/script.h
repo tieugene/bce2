@@ -5,9 +5,13 @@
 
 #include "uintxxx.h"
 
-extern uint160_t cur_addr;
+struct  ADDRS_T {
+    char        qty;
+    uint160_t   addr;
+};
 
-/** Returns qty of decoded (-1 on error) */
-int     script_decode(uint8_t *, uint32_t);
+extern ADDRS_T CUR_ADDR;
+
+bool    script_decode(uint8_t *, uint32_t);
 
 #endif // SCRIPT_H
