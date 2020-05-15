@@ -87,6 +87,8 @@ static FOFF_T   *FOFF;
 bool    parse_vin(uint32_t no)
 {
     // FIXME: coinbase = 32x00 + 4xFF (txid+vout)
+    CUR_VIN.busy = true;
+    CUR_VIN.no = no;
     CUR_VIN.txid = read_256_ptr();
     CUR_VIN.vout = read_32();
     CUR_VIN.ssize = read_v();
@@ -95,7 +97,7 @@ bool    parse_vin(uint32_t no)
     if (CUR_VIN.vout != COINBASE_vout) {
         CUR_VIN.txno = TxDB.get(*CUR_VIN.txid);
         if (CUR_VIN.txno == NOT_FOUND_U32) {
-            cerr << "txid " << hash2hex(*CUR_VIN.txid) << " not foud." << endl;
+            cerr << "txid " << hash2hex(*CUR_VIN.txid) << " not found." << endl;
             return false;
         }
     }
@@ -103,12 +105,14 @@ bool    parse_vin(uint32_t no)
         out_vin();
     if (OPTS.verbose >= 4)
         __prn_vin();
+    CUR_VIN.busy = false;
     return true;
 }
 
 bool    parse_vout(uint32_t no)
 {
     // TODO: out_addr
+    CUR_VOUT.busy = true;
     CUR_VOUT.no = no;
     CUR_VOUT.satoshi = read_64();
     CUR_VOUT.ssize = read_v();
@@ -137,12 +141,15 @@ bool    parse_vout(uint32_t no)
         __prn_vout();
         __prn_addr();
     }
+    CUR_VOUT.busy = false;
     return true;
 }
 
 bool    parse_tx(uint32_t bk_tx_no) // TODO: hash
 {
+    CUR_TX.busy = true;
     auto h_beg = CUR_PTR.u8_ptr;
+    CUR_TX.bkno = bk_tx_no;
     CUR_TX.ver = read_32();
     CUR_TX.vins = read_v();
     for (uint32_t i =  0; i < CUR_TX.vins; i++)
@@ -173,23 +180,26 @@ bool    parse_tx(uint32_t bk_tx_no) // TODO: hash
     STAT.max_vins = max(STAT.max_vins, CUR_TX.vins);
     STAT.max_vouts = max(STAT.max_vouts, CUR_TX.vouts);
     STAT.txs++;
+    CUR_TX.busy = false;
     return true;
 }
 
 bool    parse_bk(void)
 {
+
     CUR_BK.head_ptr = static_cast<BK_HEAD_T*> (CUR_PTR.v_ptr);
     CUR_PTR.u8_ptr += sizeof (BK_HEAD_T);
     CUR_BK.txs = read_v();
     if (!OPTS.quiet or OPTS.verbose >= 2) // on demand
-        hash256(&(CUR_BK.head_ptr->ver), sizeof(BK_HEAD_T)-8, CUR_BK.hash);
+        hash256(CUR_BK.head_ptr, sizeof(BK_HEAD_T), CUR_BK.hash);
     if (!OPTS.quiet)
         out_bk();
     if (OPTS.verbose >= 2)
         __prn_bk();
     if (!(CUR_BK.no == BK_GLITCH[0] or CUR_BK.no == BK_GLITCH[1]))
         for (uint32_t i = 0; i < CUR_BK.txs; i++, CUR_TX.no++)
-            parse_tx(i);
+            if (!parse_tx(i))
+                return false;
     STAT.max_txs = max(STAT.max_txs, CUR_BK.txs);
     STAT.blocks++;
     return true;
@@ -285,9 +295,19 @@ int     main(int argc, char *argv[])
     // 2. main loop
     for (auto i = OPTS.from; i < bk_no_upto; i++)
     {
+        CUR_TX.busy = CUR_VIN.busy = CUR_VOUT.busy = false;
+        CUR_BK.busy = true;
         CUR_BK.no = i;
-        if (load_bk(datfarm, FOFF[i].fileno, FOFF[i].offset))
-            parse_bk();
+        if (!load_bk(datfarm, FOFF[i].fileno, FOFF[i].offset))
+            break;
+        if (!parse_bk()) {
+            __prn_trace();
+            break;
+        }
+        if ((OPTS.verbose) and ((i % 1000) == 0))
+            cerr << i << endl;
+        CUR_TX.busy = CUR_VIN.busy = CUR_VOUT.busy = false;
+        CUR_BK.busy = false;
     }
     // x. The end
     if (OPTS.verbose)

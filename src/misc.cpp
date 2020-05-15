@@ -295,3 +295,17 @@ void        __prn_summary(void)
             << "Addrs/vout max:" << TAB << STAT.max_addrs << endl;
 }
 
+bool        __prn_trace(void)
+{
+    cerr << "*** <Trace> ***" << endl;
+    if (CUR_BK.busy)
+        cerr << "Block:" << TAB << CUR_BK.no << endl;
+    if (CUR_TX.busy)
+        cerr << "Tx:" << TAB << CUR_TX.bkno << " (" << CUR_TX.no << ")" << endl;
+    if (CUR_VIN.busy)
+        cerr << "Vin:" << TAB << CUR_VIN.txno << endl;
+    if (CUR_VOUT.busy)
+        cerr << "Vout:" << TAB << CUR_VOUT.no << endl;
+    cerr << "*** </Trace> ***" << endl;
+    return false;
+}

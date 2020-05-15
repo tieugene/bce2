@@ -28,4 +28,5 @@ void        __prn_tx(void);
 void        __prn_bk(void);
 void        __prn_file(string &);
 void        __prn_summary(void);
+bool        __prn_trace(void);
 #endif // MISC_H

@@ -61,6 +61,7 @@ struct  BK_T        ///< whole of bk data w/o txs
     BK_HEAD_T   *head_ptr;
     uint32_t    txs;
     uint256_t   hash;
+    bool        busy;
 };
 
 struct  TX_T        ///< tx variables w/o vins/vouts
@@ -71,6 +72,8 @@ struct  TX_T        ///< tx variables w/o vins/vouts
     uint32_t    vouts;
     uint32_t    locktime;   // FIXME: * (for hash)
     uint256_t   hash;
+    uint32_t    bkno;
+    bool        busy;
 };
 
 struct  VIN_T       ///< vin data
@@ -81,6 +84,8 @@ struct  VIN_T       ///< vin data
     uint32_t    ssize;      // vint
     uint8_t     *script;
     uint32_t    seq;
+    uint32_t    no;
+    bool        busy;
 };
 
 struct  VOUT_T      ///< vout data
@@ -89,7 +94,7 @@ struct  VOUT_T      ///< vout data
     uint64_t    satoshi;
     uint32_t    ssize;      // vint
     uint8_t     *script;
-
+    bool        busy;
 };
 
 struct  BUFFER_T

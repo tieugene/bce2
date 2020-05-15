@@ -27,8 +27,8 @@
   - &check;tx k-v
   - &check;addr k-v
   - &check;output: vin, addr, x
-  - multiaddress;
   - trace state on error
+  - multiaddress;
 1. &#9744; Release:
   - -k (continue)
 1. &#9766; Extra (_mempool_)
@@ -96,6 +96,11 @@ addr: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
 - intermediates:
   - tx hashes
   - address hashes
+- speed:
+  - noout:
+    - 100k - 7"
+  out:
+    - 119k - 100"
 
 ## Verbosity:
 - 0 - errors only
