@@ -29,7 +29,7 @@
   - &check;output: vin, addr, x
   - &check;trace state on error
   - &hellip;extra addresses (incl. multiaddress)
-     - add "2skip" (bk + tx.bkno + vout (uint32?))
+     - add "2skip" (bk (20) + tx.bkno (10) + vout (12) (uint64?)) as file
      - or get patch?
 1. &#9744; Release:
   - merge vout+vin
@@ -127,3 +127,7 @@ addr: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
   - vin:
   - vout:
   - addr:
+
+## Timer:
+(w/o addresses)
+- 200k - 

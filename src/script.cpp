@@ -6,6 +6,8 @@
  * - 71036
  * - 140921 (x3)
  * - 141460.13.0
+ * - 150951.1.0 (empty P2PKH)
+ * - 154012.25.2 - dirty PKH
  */
 #include <iostream>
 #include <cstring>
@@ -24,7 +26,7 @@ void    dump_script(const string s)
     cerr
         << "Script err: " << s << " ("
         << "bk = " << CUR_BK.no
-        << ", tx = " << CUR_TX.bkno << "(" << CUR_TX.no << ")"
+        << ", tx = " << CUR_TX.bkno << " (" << CUR_TX.no << ")"
         << ", vout = " << CUR_VOUT.no
         << ", script: " << ptr2hex(cur, ssize)
         << ")" << endl;
@@ -47,8 +49,10 @@ bool    do_P2PK(uint8_t opcode) {
 }
 
 bool    do_P2PKH(void) {
+    if (ssize == 5)      // very dirty hack for 150951.*.* (PKH = 0x00)
+        return true;
     if (
-        ssize >= 25 and     // dirty hack against 71036 and w/ OP_NOP @ end
+        ssize >= 25 and // dirty hack for 71036.?.? and w/ OP_NOP @ end
         cur[1] == OP_HASH160 and
         cur[2] == 20 and
         cur[23] == OP_EQUALVERIFY and

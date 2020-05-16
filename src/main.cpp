@@ -112,7 +112,7 @@ bool    parse_vin(uint32_t no)
 bool    parse_script(void)
 {
     if (!script_decode(CUR_VOUT.script, CUR_VOUT.ssize))
-        return false;
+        return false;    // !!! TERMPORARY !!!
     auto addr_id = AddrDB.get(CUR_ADDR.addr);
     if (addr_id == NOT_FOUND_U32) {
         addr_id = AddrDB.add(CUR_ADDR.addr);
@@ -143,8 +143,8 @@ bool    parse_vout(uint32_t no)
         out_vout();
     if (OPTS.verbose >= 4)
         __prn_vout();
-    if (!parse_script())
-        return false;
+    //if (!parse_script())
+    //    return false;
     CUR_VOUT.busy = false;
     return true;
 }

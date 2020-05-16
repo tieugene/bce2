@@ -283,13 +283,13 @@ void        __prn_summary(void)
 {
     cerr << "= Summary =" << endl
         << "Blocks:" << TAB << STAT.blocks << endl;
-    if (OPTS.verbose > 2)
+    if (OPTS.verbose)   // >2
         cerr
             << "Tx:" << TAB << STAT.txs << endl
-            << "Tx/bk max:" << TAB << STAT.max_txs << endl
             << "Vins:" << TAB << STAT.vins << endl
             << "Vouts:" << TAB << STAT.vouts << endl
             << "Addrs:" << TAB << STAT.addrs << endl
+            << "Tx/bk max:" << TAB << STAT.max_txs << endl
             << "Vins/tx max:" << TAB << STAT.max_vins << endl
             << "Vouts/tx max:" << TAB << STAT.max_vouts << endl
             << "Addrs/vout max:" << TAB << STAT.max_addrs << endl;
