@@ -18,8 +18,8 @@
 
 ADDRS_T CUR_ADDR;
 
-static uint8_t  *cur;   // ptr to currently decoded opcode
-static uint32_t ssize;  // script size
+static uint8_t  *script_ptr;   // ptr to currently decoded opcode
+static uint32_t script_size;  // script size
 
 void    dump_script(const string s)
 {
@@ -28,17 +28,17 @@ void    dump_script(const string s)
         << "bk = " << CUR_BK.no
         << ", tx = " << CUR_TX.bkno << " (" << CUR_TX.no << ")"
         << ", vout = " << CUR_VOUT.no
-        << ", script: " << ptr2hex(cur, ssize)
+        << ", script: " << ptr2hex(script_ptr, script_size)
         << ")" << endl;
 }
 
 bool    do_P2PK(uint8_t opcode) {
     if (
-        ssize == 67 and
+        script_size == 67 and
         opcode == 0x41 and
-        cur[66] == OP_CHECKSIG
+        script_ptr[66] == OP_CHECKSIG
         ) {
-        hash160(cur+1, 65, CUR_ADDR.addr);
+        hash160(script_ptr+1, 65, CUR_ADDR.addr);
         CUR_ADDR.qty = 1;
         return true;
     }
@@ -49,16 +49,16 @@ bool    do_P2PK(uint8_t opcode) {
 }
 
 bool    do_P2PKH(void) {
-    if (ssize == 5)      // very dirty hack for 150951.*.* (PKH = 0x00)
+    if (script_size == 5)      // very dirty hack for 150951.*.* (PKH = 0x00)
         return true;
     if (
-        ssize >= 25 and // dirty hack for 71036.?.? and w/ OP_NOP @ end
-        cur[1] == OP_HASH160 and
-        cur[2] == 20 and
-        cur[23] == OP_EQUALVERIFY and
-        cur[24] == OP_CHECKSIG
+        script_size >= 25 and // dirty hack for 71036.?.? and w/ OP_NOP @ end
+        script_ptr[1] == OP_HASH160 and
+        script_ptr[2] == 20 and
+        script_ptr[23] == OP_EQUALVERIFY and
+        script_ptr[24] == OP_CHECKSIG
         ) {
-        memcpy(&CUR_ADDR.addr, cur+3, sizeof (uint160_t));
+        memcpy(&CUR_ADDR.addr, script_ptr+3, sizeof (uint160_t));
         CUR_ADDR.qty = 1;
         // if (ssize > 25)
         //    dump_script("P2PKH: Wrong script length");
@@ -75,11 +75,11 @@ bool    do_P2MS(void) {
 
 bool    do_P2SH(void) {
     if (
-        ssize == 23 and
-        cur[1] == 20 and
-        cur[22] == OP_EQUAL
+        script_size == 23 and
+        script_ptr[1] == 20 and
+        script_ptr[22] == OP_EQUAL
         ) {
-        memcpy(&CUR_ADDR.addr, cur+2, sizeof (uint160_t));
+        memcpy(&CUR_ADDR.addr, script_ptr+2, sizeof (uint160_t));
         CUR_ADDR.qty = 1;
         return true;
     }
@@ -95,9 +95,9 @@ bool    do_P2W(void) {
 bool    script_decode(uint8_t *script, uint32_t size)
 {
     CUR_ADDR.qty = 0;
-    cur = script;
-    ssize = size;
-    auto opcode = *cur;
+    script_ptr = script;
+    script_size = size;
+    auto opcode = *script_ptr;
     bool retvalue = false;
     switch (opcode) {
     case 0x01 ... 0x46:     // 1. P2PK (obsolet)

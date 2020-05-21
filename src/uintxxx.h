@@ -1,6 +1,8 @@
 #ifndef UINTXXX_H
 #define UINTXXX_H
 
+#include <cstdint>
+#include <string>
 #include <array>
 
 using namespace std;

@@ -1,6 +1,8 @@
 #ifndef OPCODE_H
 #define OPCODE_H
 
+#include <cstdint>
+
 enum OPCODE : uint8_t {
     OP_0            = 0x00,
     OP_1            = 0x51,
