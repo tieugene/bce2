@@ -112,9 +112,14 @@ extern BK_T     CUR_BK;
 extern TX_T     CUR_TX;
 extern VIN_T    CUR_VIN;
 extern VOUT_T   CUR_VOUT;
+extern BUFFER_T BUFFER;
+#ifdef MEM
+extern TxMAP_T   TxDB;
+extern AddrMAP_T AddrDB;
+#else
 extern TxDB_T   TxDB;
 extern AddrDB_T AddrDB;
-extern BUFFER_T BUFFER;
+#endif
 
 const string TAB = "\t";
 const uint32_t COINBASE_vout = 0xFFFFFFFF;
