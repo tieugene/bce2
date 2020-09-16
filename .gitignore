@@ -71,3 +71,6 @@ Thumbs.db
 *.dll
 *.exe
 
+# UDF
+build-*
+CMakeLists.txt.user

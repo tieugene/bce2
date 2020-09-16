@@ -100,9 +100,6 @@ struct  VOUT_T      ///< vout data
 struct  BUFFER_T
 {
     char        *beg = nullptr;
-    //char        *end = nullptr; // end of used space
-    //uint32_t    size_used = 0;
-    //uint32_t    size_real = 0;
 };
 
 extern UNIPTR_T CUR_PTR;
