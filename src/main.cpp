@@ -60,20 +60,26 @@ int     main(int argc, char *argv[])
     if (!OPTS.datdir.empty() and OPTS.datdir.back() != '/')
         OPTS.datdir += '/';  // FIXME: native OS path separator
     DATFARM_T datfarm(bk_qty, OPTS.datdir);
-    // 1.3. prepare caches
-    if (!OPTS.cachedir.empty() and OPTS.cachedir.back() != '/')
-        OPTS.cachedir += '/';  // FIXME: native path separator
-    auto s = OPTS.cachedir + "tx.kch";
-    if (!TxDB.init(s)) {
-        cerr << "Can't open 'tx' cache: " << s << endl;
-        return 1;
+    // 1.3. prepare k-v storages
+    if (job_mode()) {
+        if (OPTS.cachedir.back() != '/')
+            OPTS.cachedir += '/';  // FIXME: native path separator
+        auto s = OPTS.cachedir + "tx.kch";
+        if (!TxDB.init(s)) {
+            cerr << "Can't open 'tx' cache: " << s << endl;
+            return 1;
+        }
+        s = OPTS.cachedir + "addr.kch";
+        if (!AddrDB.init(s)) {
+            cerr << "Can't open 'addr' cache " << s << endl;
+            return 1;
+        }
+        if (OPTS.from == 0) {
+          TxDB.clear();
+          AddrDB.clear();
+        }
     }
-    s = OPTS.cachedir + "addr.kch";
-    if (!AddrDB.init(s)) {
-        cerr << "Can't open 'addr' cache " << s << endl;
-        return 1;
-    }
-    // 1.3. etc
+    // 1.4. last prestart
     BUFFER.beg = new char[MAX_BK_SIZE];
     // 2. main loop
     for (auto i = OPTS.from; i < bk_no_upto; i++)

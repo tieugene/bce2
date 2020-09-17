@@ -18,7 +18,7 @@ public:
   bool        init(string &s) {
       return db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE | kyotocabinet::PolyDB::OTRUNCATE); // TODO:
   }
-//  void        clear();
+  void        clear() { db.clear(); }
   uint32_t    count(void) {
       auto retvalue = db.count();
       return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);

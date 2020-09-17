@@ -24,8 +24,8 @@ union   UNIPTR_T    ///< Universal ptr
 
 struct  OPT_T       ///< program CLI options
 {
-    string      datdir = "";
-    string      cachedir = "";
+    string      datdir;
+    string      cachedir;
     uint32_t    from = 0;
     uint32_t    num = 1;
     bool        out = false;
