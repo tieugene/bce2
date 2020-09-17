@@ -17,9 +17,9 @@ bool    parse_bk(void)
     CUR_BK.head_ptr = static_cast<BK_HEAD_T*> (CUR_PTR.v_ptr);
     CUR_PTR.u8_ptr += sizeof (BK_HEAD_T);
     CUR_BK.txs = read_v();
-    if (!OPTS.out or OPTS.verbose >= 2) // on demand
+    if (OPTS.out or OPTS.verbose >= 2) // on demand
         hash256(CUR_BK.head_ptr, sizeof(BK_HEAD_T), CUR_BK.hash);
-    if (!OPTS.out)
+    if (OPTS.out)
         out_bk();
     if (OPTS.verbose >= 2)
         __prn_bk();
@@ -58,7 +58,7 @@ bool    parse_tx(uint32_t bk_tx_no) // TODO: hash
             cerr << "Added tx " << hash2hex(CUR_TX.hash) << " added as " << tx_added << " against waiting " << CUR_TX.no << endl;
             return false;
     }
-    if (!OPTS.out)
+    if (OPTS.out)
         out_tx();
     if (OPTS.verbose >= 3)
         __prn_tx();
@@ -88,7 +88,7 @@ bool    parse_vin(uint32_t no)
             return false;
         }
     }
-    if (!OPTS.out)
+    if (OPTS.out)
         out_vin();
     if (OPTS.verbose >= 4)
         __prn_vin();
@@ -104,7 +104,7 @@ bool    parse_vout(uint32_t no)
     CUR_VOUT.satoshi = read_64();
     CUR_VOUT.ssize = read_v();
     CUR_VOUT.script = read_u8_ptr(CUR_VOUT.ssize);
-    if (!OPTS.out)
+    if (OPTS.out)
         out_vout();
     if (OPTS.verbose >= 4)
         __prn_vout();
@@ -125,11 +125,11 @@ bool    parse_script(void)
             cerr << "Can not find nor add addr " << ripe2hex(CUR_ADDR.addr) << endl;
             return false;
         }
-        if (!OPTS.out)
+        if (OPTS.out)
             out_addr(addr_id, CUR_ADDR.addr);
         STAT.addrs += 1;
     }
-    if (!OPTS.out)
+    if (OPTS.out)
         out_xaddr(addr_id);
     if (OPTS.verbose >= 4)
         __prn_addr();
