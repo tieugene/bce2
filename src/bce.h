@@ -28,7 +28,7 @@ struct  OPT_T       ///< program CLI options
     string      cachedir = "";
     uint32_t    from = 0;
     uint32_t    num = 1;
-    bool        quiet = false;
+    bool        out = false;
     int         verbose = 0;
 };
 

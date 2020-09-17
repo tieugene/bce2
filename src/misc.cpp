@@ -31,7 +31,7 @@ void        __prn_opts(void)
         << "Options:" << endl
         << TAB << "From:" << TAB << OPTS.from << endl
         << TAB << "Num:" << TAB << OPTS.num << endl
-        << TAB << "Quiet:" << TAB << OPTS.quiet << endl
+        << TAB << "Quiet:" << TAB << OPTS.out << endl
         << TAB << "Debug:" << TAB << OPTS.verbose << endl
         << TAB << "DatDir:" << TAB << OPTS.datdir << endl
         << TAB << "Cache:" << TAB << OPTS.cachedir << endl
@@ -46,10 +46,10 @@ bool        cli(int argc, char *argv[])
     OPTS.from = 0;
     OPTS.num = 1;
     OPTS.datdir = "";
-    OPTS.cachedir = ".";
-    OPTS.quiet = false;
+    // OPTS.cachedir = ".";
+    OPTS.out = false;
     OPTS.verbose = 0;
-    while ((opt = getopt(argc, argv, "f:n:d:c:qv::")) != -1)
+    while ((opt = getopt(argc, argv, "f:n:d:c:ov::")) != -1)
     {
         switch (opt) {
             case 'f':   // FIXME: optarg < 0 | > 999999
@@ -67,8 +67,8 @@ bool        cli(int argc, char *argv[])
             case 'c':
                 OPTS.cachedir = optarg;
                 break;
-            case 'q':
-                OPTS.quiet = true;
+            case 'o':
+                OPTS.out = true;
                 break;
             case 'v':   // FIXME: optarg = 0..5
                 OPTS.verbose = (optarg) ? atoi(optarg) : 1;
