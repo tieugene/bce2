@@ -4,7 +4,7 @@
 #include "bce.h"
 #include "bkidx.h"
 
-namespace fs = std::filesystem;
+//namespace fs = std::filesystem;
 using namespace std;
 
 FOFF_T   *FOFF;
