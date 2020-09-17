@@ -3,6 +3,21 @@
 #include "printers.h"
 #include "script.h"
 
+void        out_bk(void)    ///< Output bk data for DB
+{
+    time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);
+    char dt[20];
+    strftime(dt, 20, "%Y-%m-%d %OH:%OM:%OS", gmtime(&t));
+    printf("b\t%u\t'%s'\t%s\n", CUR_BK.no, dt, hash2hex(CUR_BK.hash).c_str());
+    // cout << "b" << TAB << CUR_BK.no << TAB << "'" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << "'" << TAB << hash2hex(CUR_BK.hash) << endl;
+}
+
+void        out_tx(void)
+{
+  printf("t\t%u\t%u\t%s\n", CUR_TX.no, CUR_BK.no, hash2hex(CUR_TX.hash).c_str());
+  // cout << "t" << TAB << CUR_TX.no << TAB << CUR_BK.no << TAB << hash2hex(CUR_TX.hash) << endl;
+}
+
 void        out_vin(void)   // FIXME: compare w/ COINBASE_txid too
 {
     if (CUR_VIN.vout != COINBASE_vout)  // skip coinbase
@@ -27,21 +42,6 @@ void        out_xaddr(uint32_t id)
 {
   printf("x\t%u\t%u\t%u\n", CUR_TX.no, CUR_VOUT.no, id);
   // cout << "x" << TAB << CUR_TX.no << TAB << CUR_VOUT.no << TAB << id << endl;
-}
-
-void        out_tx(void)
-{
-  printf("t\t%u\t%u\t%s\n", CUR_TX.no, CUR_BK.no, hash2hex(CUR_TX.hash).c_str());
-  // cout << "t" << TAB << CUR_TX.no << TAB << CUR_BK.no << TAB << hash2hex(CUR_TX.hash) << endl;
-}
-
-void        out_bk(void)    ///< Output bk data for DB
-{
-    time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);
-    char dt[20];
-    strftime(dt, 20, "%Y-%m-%d %OH:%OM:%OS", gmtime(&t));
-    printf("b\t%u\t'%s'\t%s\n", CUR_BK.no, dt, hash2hex(CUR_BK.hash).c_str());
-    // cout << "b" << TAB << CUR_BK.no << TAB << "'" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << "'" << TAB << hash2hex(CUR_BK.hash) << endl;
 }
 
 void        __prn_vin(void)
