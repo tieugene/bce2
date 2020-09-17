@@ -1,12 +1,13 @@
-project(bce2 CXX)
-cmake_minimum_required(VERSION 2.8)
-set(CMAKE_CXX_STANDARD 20)
+cmake_minimum_required(VERSION 3.5)
+
+project(bce2 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 aux_source_directory(src SRC_LIST)
 
-include_directories(
-    src
-)
+include_directories(src)
 
 add_executable(${PROJECT_NAME} ${SRC_LIST})
 
@@ -14,6 +15,7 @@ add_executable(${PROJECT_NAME} ${SRC_LIST})
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} ${OPENSSL_CRYPTO_LIBRARY})
+
 ## kyotocabinet
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(kyotocabinet REQUIRED IMPORTED_TARGET kyotocabinet)

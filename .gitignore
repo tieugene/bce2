@@ -72,5 +72,5 @@ Thumbs.db
 *.exe
 
 # UDF
-build-*
+build*
 CMakeLists.txt.user
