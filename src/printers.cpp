@@ -21,14 +21,14 @@ void        out_tx(void)
 void        out_vin(void)   // FIXME: compare w/ COINBASE_txid too
 {
     if (CUR_VIN.vout != COINBASE_vout)  // skip coinbase
-      printf("i\t%u\t%lu\t%u\n", CUR_TX.no, CUR_VIN.txno, CUR_VIN.vout);
+      printf("i\t%u\t%llu\t%u\n", CUR_TX.no, CUR_VIN.txno, CUR_VIN.vout);
       // cout << "i" << TAB << CUR_TX.no << TAB << CUR_VIN.txno << TAB << CUR_VIN.vout << endl;
       // hash2hex(*CUR_VIN.txid)
 }
 
 void        out_vout(void)
 {
-  printf("o\t%u\t%u\t%lu\n", CUR_TX.no, CUR_VOUT.no, CUR_VOUT.satoshi);
+  printf("o\t%u\t%u\t%llu\n", CUR_TX.no, CUR_VOUT.no, CUR_VOUT.satoshi);
   // cout << "o" << TAB << CUR_TX.no << TAB << CUR_VOUT.no << TAB << CUR_VOUT.satoshi << endl;
 }
 
