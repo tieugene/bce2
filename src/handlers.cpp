@@ -108,8 +108,8 @@ bool    parse_vout(uint32_t no)
         out_vout();
     if (OPTS.verbose >= 4)
         __prn_vout();
-    //if (!parse_script())
-    //    return false;
+    if (!parse_script())
+        return false;
     CUR_VOUT.busy = false;
     return true;
 }

@@ -2,12 +2,12 @@
 #ifndef KV_H
 #define KV_H
 
-#define MEM
-
 #include "uintxxx.h"
 #include <kcpolydb.h>
 #include <array>    // FIXME:
 #include <unordered_map>
+
+#define MEM
 
 const uint32_t NOT_FOUND_U32 = 0xFFFFFFFF;
 
