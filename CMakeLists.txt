@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project(bce2 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 aux_source_directory(src SRC_LIST)
@@ -10,6 +10,11 @@ aux_source_directory(src SRC_LIST)
 include_directories(src)
 
 add_executable(${PROJECT_NAME} ${SRC_LIST})
+
+# Boost
+find_package(Boost REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARY})
 
 ## openssl
 find_package(OpenSSL REQUIRED)

@@ -118,6 +118,8 @@ extern TxDB_T   TxDB;
 extern AddrDB_T AddrDB;
 #endif
 
+extern time_t   start_time;
+
 const string TAB = "\t";
 const uint32_t COINBASE_vout = 0xFFFFFFFF;
 

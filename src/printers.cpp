@@ -21,14 +21,14 @@ void        out_tx(void)
 void        out_vin(void)   // FIXME: compare w/ COINBASE_txid too
 {
     if (CUR_VIN.vout != COINBASE_vout)  // skip coinbase
-      printf("i\t%u\t%llu\t%u\n", CUR_TX.no, CUR_VIN.txno, CUR_VIN.vout);
+      printf("i\t%u\t%lu\t%u\n", CUR_TX.no, CUR_VIN.txno, CUR_VIN.vout);
       // cout << "i" << TAB << CUR_TX.no << TAB << CUR_VIN.txno << TAB << CUR_VIN.vout << endl;
       // hash2hex(*CUR_VIN.txid)
 }
 
 void        out_vout(void)
 {
-  printf("o\t%u\t%u\t%llu\n", CUR_TX.no, CUR_VOUT.no, CUR_VOUT.satoshi);
+  printf("o\t%u\t%u\t%lu\n", CUR_TX.no, CUR_VOUT.no, CUR_VOUT.satoshi);
   // cout << "o" << TAB << CUR_TX.no << TAB << CUR_VOUT.no << TAB << CUR_VOUT.satoshi << endl;
 }
 
@@ -111,6 +111,29 @@ void        __prn_bk(void)  // TODO: hash
         << ", txs: " << CUR_BK.txs
         << endl;
         // << " (" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << ")"
+}
+
+// ====
+void    __prn_head(void)
+{
+  cerr << "Bk\tTx\tVins\tVouts\tAddrs\tUAddrs\tTime\n";
+  __prn_tail();
+}
+
+void    __prn_tail(void)
+{
+  cerr << "---\t-------\t-------\t-------\t-------\t-------\t-----\n";
+}
+
+void    __prn_interim() {
+    cerr <<
+         (CUR_BK.no+1)/1000 <<
+         TAB << STAT.txs <<
+         TAB << STAT.vins <<
+         TAB << STAT.vouts <<
+         TAB << STAT.addrs <<
+         TAB << time(nullptr) - start_time <<
+    "\n";
 }
 
 void        __prn_summary(void)

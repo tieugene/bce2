@@ -16,6 +16,9 @@ void        __prn_vout(void);
 void        __prn_addr(void);
 
 void        __prn_file(string &);
+void        __prn_head(void);
+void        __prn_tail(void);
+void        __prn_interim(void);
 void        __prn_summary(void);
 bool        __prn_trace(void);
 

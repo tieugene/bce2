@@ -33,6 +33,7 @@ AddrMAP_T  AddrDB;
 TxDB_T    TxDB;
 AddrDB_T  AddrDB;
 #endif
+time_t    start_time;
 // locals
 // consts
 const uint32_t  BULK_SIZE = 10000;
@@ -82,6 +83,9 @@ int     main(int argc, char *argv[])
     // 1.4. last prestart
     BUFFER.beg = new char[MAX_BK_SIZE];
     // 2. main loop
+    start_time = time(nullptr);
+    if (OPTS.verbose)
+      __prn_head();
     for (auto i = OPTS.from; i < bk_no_upto; i++)
     {
         CUR_TX.busy = CUR_VIN.busy = CUR_VOUT.busy = false;
@@ -93,14 +97,20 @@ int     main(int argc, char *argv[])
             __prn_trace();
             break;
         }
+        if ((OPTS.verbose) and (((CUR_BK.no+1) % BULK_SIZE) == 0))
+            __prn_interim();
         if ((OPTS.verbose > 3) and ((i % BULK_SIZE) == 0))
             cerr << i << endl;
         CUR_TX.busy = CUR_VIN.busy = CUR_VOUT.busy = false;
         CUR_BK.busy = false;
     }
     // x. The end
-    if (OPTS.verbose)
+    if (OPTS.verbose) {
+      __prn_tail();
+      __prn_interim();
+      if (OPTS.verbose >= 2)
         __prn_summary();
+    }
     if (BUFFER.beg)
         delete BUFFER.beg;
     return 0;

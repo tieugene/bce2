@@ -51,7 +51,7 @@ typedef KVDB_T <uint256_t> TxDB_T;
 typedef KVDB_T <uint160_t> AddrDB_T;
 
 template <typename T> class KVMAP_T {
-    unordered_map <T, uint32_t> db;
+    unordered_map <T, uint32_t> db; // FIXME: hash, equal funcs
   public:
     bool        init(string &) { return true; }
     void        clear(void) { db.clear(); }
