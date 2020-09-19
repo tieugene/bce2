@@ -32,13 +32,13 @@ void        out_vout(void)
   // cout << "o" << TAB << CUR_TX.no << TAB << CUR_VOUT.no << TAB << CUR_VOUT.satoshi << endl;
 }
 
-void        out_addr(uint32_t id, uint160_t &ripe)
+void        out_addr(uint32_t const id, uint160_t const &ripe)
 {
   printf("a\t%u\t%s\n", id, ripe2addr(ripe).c_str());
   // cout << "a" << TAB << id << TAB << ripe2addr(ripe) << endl;
 }
 
-void        out_xaddr(uint32_t id)
+void        out_xaddr(uint32_t const id)
 {
   printf("x\t%u\t%u\t%u\n", CUR_TX.no, CUR_VOUT.no, id);
   // cout << "x" << TAB << CUR_TX.no << TAB << CUR_VOUT.no << TAB << id << endl;
@@ -125,7 +125,7 @@ void    __prn_tail(void)
   cerr << "---\t-------\t-------\t-------\t-------\t-------\t-----\n";
 }
 
-void    __prn_interim() {
+void    __prn_interim(void) {
     cerr <<
          (CUR_BK.no+1)/1000 <<
          TAB << STAT.txs <<

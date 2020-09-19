@@ -32,7 +32,7 @@ void    dump_script(const string s)
         << ")" << endl;
 }
 
-bool    do_P2PK(uint8_t opcode) {
+bool    do_P2PK(uint8_t const opcode) {
     if (
         script_size == 67 and
         opcode == 0x41 and
@@ -92,7 +92,7 @@ bool    do_P2W(void) {
     return true;
 }
 
-bool    script_decode(uint8_t *script, uint32_t size)
+bool    script_decode(uint8_t * const script, uint32_t const size)
 {
     CUR_ADDR.qty = 0;
     script_ptr = script;

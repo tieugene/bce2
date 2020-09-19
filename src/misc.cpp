@@ -119,7 +119,7 @@ uint64_t    read_64(void)  ///< Read 8-byte int and go forward
     return *CUR_PTR.u64_ptr++;
 }
 
-uint8_t     *read_u8_ptr(uint32_t size)
+uint8_t     *read_u8_ptr(uint32_t const size)
 {
     auto retvalue = CUR_PTR.u8_ptr;
     CUR_PTR.u8_ptr += size;
@@ -136,11 +136,11 @@ uint256_t   *read_256_ptr(void)
     return CUR_PTR.u256_ptr++;
 }
 
-string      ptr2hex(void *vptr, size_t size)
+string      ptr2hex(void const *vptr, size_t const size)
 {
     static string hex_chars = "0123456789abcdef";
     string s;
-    char *cptr = static_cast<char *>(vptr);
+    auto cptr = reinterpret_cast<char const *>(vptr);
     for (size_t i = 0; i < size; i++, cptr++) {
         s.push_back(hex_chars[(*cptr & 0xF0) >> 4]);
         s.push_back(hex_chars[(*cptr & 0x0F)]);

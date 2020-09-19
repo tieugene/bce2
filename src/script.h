@@ -12,6 +12,6 @@ struct  ADDRS_T {
 
 extern ADDRS_T CUR_ADDR;
 
-bool    script_decode(uint8_t *, uint32_t);
+bool    script_decode(uint8_t * const, uint32_t const);
 
 #endif // SCRIPT_H

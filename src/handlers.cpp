@@ -6,9 +6,9 @@
 
 static uint32_t BK_GLITCH[] = {91722, 91842};    // dup 91880, 91812
 
-bool    parse_tx(uint32_t bk_tx_no); // TODO: hash
-bool    parse_vin(uint32_t no);
-bool    parse_vout(uint32_t no);
+bool    parse_tx(const uint32_t bk_tx_no); // TODO: hash
+bool    parse_vin(const uint32_t no);
+bool    parse_vout(const uint32_t no);
 bool    parse_script(void);
 
 bool    parse_bk(void)
@@ -32,7 +32,7 @@ bool    parse_bk(void)
     return true;
 }
 
-bool    parse_tx(uint32_t bk_tx_no) // TODO: hash
+bool    parse_tx(const uint32_t bk_tx_no) // TODO: hash
 {
     CUR_TX.busy = true;
     auto h_beg = CUR_PTR.u8_ptr;
@@ -71,7 +71,7 @@ bool    parse_tx(uint32_t bk_tx_no) // TODO: hash
     return true;
 }
 
-bool    parse_vin(uint32_t no)
+bool    parse_vin(const uint32_t no)
 {
     // FIXME: coinbase = 32x00 + 4xFF (txid+vout)
     CUR_VIN.busy = true;
@@ -96,7 +96,7 @@ bool    parse_vin(uint32_t no)
     return true;
 }
 
-bool    parse_vout(uint32_t no)
+bool    parse_vout(const uint32_t no)
 {
     // TODO: out_addr
     CUR_VOUT.busy = true;

@@ -10,7 +10,7 @@ using namespace std;
 FOFF_T   *FOFF;
 const uint32_t  BK_SIGN = 0xD9B4BEF9;   // LE
 
-bool        DATFARM_T::open(size_t no) {
+bool        DATFARM_T::open(const size_t no) {
     if (no > qty) {
         cerr << "File # too big: " << no << endl;
         return false;
@@ -28,7 +28,7 @@ bool        DATFARM_T::open(size_t no) {
     return true;
 }
 
-bool        DATFARM_T::read(size_t no, size_t offset, int size, void *dst)
+bool        DATFARM_T::read(const size_t no, const size_t offset, const int size, void *dst)
 {
     if (!open(no))
         return false;
@@ -41,7 +41,7 @@ bool        DATFARM_T::read(size_t no, size_t offset, int size, void *dst)
     return true;
 }
 
-size_t  load_fileoffsets(char *fn)  ///< load file-offset file
+size_t  load_fileoffsets(const char *fn)  ///< load file-offset file
 {
     ifstream file (fn, ios::in|ios::binary|ios::ate);
     if (!file) {            // 1. open
@@ -61,13 +61,13 @@ size_t  load_fileoffsets(char *fn)  ///< load file-offset file
         return 0;
     }
     file.seekg (0, ios::beg);
-    char *tmp = static_cast<char *>(static_cast<void *>(FOFF));
+    auto tmp = reinterpret_cast<char *>(FOFF);
     file.read (tmp, data_size);
     file.close();
     return blocks;
 }
 
-bool    load_bk(DATFARM_T &datfarm, uint32_t fileno, uint32_t offset)       ///< load bk to buffer
+bool    load_bk(DATFARM_T &datfarm, const uint32_t fileno, const uint32_t offset)       ///< load bk to buffer
 {
     uint32_t sig, size;
     if (!datfarm.read(fileno, offset-8, sizeof(sig), &sig)) {

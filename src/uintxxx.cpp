@@ -52,20 +52,18 @@ string EncodeBase58(uint8_t* pbegin, const uint8_t* pend)    // bitcoin-core 0.1
     return str;
 }
 
-string      hash2hex(uint256_t &h)
+string      hash2hex(uint256_t const &h)
 {
-    void *v = static_cast<void *>(&h);
-    uint64_t *u = static_cast<uint64_t *>(v);
+    auto u = reinterpret_cast<const uint64_t *> (&h);
     char tmp[65];
     tmp[64] = '\0';
     sprintf(tmp, "%016llx%016llx%016llx%016llx", u[3], u[2], u[1], u[0]);
     return string(tmp);
 }
 
-string      ripe2hex(uint160_t &r)
+string      ripe2hex(uint160_t const &r)
 {
-    void *v = static_cast<void *>(&r);
-    uint32_t *u = static_cast<uint32_t *>(v);
+    auto *u = reinterpret_cast<const uint32_t *>(&r);
     char tmp[41];
     tmp[40] = '\0';
     sprintf(tmp, "%08x%08x%08x%08x%08x", u[4], u[3], u[2], u[1], u[0]);
@@ -73,7 +71,7 @@ string      ripe2hex(uint160_t &r)
 }
 
 /** Inner function */
-void        sha256(void *src, uint32_t size, uint256_t &dst)
+void        sha256(void const *src, uint32_t const size, uint256_t &dst)
 {
     SHA256_CTX context;
     SHA256_Init(&context);
@@ -81,7 +79,7 @@ void        sha256(void *src, uint32_t size, uint256_t &dst)
     SHA256_Final(dst.begin(), &context);
 }
 
-void        hash256(void *src, uint32_t size, uint256_t &dst)
+void        hash256(void const *src, uint32_t const size, uint256_t &dst)
 {
     uint256_t tmp;
     sha256(src, size, tmp);
@@ -89,15 +87,15 @@ void        hash256(void *src, uint32_t size, uint256_t &dst)
 }
 
 /** Inner function */
-void        ripe160(uint256_t &src, uint160_t &dst)
+void        ripe160(uint256_t const &src, uint160_t &dst)
 {
     RIPEMD160_CTX context;
     RIPEMD160_Init(&context);
-    RIPEMD160_Update(&context, static_cast<void *>(&src), sizeof(uint256_t));
+    RIPEMD160_Update(&context, reinterpret_cast<void const *>(&src), sizeof(uint256_t));
     RIPEMD160_Final(dst.begin(), &context);
 }
 
-void        hash160(void *src, uint32_t size, uint160_t &dst)
+void        hash160(void const *src, uint32_t const size, uint160_t &dst)
 {
     uint256_t tmp;
     sha256(src, size, tmp);
@@ -105,7 +103,8 @@ void        hash160(void *src, uint32_t size, uint160_t &dst)
 }
 
 /** Convert datum hash160 into base58 encoded string */
-string      ripe2addr(uint160_t &src) {
+string      ripe2addr(uint160_t const &src)
+{
     uint8_t tmp1[sizeof(uint160_t)+5];
     tmp1[0] = 0;
     memcpy(tmp1+1, &src, sizeof (uint160_t));   // 1. add leading 0

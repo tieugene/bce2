@@ -17,30 +17,26 @@ template <typename T> class   KVDB_T {
 protected:
   kyotocabinet::PolyDB     db;
 public:
-  bool        init(string &s) {
+  bool        init(string const &s) {
       return db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE | kyotocabinet::PolyDB::OTRUNCATE); // TODO:
   }
-  void        clear() { db.clear(); }
+  void        clear(void) { db.clear(); }
   uint32_t    count(void) {
       auto retvalue = db.count();
       return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
   }
-  uint32_t    add(T &key) {
+  uint32_t    add(T const &key) {
       //auto value = map.emplace(key, value);   // FIXME: emplace() w/ checking retvalue
       auto value = count();
       if (value != NOT_FOUND_U32) {
-          void *k_ptr = static_cast<void *>(&key);
-          void *v_ptr = static_cast<void *>(&value);
-          if (!db.add(static_cast<char *>(k_ptr), sizeof(T), static_cast<char *>(v_ptr), sizeof(uint32_t)))
+          if (!db.add(reinterpret_cast<char *>(&key), sizeof(T), reinterpret_cast<char *>(&value), sizeof(uint32_t)))
               value = NOT_FOUND_U32;
       }
       return value;
   }
-  uint32_t    get(T &key) {
+  uint32_t    get(T const &key) {
       uint32_t value;
-      void *k_ptr = static_cast<void *>(&key);
-      void *v_ptr = static_cast<void *>(&value);
-      auto result = db.get(static_cast<char *>(k_ptr), sizeof(T), static_cast<char *>(v_ptr), sizeof(uint32_t));
+      auto result = db.get(reinterpret_cast<char *>(&key), sizeof(T), reinterpret_cast<char *>(&value), sizeof(uint32_t));
       if (result != sizeof(uint32_t))
           value = NOT_FOUND_U32;
       return value;
@@ -53,17 +49,17 @@ typedef KVDB_T <uint160_t> AddrDB_T;
 template <typename T> class KVMAP_T {
     unordered_map <T, uint32_t> db; // FIXME: hash, equal funcs
   public:
-    bool        init(string &) { return true; }
+    bool        init(string const &) { return true; }
     void        clear(void) { db.clear(); }
     uint32_t    count(void) { return db.size(); }
-    uint32_t    get(T &key) {
+    uint32_t    get(T const &key) {
       auto value = NOT_FOUND_U32;
       auto search = db.find(key);
       if (search != db.end())
           value = search->second;
       return value;
     }
-    uint32_t    add(T &key) {
+    uint32_t    add(T const &key) {
       auto value = NOT_FOUND_U32;
       if (db.find(key) == db.end()) {
         value = db.size();

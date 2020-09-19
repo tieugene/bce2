@@ -14,14 +14,14 @@ private:
     size_t        qty;
     bool          open(const size_t);
 public:
-    DATFARM_T(const size_t qty, std::string &folder)
+    DATFARM_T(const size_t qty, const std::string &folder)
         : folder(folder), qty(qty)
         { file = new std::ifstream[qty]; }
-    bool        read(size_t, size_t, int, void *);
+    bool        read(const size_t, const size_t, const int, void *);
 };
 
-size_t  load_fileoffsets(char *);  ///< load file-offset file
-bool    load_bk(DATFARM_T &, uint32_t, uint32_t);       ///< load bk to buffer
+size_t  load_fileoffsets(const char *);  ///< load file-offset file
+bool    load_bk(DATFARM_T &, const uint32_t, const uint32_t);       ///< load bk to buffer
 
 extern FOFF_T   *FOFF;
 
