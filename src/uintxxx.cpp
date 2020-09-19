@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <assert.h>
-//#include <iostream> // cerr
 #include <cstring>
 #include <vector>
 #include <openssl/sha.h>
@@ -52,7 +51,7 @@ string EncodeBase58(uint8_t* pbegin, const uint8_t* pend)    // bitcoin-core 0.1
     return str;
 }
 
-string      hash2hex(uint256_t const &h)
+string      hash2hex(const uint256_t &h)
 {
     auto u = reinterpret_cast<const uint64_t *> (&h);
     char tmp[65];
@@ -61,7 +60,7 @@ string      hash2hex(uint256_t const &h)
     return string(tmp);
 }
 
-string      ripe2hex(uint160_t const &r)
+string      ripe2hex(const uint160_t &r)
 {
     auto *u = reinterpret_cast<const uint32_t *>(&r);
     char tmp[41];
@@ -71,7 +70,7 @@ string      ripe2hex(uint160_t const &r)
 }
 
 /** Inner function */
-void        sha256(void const *src, uint32_t const size, uint256_t &dst)
+void        sha256(const void *src, const uint32_t size, uint256_t &dst)
 {
     SHA256_CTX context;
     SHA256_Init(&context);
@@ -79,7 +78,7 @@ void        sha256(void const *src, uint32_t const size, uint256_t &dst)
     SHA256_Final(dst.begin(), &context);
 }
 
-void        hash256(void const *src, uint32_t const size, uint256_t &dst)
+void        hash256(const void *src, const uint32_t size, uint256_t &dst)
 {
     uint256_t tmp;
     sha256(src, size, tmp);
@@ -95,7 +94,7 @@ void        ripe160(uint256_t const &src, uint160_t &dst)
     RIPEMD160_Final(dst.begin(), &context);
 }
 
-void        hash160(void const *src, uint32_t const size, uint160_t &dst)
+void        hash160(const void *src, const uint32_t size, uint160_t &dst)
 {
     uint256_t tmp;
     sha256(src, size, tmp);
@@ -103,7 +102,7 @@ void        hash160(void const *src, uint32_t const size, uint160_t &dst)
 }
 
 /** Convert datum hash160 into base58 encoded string */
-string      ripe2addr(uint160_t const &src)
+string      ripe2addr(const uint160_t &src)
 {
     uint8_t tmp1[sizeof(uint160_t)+5];
     tmp1[0] = 0;
