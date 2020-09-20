@@ -13,6 +13,7 @@ const uint32_t NOT_FOUND_U32 = 0xFFFFFFFF;
 
 using namespace std;
 
+// kyotocabinet
 template <typename T> class   KVDB_T {
 protected:
   kyotocabinet::PolyDB     db;
@@ -25,18 +26,22 @@ public:
       auto retvalue = db.count();
       return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
   }
-  uint32_t    add(const T &key) {
+  uint32_t    add(T &key) {
       //auto value = map.emplace(key, value);   // FIXME: emplace() w/ checking retvalue
       auto value = count();
       if (value != NOT_FOUND_U32) {
-          if (!db.add(reinterpret_cast<char *>(&key), sizeof(T), reinterpret_cast<char *>(&value), sizeof(uint32_t)))
+          void *k_ptr = static_cast<void *>(&key);
+          void *v_ptr = static_cast<void *>(&value);
+          if (!db.add(static_cast<char *>(k_ptr), sizeof(T), static_cast<char *>(v_ptr), sizeof(uint32_t)))
               value = NOT_FOUND_U32;
       }
       return value;
   }
-  uint32_t    get(const T &key) {
+  uint32_t    get(T &key) {
       uint32_t value;
-      auto result = db.get(reinterpret_cast<char *>(&key), sizeof(T), reinterpret_cast<char *>(&value), sizeof(uint32_t));
+      void *k_ptr = static_cast<void *>(&key);
+      void *v_ptr = static_cast<void *>(&value);
+      auto result = db.get(static_cast<char *>(k_ptr), sizeof(T), static_cast<char *>(v_ptr), sizeof(uint32_t));
       if (result != sizeof(uint32_t))
           value = NOT_FOUND_U32;
       return value;
@@ -46,6 +51,7 @@ public:
 typedef KVDB_T <uint256_t> TxDB_T;
 typedef KVDB_T <uint160_t> AddrDB_T;
 
+// inmemory
 template <typename T> class KVMAP_T {
     unordered_map <T, uint32_t> db; // FIXME: hash, equal funcs
   public:

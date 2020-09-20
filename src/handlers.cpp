@@ -13,7 +13,6 @@ bool    parse_script(void);
 
 bool    parse_bk(void)
 {
-
     CUR_BK.head_ptr = static_cast<BK_HEAD_T*> (CUR_PTR.v_ptr);
     CUR_PTR.u8_ptr += sizeof (BK_HEAD_T);
     CUR_BK.txs = read_v();
@@ -23,28 +22,27 @@ bool    parse_bk(void)
         out_bk();
     if (OPTS.verbose >= 2)
         __prn_bk();
-    if (!(CUR_BK.no == BK_GLITCH[0] or CUR_BK.no == BK_GLITCH[1]))
-        for (uint32_t i = 0; i < CUR_BK.txs; i++, CUR_TX.no++)
-            if (!parse_tx(i))
+    if (!(COUNT.bk == BK_GLITCH[0] or COUNT.bk == BK_GLITCH[1]))
+        for (LOCAL.tx = 0; LOCAL.tx < CUR_BK.txs; LOCAL.tx++, COUNT.tx++)
+            if (!parse_tx(LOCAL.tx))
                 return false;
     STAT.max_txs = max(STAT.max_txs, CUR_BK.txs);
-    STAT.blocks++;
     return true;
 }
 
 bool    parse_tx(const uint32_t bk_tx_no) // TODO: hash
 {
-    CUR_TX.busy = true;
+    BUSY.tx = true;
     auto h_beg = CUR_PTR.u8_ptr;
-    CUR_TX.bkno = bk_tx_no;
+    // CUR_TX.bkno = bk_tx_no;
     CUR_TX.ver = read_32();
     CUR_TX.vins = read_v();
-    for (uint32_t i =  0; i < CUR_TX.vins; i++)
-        if (!parse_vin(i))
+    for (LOCAL.vin =  0; LOCAL.vin < CUR_TX.vins; LOCAL.vin++)
+        if (!parse_vin(LOCAL.vin))
             return false;
     CUR_TX.vouts = read_v();
-    for (uint32_t i =  0; i < CUR_TX.vouts; i++)
-        if (!parse_vout(i))
+    for (LOCAL.vout = 0; LOCAL.vout < CUR_TX.vouts; LOCAL.vout++)
+        if (!parse_vout(LOCAL.vout))
             return false;
     CUR_TX.locktime = read_32();
     auto h_end = CUR_PTR.u8_ptr;
@@ -54,8 +52,8 @@ bool    parse_tx(const uint32_t bk_tx_no) // TODO: hash
             cerr << "Can't add tx " << hash2hex(CUR_TX.hash) << endl;
             return false;
     }
-    if (tx_added != CUR_TX.no) {
-            cerr << "Added tx " << hash2hex(CUR_TX.hash) << " added as " << tx_added << " against waiting " << CUR_TX.no << endl;
+    if (tx_added != COUNT.tx) {
+            cerr << "Tx " << hash2hex(CUR_TX.hash) << " added as " << tx_added << " against waiting " << COUNT.tx << endl;
             return false;
     }
     if (OPTS.out)
@@ -66,16 +64,14 @@ bool    parse_tx(const uint32_t bk_tx_no) // TODO: hash
     STAT.vouts += CUR_TX.vouts;
     STAT.max_vins = max(STAT.max_vins, CUR_TX.vins);
     STAT.max_vouts = max(STAT.max_vouts, CUR_TX.vouts);
-    STAT.txs++;
-    CUR_TX.busy = false;
+    BUSY.tx = false;
     return true;
 }
 
 bool    parse_vin(const uint32_t no)
 {
     // FIXME: coinbase = 32x00 + 4xFF (txid+vout)
-    CUR_VIN.busy = true;
-    CUR_VIN.no = no;
+    BUSY.vin = true;
     CUR_VIN.txid = read_256_ptr();
     CUR_VIN.vout = read_32();
     CUR_VIN.ssize = read_v();
@@ -92,15 +88,14 @@ bool    parse_vin(const uint32_t no)
         out_vin();
     if (OPTS.verbose >= 4)
         __prn_vin();
-    CUR_VIN.busy = false;
+    BUSY.vin = false;
     return true;
 }
 
 bool    parse_vout(const uint32_t no)
 {
     // TODO: out_addr
-    CUR_VOUT.busy = true;
-    CUR_VOUT.no = no;
+    BUSY.vout = true;
     CUR_VOUT.satoshi = read_64();
     CUR_VOUT.ssize = read_v();
     CUR_VOUT.script = read_u8_ptr(CUR_VOUT.ssize);
@@ -110,7 +105,7 @@ bool    parse_vout(const uint32_t no)
         __prn_vout();
     if (!parse_script())
         return false;
-    CUR_VOUT.busy = false;
+    BUSY.vout = false;
     return true;
 }
 
@@ -125,10 +120,15 @@ bool    parse_script(void)
             cerr << "Can not find nor add addr " << ripe2hex(CUR_ADDR.addr) << endl;
             return false;
         }
+        if (addr_id != COUNT.addr) {
+                cerr << "Addr added as " << addr_id << " against waiting " << COUNT.addr << endl;
+                return false;
+        }
         if (OPTS.out)
             out_addr(addr_id, CUR_ADDR.addr);
-        STAT.addrs += 1;
+        COUNT.addr += 1;
     }
+    STAT.addrs += 1;
     if (OPTS.out)
         out_xaddr(addr_id);
     if (OPTS.verbose >= 4)

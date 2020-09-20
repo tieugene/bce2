@@ -18,22 +18,26 @@ Options:
 #include "printers.h"
 
 // globals
-UNIPTR_T    CUR_PTR;
 OPT_T       OPTS;
+COUNT_T     COUNT;
 STAT_T      STAT;
+LOCAL_T     LOCAL;
+BUSY_T      BUSY {false, false, false, false};
 BK_T        CUR_BK;
 TX_T        CUR_TX;
 VIN_T       CUR_VIN;
 VOUT_T      CUR_VOUT;
+UNIPTR_T    CUR_PTR;
 BUFFER_T    BUFFER;
 #ifdef MEM
-TxMAP_T    TxDB;
-AddrMAP_T  AddrDB;
+TxMAP_T     TxDB;
+AddrMAP_T   AddrDB;
 #else
-TxDB_T    TxDB;
-AddrDB_T  AddrDB;
+TxDB_T      TxDB;
+AddrDB_T    AddrDB;
 #endif
-time_t    start_time;
+long        start_mem;
+time_t      start_time;
 // locals
 // consts
 const uint32_t  BULK_SIZE = 10000;
@@ -84,25 +88,25 @@ int     main(int argc, char *argv[])
     BUFFER.beg = new char[MAX_BK_SIZE];
     // 2. main loop
     start_time = time(nullptr);
+    start_mem = memused();
     if (OPTS.verbose)
       __prn_head();
-    for (auto i = OPTS.from; i < bk_no_upto; i++)
+    for (COUNT.bk = OPTS.from; COUNT.bk < bk_no_upto; COUNT.bk++)
     {
-        CUR_TX.busy = CUR_VIN.busy = CUR_VOUT.busy = false;
-        CUR_BK.busy = true;
-        CUR_BK.no = i;
-        if (!load_bk(datfarm, FOFF[i].fileno, FOFF[i].offset))
+        // BUSY.tx = BUSY.vin = BUSY.vout = false;
+        BUSY.bk = true;
+        if (!load_bk(datfarm, FOFF[COUNT.bk].fileno, FOFF[COUNT.bk].offset))
             break;
         if (!parse_bk()) {
             __prn_trace();
             break;
         }
-        if ((OPTS.verbose) and (((CUR_BK.no+1) % BULK_SIZE) == 0))
+        if ((OPTS.verbose) and (((COUNT.bk+1) % BULK_SIZE) == 0))
             __prn_interim();
-        if ((OPTS.verbose > 3) and ((i % BULK_SIZE) == 0))
-            cerr << i << endl;
-        CUR_TX.busy = CUR_VIN.busy = CUR_VOUT.busy = false;
-        CUR_BK.busy = false;
+        if ((OPTS.verbose > 3) and ((COUNT.bk % BULK_SIZE) == 0))
+            cerr << COUNT.bk << endl;
+        // CUR_TX.busy = CUR_VIN.busy = CUR_VOUT.busy = false;
+        BUSY.bk = false;
     }
     // x. The end
     if (OPTS.verbose) {

@@ -12,16 +12,6 @@
 #include "uintxxx.h"
 #include "kv.h"
 
-union   UNIPTR_T    ///< Universal ptr
-{
-    void        *v_ptr;
-    uint8_t     *u8_ptr;
-    uint16_t    *u16_ptr;
-    uint32_t    *u32_ptr;
-    uint64_t    *u64_ptr;
-    uint256_t   *u256_ptr;
-};
-
 struct  OPT_T       ///< program CLI options
 {
     string      datdir;
@@ -32,10 +22,15 @@ struct  OPT_T       ///< program CLI options
     int         verbose = 0;
 };
 
-struct  STAT_T      ///< misc bc statistics
+struct  COUNT_T     ///< through counters
 {
-    uint32_t    blocks = 0;
-    uint32_t    txs = 0;
+    uint32_t    bk = 0;
+    uint32_t    tx = 0;     // session if no cache
+    uint32_t    addr = 0;
+};
+
+struct  STAT_T      ///< session counters
+{
     uint32_t    max_txs = 0;
     uint32_t    vins = 0;
     uint32_t    max_vins = 0;
@@ -43,6 +38,21 @@ struct  STAT_T      ///< misc bc statistics
     uint32_t    max_vouts = 0;
     uint32_t    addrs = 0;
     uint32_t    max_addrs = 0;
+};
+
+struct  LOCAL_T     ///< per parent counters
+{
+    uint32_t    tx;
+    uint32_t    vin;
+    uint32_t    vout;
+};
+
+struct  BUSY_T
+{
+    bool    bk;
+    bool    tx;
+    bool    vin;
+    bool    vout;
 };
 
 struct  BK_HEAD_T   ///< bk header, 80 bytes
@@ -57,58 +67,62 @@ struct  BK_HEAD_T   ///< bk header, 80 bytes
 
 struct  BK_T        ///< whole of bk data w/o txs
 {
-    uint32_t    no;
     BK_HEAD_T   *head_ptr;
     uint32_t    txs;
     uint256_t   hash;
-    bool        busy;
 };
 
 struct  TX_T        ///< tx variables w/o vins/vouts
 {
-    uint32_t    no;
     uint32_t    ver;        // FIXME: * (for hash)
     uint32_t    vins;
     uint32_t    vouts;
     uint32_t    locktime;   // FIXME: * (for hash)
     uint256_t   hash;
-    uint32_t    bkno;
-    bool        busy;
 };
 
 struct  VIN_T       ///< vin data
 {
     uint256_t   *txid;
-    uint64_t    txno;
+    uint64_t    txno;       // ?
     uint32_t    vout;
     uint32_t    ssize;      // vint
     uint8_t     *script;
     uint32_t    seq;
-    uint32_t    no;
-    bool        busy;
 };
 
 struct  VOUT_T      ///< vout data
 {
-    uint32_t    no;
     uint64_t    satoshi;
     uint32_t    ssize;      // vint
     uint8_t     *script;
-    bool        busy;
 };
 
-struct  BUFFER_T
+struct  BUFFER_T    ///< loaded block (raw)
 {
     char        *beg = nullptr;
 };
 
-extern UNIPTR_T CUR_PTR;
+union   UNIPTR_T    ///< Universal ptr
+{
+    void        *v_ptr;
+    uint8_t     *u8_ptr;
+    uint16_t    *u16_ptr;
+    uint32_t    *u32_ptr;
+    uint64_t    *u64_ptr;
+    uint256_t   *u256_ptr;
+};
+
 extern OPT_T    OPTS;
+extern COUNT_T  COUNT;
 extern STAT_T   STAT;
+extern LOCAL_T  LOCAL;
+extern BUSY_T   BUSY;
 extern BK_T     CUR_BK;
 extern TX_T     CUR_TX;
 extern VIN_T    CUR_VIN;
 extern VOUT_T   CUR_VOUT;
+extern UNIPTR_T CUR_PTR;
 extern BUFFER_T BUFFER;
 #ifdef MEM
 extern TxMAP_T   TxDB;
@@ -119,6 +133,7 @@ extern AddrDB_T AddrDB;
 #endif
 
 extern time_t   start_time;
+extern long     start_mem;
 
 const string TAB = "\t";
 const uint32_t COINBASE_vout = 0xFFFFFFFF;

@@ -89,6 +89,17 @@ bool        cli(int argc, char *argv[])
     return retvalue;
 }
 
+long memused(void)
+{
+    rusage rused;
+    long retvalue = 0;
+    if (getrusage(RUSAGE_SELF, &rused) == 0)
+    {
+      retvalue = rused.ru_maxrss;
+    }
+    return retvalue;
+}
+
 uint32_t    read_v(void)   ///<read 1..4-byte int and forward;
 {
     auto retvalue = static_cast<uint32_t>(*CUR_PTR.u8_ptr++);

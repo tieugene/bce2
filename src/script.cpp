@@ -25,9 +25,9 @@ void    dump_script(const string s)
 {
     cerr
         << "Script err: " << s << " ("
-        << "bk = " << CUR_BK.no
-        << ", tx = " << CUR_TX.bkno << " (" << CUR_TX.no << ")"
-        << ", vout = " << CUR_VOUT.no
+        << "bk = " << COUNT.bk
+        << ", tx = " << LOCAL.tx << " (" << COUNT.tx << ")"
+        << ", vout = " << LOCAL.vout
         << ", script: " << ptr2hex(script_ptr, script_size)
         << ")" << endl;
 }
@@ -42,7 +42,7 @@ bool    do_P2PK(uint8_t const opcode) {
         CUR_ADDR.qty = 1;
         return true;
     }
-    if (CUR_BK.no == 140921)    // dirty hack (skip "nonstandart")
+    if (COUNT.bk == 140921)    // dirty hack (skip "nonstandart")
         return true;
     dump_script("Wrong P2PK");
     return false;
@@ -92,7 +92,7 @@ bool    do_P2W(void) {
     return true;
 }
 
-bool    script_decode(uint8_t * const script, uint32_t const size)
+bool    script_decode(uint8_t * script, const uint32_t size)
 {
     CUR_ADDR.qty = 0;
     script_ptr = script;
@@ -120,7 +120,7 @@ bool    script_decode(uint8_t * const script, uint32_t const size)
         break;
     default:
         if (opcode <= 0xB9) { // last defined opcode
-            if (CUR_BK.no == 141460) {    // dirty hack (tx.13, skip "nonstandart")
+            if (COUNT.bk == 141460) {    // dirty hack (tx.13, skip "nonstandart")
                 retvalue = true;
             }  else {
                 dump_script("Not implemented");
