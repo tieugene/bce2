@@ -94,9 +94,7 @@ long memused(void)
     rusage rused;
     long retvalue = 0;
     if (getrusage(RUSAGE_SELF, &rused) == 0)
-    {
       retvalue = rused.ru_maxrss;
-    }
     return retvalue;
 }
 

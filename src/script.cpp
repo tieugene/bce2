@@ -16,10 +16,24 @@
 #include "script.h"
 #include "opcode.h"
 
-ADDRS_T CUR_ADDR;
+static const char * ScriptType_s[] = {
+    "nonstandard",
+    "pubkey",
+    "pubkeyhash",
+    "multisig",
+    "scripthash"
+};
 
-static uint8_t  *script_ptr;   // ptr to currently decoded opcode
-static uint32_t script_size;  // script size
+ADDRS_T CUR_ADDR;
+SCRIPT_TYPE_T ScriptType_n;
+
+static uint8_t  *script_ptr;    // ptr to currently decoded opcode
+static uint32_t script_size;    // script size
+
+const char *get_cur_keytype(void)
+{
+    return ScriptType_s[ScriptType_n];
+}
 
 void    dump_script(const string s)
 {
@@ -32,7 +46,8 @@ void    dump_script(const string s)
         << ")" << endl;
 }
 
-bool    do_P2PK(uint8_t const opcode) {
+bool    do_P2PK(uint8_t const opcode)   ///< ?pubkey
+{
     if (
         script_size == 67 and
         opcode == 0x41 and
@@ -40,6 +55,7 @@ bool    do_P2PK(uint8_t const opcode) {
         ) {
         hash160(script_ptr+1, 65, CUR_ADDR.addr);
         CUR_ADDR.qty = 1;
+        ScriptType_n = PUBKEY;
         return true;
     }
     if (COUNT.bk == 140921)    // dirty hack (skip "nonstandart")
@@ -48,7 +64,8 @@ bool    do_P2PK(uint8_t const opcode) {
     return false;
 }
 
-bool    do_P2PKH(void) {
+bool    do_P2PKH(void)                  ///< ?pubkeyhash
+{
     if (script_size == 5)      // very dirty hack for 150951.*.* (PKH = 0x00)
         return true;
     if (
@@ -62,13 +79,15 @@ bool    do_P2PKH(void) {
         CUR_ADDR.qty = 1;
         // if (ssize > 25)
         //    dump_script("P2PKH: Wrong script length");
+        ScriptType_n = PUBKEYHASH;
         return true;
     }
     dump_script("Wrong P2PKH");
     return false;
 }
 
-bool    do_P2MS(void) {
+bool    do_P2MS(void) {                 ///< multisig
+    ScriptType_n = MULTISIG;
     dump_script("P2MS detected");
     return true;
 }
@@ -81,6 +100,7 @@ bool    do_P2SH(void) {
         ) {
         memcpy(&CUR_ADDR.addr, script_ptr+2, sizeof (uint160_t));
         CUR_ADDR.qty = 1;
+        ScriptType_n = SCRIPTHASH;
         return true;
     }
     dump_script("Wrong P2SH");
@@ -99,6 +119,7 @@ bool    script_decode(uint8_t * script, const uint32_t size)
     script_size = size;
     auto opcode = *script_ptr;
     bool retvalue = false;
+    ScriptType_n = NONSTANDARD;
     switch (opcode) {
     case 0x01 ... 0x46:     // 1. P2PK (obsolet)
         retvalue = do_P2PK(opcode);

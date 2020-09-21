@@ -19,6 +19,7 @@ struct  OPT_T       ///< program CLI options
     uint32_t    from = 0;
     uint32_t    num = 1;
     bool        out = false;
+    bool        cash = false;
     int         verbose = 0;
 };
 
@@ -42,17 +43,17 @@ struct  STAT_T      ///< session counters
 
 struct  LOCAL_T     ///< per parent counters
 {
-    uint32_t    tx;
-    uint32_t    vin;
-    uint32_t    vout;
+    uint32_t    tx = 0;
+    uint32_t    vin = 0;
+    uint32_t    vout = 0;
 };
 
 struct  BUSY_T
 {
-    bool    bk;
-    bool    tx;
-    bool    vin;
-    bool    vout;
+    bool    bk = false;
+    bool    tx = false;
+    bool    vin = false;
+    bool    vout = false;
 };
 
 struct  BK_HEAD_T   ///< bk header, 80 bytes

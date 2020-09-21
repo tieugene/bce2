@@ -22,14 +22,14 @@ void        out_tx(void)
 void        out_vin(void)   // FIXME: compare w/ COINBASE_txid too
 {
     if (CUR_VIN.vout != COINBASE_vout)  // skip coinbase
-      printf("i\t%u\t%lu\t%u\n", COUNT.tx, CUR_VIN.txno, CUR_VIN.vout);
+      printf("i\t%u\t%llu\t%u\n", COUNT.tx, CUR_VIN.txno, CUR_VIN.vout);
       // cout << "i" << TAB << CUR_TX.no << TAB << CUR_VIN.txno << TAB << CUR_VIN.vout << endl;
       // hash2hex(*CUR_VIN.txid)
 }
 
 void        out_vout(void)
 {
-  printf("o\t%u\t%u\t%lu\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi);
+  printf("o\t%u\t%u\t%llu\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi);
   // cout << "o" << TAB << CUR_TX.no << TAB << CUR_VOUT.no << TAB << CUR_VOUT.satoshi << endl;
 }
 
@@ -47,7 +47,7 @@ void        out_xaddr(uint32_t const id)
 
 void        __prn_vin(void)
 {
-    cerr << TAB << "Vin: ";
+    cerr << TAB << TAB << "Vin: ";
     if (CUR_VIN.vout == 0xFFFFFFFF)
         cerr << "<coinbase>";
     else
@@ -61,7 +61,7 @@ void        __prn_vin(void)
 void        __prn_vout(void)
 {
     cerr
-        << TAB << "Vout: "
+        << TAB << TAB << "Vout: "
         << "tx: " << COUNT.tx
         << ", no: " << LOCAL.vout
         << ", $: " << CUR_VOUT.satoshi
@@ -117,7 +117,7 @@ void        __prn_bk(void)  // TODO: hash
 // ====
 void    __prn_head(void)
 {
-  cerr << "Bk\tTx\tVins\tVouts\tAddrs\tUAddrs\tMem\tTime\n";
+  cerr << "Bk\tTx\tVins\tVouts\tAddrs\tUAddrs\tMem,M\tTime\n";
   __prn_tail();
 }
 

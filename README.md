@@ -2,6 +2,13 @@
 Blockchain export.
 CLI utility to export blockchain data into plain text format
 
+## Modes:
+Walk and count depending on -c & -o:
+- ~~c~~/~~o~~: btio (w/o uniq addrs)
+- ~~c~~/o: btio and out blocks
+- c/~~o~~: all (w/ uniq addrs)
+- c/o: all and print results
+
 ## Order:
 1. get bk's hashes (bash, py):
   - in: int range
