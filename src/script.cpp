@@ -114,14 +114,14 @@ bool    do_P2MS(void)                   ///< multisig
         script_ptr[script_size-1] == OP_CHKMULTISIG     // 2nd signature
         and script_ptr[0] <= msize_sym                  // required <= qty
         and msize_sym <= OP_16                          // max 16 keys
-        and script_size == (3 + msize * 66)
+//        and script_size == (3 + msize * 66)
        )
     {
         CUR_ADDR.type = MULTISIG;
         CUR_ADDR.qty = msize;
         auto tmp_ptr = script_ptr+1;
         for (auto i = 0; i < msize; i++, tmp_ptr += (tmp_ptr[0]+1))
-            hash160(tmp_ptr+1, 65, CUR_ADDR.addr[i]);
+            hash160(tmp_ptr+1, tmp_ptr[0], CUR_ADDR.addr[i]);
         return true;
     }
     dump_script("Bad P2MS");
@@ -134,7 +134,7 @@ bool    do_P2W(void)
     return true;
 }
 
-bool    script_decode(uint8_t * script, const uint32_t size)
+bool    script_decode(uint8_t *script, const uint32_t size)
 {
     CUR_ADDR.type = NONSTANDARD;
     CUR_ADDR.qty = 0;
