@@ -141,11 +141,12 @@ bool    parse_script(void)
 {
     if (!script_decode(CUR_VOUT.script, CUR_VOUT.ssize))
         return false;    // !!! TERMPORARY !!!
+        //printf("%d\t%d\t%d\tbad\t%s\n", COUNT.bk, LOCAL.tx, LOCAL.vout, get_cur_keytype());
     // <get_addrs>
     printf("%d\t%d\t%d\t%s", COUNT.bk, LOCAL.tx, LOCAL.vout, get_cur_keytype());
-    if (ScriptType_n != NONSTANDARD)
-        printf("\t%s\n", ripe2addr(CUR_ADDR.addr).c_str());
-    else
+    if (ScriptType_n != NONSTANDARD) {
+        printf("\t%s\n", ripe2addr(CUR_ADDR.addr, (ScriptType_n == SCRIPTHASH) ? 5 : 0).c_str());
+    } else
         printf("\n");
     // </get_addrs>
     // FIXME: cashless

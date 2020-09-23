@@ -86,7 +86,7 @@ void        hash256(const void *src, const uint32_t size, uint256_t &dst)
 }
 
 /** Inner function */
-void        ripe160(uint256_t const &src, uint160_t &dst)
+void        ripe160(const uint256_t &src, uint160_t &dst)
 {
     RIPEMD160_CTX context;
     RIPEMD160_Init(&context);
@@ -102,10 +102,10 @@ void        hash160(const void *src, const uint32_t size, uint160_t &dst)
 }
 
 /** Convert datum hash160 into base58 encoded string */
-string      ripe2addr(const uint160_t &src)
+string      ripe2addr(const uint160_t &src, const uint8_t pfx)
 {
     uint8_t tmp1[sizeof(uint160_t)+5];
-    tmp1[0] = 0;
+    tmp1[0] = pfx;
     memcpy(tmp1+1, &src, sizeof (uint160_t));   // 1. add leading 0
     uint256_t tmp2;
     hash256(tmp1, sizeof (uint160_t)+1, tmp2);  // 2. 2 x sha256

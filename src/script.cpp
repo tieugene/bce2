@@ -16,12 +16,15 @@
 #include "script.h"
 #include "opcode.h"
 
-static const char * ScriptType_s[] = {
+static const char * ScriptType_s[] = {  // for 0..550k
     "nonstandard",
+    "nulldata",
     "pubkey",
     "pubkeyhash",
     "multisig",
-    "scripthash"
+    "scripthash",
+    "witness_v0_scripthash",
+    "witness_v0_keyhash"
 };
 
 ADDRS_T CUR_ADDR;
@@ -38,7 +41,7 @@ const char *get_cur_keytype(void)
 void    dump_script(const string s)
 {
     cerr
-        << "Script err: " << s << " ("
+        << "Script err: " << s << "\t("
         << "bk = " << COUNT.bk
         << ", tx = " << LOCAL.tx << " (" << COUNT.tx << ")"
         << ", vout = " << LOCAL.vout
@@ -48,33 +51,39 @@ void    dump_script(const string s)
 
 bool    do_P2PK(uint8_t const opcode)   ///< ?pubkey
 {
-    if (
-        script_size == 67 and
-        opcode == 0x41 and
-        script_ptr[66] == OP_CHECKSIG
-        ) {
-        hash160(script_ptr+1, 65, CUR_ADDR.addr);
+    if ((
+            script_size == 67 and
+            opcode == 0x41 and
+            script_ptr[66] == OP_CHECKSIG
+        ) or (
+            script_size == 35 and
+            opcode == 0x21 and
+            script_ptr[34] == OP_CHECKSIG
+        ))
+    {
+        hash160(script_ptr+1, script_size-2, CUR_ADDR.addr);
         CUR_ADDR.qty = 1;
         ScriptType_n = PUBKEY;
         return true;
     }
-    if (COUNT.bk == 140921)    // dirty hack (skip "nonstandart")
-        return true;
-    dump_script("Wrong P2PK");
+    ///if (COUNT.bk == 140921)    // dirty hack (skip "nonstandart")
+    ///    return true;
+    dump_script("Bad P2PK");
     return false;
 }
 
 bool    do_P2PKH(void)                  ///< ?pubkeyhash
 {
-    if (script_size == 5)      // very dirty hack for 150951.*.* (PKH = 0x00)
-        return true;
+    //if (script_size == 5)      // very dirty hack for short 150951.*.* (PKH = 0x00)
+    //    return true;
     if (
-        script_size >= 25 and // dirty hack for 71036.?.? and w/ OP_NOP @ end
+        script_size >= 25 and       // dirty hack for 71036.?.? and w/ OP_NOP @ end
         script_ptr[1] == OP_HASH160 and
         script_ptr[2] == 20 and
         script_ptr[23] == OP_EQUALVERIFY and
         script_ptr[24] == OP_CHECKSIG
-        ) {
+        )
+    {
         memcpy(&CUR_ADDR.addr, script_ptr+3, sizeof (uint160_t));
         CUR_ADDR.qty = 1;
         // if (ssize > 25)
@@ -82,28 +91,29 @@ bool    do_P2PKH(void)                  ///< ?pubkeyhash
         ScriptType_n = PUBKEYHASH;
         return true;
     }
-    dump_script("Wrong P2PKH");
+    dump_script("Bad P2PKH");
     return false;
 }
 
 bool    do_P2MS(void) {                 ///< multisig
     ScriptType_n = MULTISIG;
-    dump_script("P2MS detected");
+    dump_script("P2MS");
     return true;
 }
 
-bool    do_P2SH(void) {
+bool    do_P2SH(void) {                 ///< scripthash
     if (
         script_size == 23 and
         script_ptr[1] == 20 and
         script_ptr[22] == OP_EQUAL
-        ) {
+        )
+    {
         memcpy(&CUR_ADDR.addr, script_ptr+2, sizeof (uint160_t));
         CUR_ADDR.qty = 1;
         ScriptType_n = SCRIPTHASH;
         return true;
     }
-    dump_script("Wrong P2SH");
+    dump_script("Bad P2SH");
     return false;
 }
 
@@ -114,18 +124,22 @@ bool    do_P2W(void) {
 
 bool    script_decode(uint8_t * script, const uint32_t size)
 {
+    ScriptType_n = NONSTANDARD;
+    if (size < 23)  // P2SH is smallest script
+        return true;
     CUR_ADDR.qty = 0;
     script_ptr = script;
     script_size = size;
     auto opcode = *script_ptr;
     bool retvalue = false;
-    ScriptType_n = NONSTANDARD;
     switch (opcode) {
     case 0x01 ... 0x46:     // 1. P2PK (obsolet)
         retvalue = do_P2PK(opcode);
+        retvalue = true;    /// forse ok
         break;
     case OP_DUP:            // 2. P2PKH
         retvalue = do_P2PKH();
+        retvalue = true;    /// forse ok
         break;
     case OP_1:              // 3. P2MS
         retvalue = do_P2MS();
@@ -141,14 +155,14 @@ bool    script_decode(uint8_t * script, const uint32_t size)
         break;
     default:
         if (opcode <= 0xB9) { // last defined opcode
-            if (COUNT.bk == 141460) {    // dirty hack (tx.13, skip "nonstandart")
-                retvalue = true;
-            }  else {
-                dump_script("Not implemented");
-                retvalue = false;
-            }
+            ///if (COUNT.bk == 141460) {    // dirty hack (tx.13, skip "nonstandart")
+            ///    retvalue = true;
+            ///}  else {
+                dump_script("Not impl-d");
+                retvalue = true;   /// false
+            ///}
         } else {
-            dump_script("Script invalid");
+            dump_script("Invalid");
             retvalue = true;
         }
     }

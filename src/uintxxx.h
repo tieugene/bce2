@@ -12,12 +12,12 @@ using byte_array = std::array<uint8_t, Size>;
 typedef byte_array<32> uint256_t;   ///< hash representation
 typedef byte_array<20> uint160_t;   ///< addr representation
 
-std::string      hash2hex(uint256_t const &);
-std::string      ripe2hex(uint160_t const &);
-std::string      ripe2addr(uint160_t const &);
+std::string      hash2hex(const uint256_t &);
+std::string      ripe2hex(const uint160_t &);
+std::string      ripe2addr(const uint160_t &, const uint8_t = 0);
 
-void        hash256(void const *, uint32_t const, uint256_t &); // 1.
-void        hash160(void const *, uint32_t const, uint160_t &);
+void        hash256(const void *, const uint32_t, uint256_t &); // 1.
+void        hash160(const void *, const uint32_t, uint160_t &);
 
 namespace std
 {
