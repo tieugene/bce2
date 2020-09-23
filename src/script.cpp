@@ -66,8 +66,6 @@ bool    do_P2PK(uint8_t const opcode)   ///< ?pubkey
         ScriptType_n = PUBKEY;
         return true;
     }
-    ///if (COUNT.bk == 140921)    // dirty hack (skip "nonstandart")
-    ///    return true;
     dump_script("Bad P2PK");
     return false;
 }
@@ -95,12 +93,6 @@ bool    do_P2PKH(void)                  ///< ?pubkeyhash
     return false;
 }
 
-bool    do_P2MS(void) {                 ///< multisig
-    ScriptType_n = MULTISIG;
-    dump_script("P2MS");
-    return true;
-}
-
 bool    do_P2SH(void) {                 ///< scripthash
     if (
         script_size == 23 and
@@ -115,6 +107,12 @@ bool    do_P2SH(void) {                 ///< scripthash
     }
     dump_script("Bad P2SH");
     return false;
+}
+
+bool    do_P2MS(void) {                 ///< multisig
+    ScriptType_n = MULTISIG;
+    dump_script("P2MS");
+    return true;
 }
 
 bool    do_P2W(void) {
@@ -133,7 +131,7 @@ bool    script_decode(uint8_t * script, const uint32_t size)
     auto opcode = *script_ptr;
     bool retvalue = false;
     switch (opcode) {
-    case 0x01 ... 0x46:     // 1. P2PK (obsolet)
+    case 0x01 ... 0x46:     // 1. P2PK
         retvalue = do_P2PK(opcode);
         retvalue = true;    /// forse ok
         break;
@@ -141,13 +139,14 @@ bool    script_decode(uint8_t * script, const uint32_t size)
         retvalue = do_P2PKH();
         retvalue = true;    /// forse ok
         break;
-    case OP_1:              // 3. P2MS
-        retvalue = do_P2MS();
-        break;
     case OP_HASH160:        // 4. P2SH
         retvalue = do_P2SH();
         break;
+    case OP_1:              // 3. P2MS
+        retvalue = do_P2MS();
+        break;
     case OP_RETURN:         // 5. NULL_DATA == nothing to do
+        // FIXME:
         retvalue = true;
         break;
     case OP_0:              // x. witness*
@@ -155,12 +154,8 @@ bool    script_decode(uint8_t * script, const uint32_t size)
         break;
     default:
         if (opcode <= 0xB9) { // last defined opcode
-            ///if (COUNT.bk == 141460) {    // dirty hack (tx.13, skip "nonstandart")
-            ///    retvalue = true;
-            ///}  else {
-                dump_script("Not impl-d");
-                retvalue = true;   /// false
-            ///}
+            dump_script("Not impl-d");
+            retvalue = true;   /// false
         } else {
             dump_script("Invalid");
             retvalue = true;
