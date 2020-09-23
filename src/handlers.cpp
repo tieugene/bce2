@@ -144,19 +144,21 @@ bool    parse_script(void)
         //printf("%d\t%d\t%d\tbad\t%s\n", COUNT.bk, LOCAL.tx, LOCAL.vout, get_cur_keytype());
     // <get_addrs>
     printf("%d\t%d\t%d\t%s", COUNT.bk, LOCAL.tx, LOCAL.vout, get_cur_keytype());
-    if (ScriptType_n != NONSTANDARD) {
-        printf("\t%s\n", ripe2addr(CUR_ADDR.addr, (ScriptType_n == SCRIPTHASH) ? 5 : 0).c_str());
-    } else
-        printf("\n");
+    if (CUR_ADDR.qty) {
+        printf("\t%s", ripe2addr(CUR_ADDR.addr[0], (CUR_ADDR.type == SCRIPTHASH) ? 5 : 0).c_str());
+        for (auto i = 1; i < CUR_ADDR.qty; i++)
+            printf(",%s", ripe2addr(CUR_ADDR.addr[i]).c_str());
+    };
+    printf("\n");
     // </get_addrs>
     // FIXME: cashless
     if (OPTS.cash)
     {
-        auto addr_added = AddrDB.get(CUR_ADDR.addr);
+        auto addr_added = AddrDB.get(CUR_ADDR.addr[0]);
         if (addr_added == NOT_FOUND_U32) {
-            addr_added = AddrDB.add(CUR_ADDR.addr);
+            addr_added = AddrDB.add(CUR_ADDR.addr[0]);
             if (addr_added == NOT_FOUND_U32) {
-                cerr << "Can not find nor add addr " << ripe2hex(CUR_ADDR.addr) << endl;
+                cerr << "Can not find nor add addr " << ripe2hex(CUR_ADDR.addr[0]) << endl;
                 return false;
             }
             if (addr_added != COUNT.addr) {
@@ -164,7 +166,7 @@ bool    parse_script(void)
                     return false;
             }
             if (OPTS.out)
-                out_addr(addr_added, CUR_ADDR.addr);
+                out_addr(addr_added, CUR_ADDR.addr[0]);
             COUNT.addr += 1;
         }
     } else if (OPTS.out)

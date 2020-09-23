@@ -83,7 +83,7 @@ void        __prn_addr(void)
         << "Addr:"
         << "tx: " << COUNT.tx
         << ", vout: " << LOCAL.vout
-        << ", ripe160: " << ripe2addr(CUR_ADDR.addr)
+        << ", ripe160: " << ripe2addr(CUR_ADDR.addr[0])
         << endl;
 }
 

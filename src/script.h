@@ -5,12 +5,7 @@
 
 #include "uintxxx.h"
 
-struct  ADDRS_T {
-    char        qty;
-    uint160_t   addr;
-};
-
-enum    SCRIPT_TYPE_T {
+enum    SCTYPE {
     NONSTANDARD,
     NULLDATA,
     PUBKEY,
@@ -21,10 +16,15 @@ enum    SCRIPT_TYPE_T {
     W0KEYHASH
 };
 
-extern ADDRS_T CUR_ADDR;
-extern SCRIPT_TYPE_T ScriptType_n;
+struct  ADDRS_T {
+    SCTYPE      type;
+    char        qty;
+    uint160_t   addr[16];
+};
 
-bool    script_decode(uint8_t *, const uint32_t);
+extern ADDRS_T CUR_ADDR;
+
+bool        script_decode(uint8_t *, const uint32_t);
 const char *get_cur_keytype(void);
 
 #endif // SCRIPT_H

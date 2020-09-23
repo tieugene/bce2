@@ -28,14 +28,13 @@ static const char * ScriptType_s[] = {  // for 0..550k
 };
 
 ADDRS_T CUR_ADDR;
-SCRIPT_TYPE_T ScriptType_n;
 
 static uint8_t  *script_ptr;    // ptr to currently decoded opcode
 static uint32_t script_size;    // script size
 
 const char *get_cur_keytype(void)
 {
-    return ScriptType_s[ScriptType_n];
+    return ScriptType_s[CUR_ADDR.type];
 }
 
 void    dump_script(const string s)
@@ -61,9 +60,9 @@ bool    do_P2PK(uint8_t const opcode)   ///< ?pubkey
             script_ptr[34] == OP_CHECKSIG
         ))
     {
-        hash160(script_ptr+1, script_size-2, CUR_ADDR.addr);
+        CUR_ADDR.type = PUBKEY;
         CUR_ADDR.qty = 1;
-        ScriptType_n = PUBKEY;
+        hash160(script_ptr+1, script_size-2, CUR_ADDR.addr[0]);
         return true;
     }
     dump_script("Bad P2PK");
@@ -72,8 +71,6 @@ bool    do_P2PK(uint8_t const opcode)   ///< ?pubkey
 
 bool    do_P2PKH(void)                  ///< ?pubkeyhash
 {
-    //if (script_size == 5)      // very dirty hack for short 150951.*.* (PKH = 0x00)
-    //    return true;
     if (
         script_size >= 25 and       // dirty hack for 71036.?.? and w/ OP_NOP @ end
         script_ptr[1] == OP_HASH160 and
@@ -82,47 +79,65 @@ bool    do_P2PKH(void)                  ///< ?pubkeyhash
         script_ptr[24] == OP_CHECKSIG
         )
     {
-        memcpy(&CUR_ADDR.addr, script_ptr+3, sizeof (uint160_t));
+        CUR_ADDR.type = PUBKEYHASH;
         CUR_ADDR.qty = 1;
-        // if (ssize > 25)
-        //    dump_script("P2PKH: Wrong script length");
-        ScriptType_n = PUBKEYHASH;
+        memcpy(&CUR_ADDR.addr[0], script_ptr+3, sizeof (uint160_t));
         return true;
     }
     dump_script("Bad P2PKH");
     return false;
 }
 
-bool    do_P2SH(void) {                 ///< scripthash
+bool    do_P2SH(void)                   ///< scripthash
+{
     if (
         script_size == 23 and
         script_ptr[1] == 20 and
         script_ptr[22] == OP_EQUAL
         )
     {
-        memcpy(&CUR_ADDR.addr, script_ptr+2, sizeof (uint160_t));
+        CUR_ADDR.type = SCRIPTHASH;
         CUR_ADDR.qty = 1;
-        ScriptType_n = SCRIPTHASH;
+        memcpy(&CUR_ADDR.addr[0], script_ptr+2, sizeof (uint160_t));
         return true;
     }
     dump_script("Bad P2SH");
     return false;
 }
 
-bool    do_P2MS(void) {                 ///< multisig
-    ScriptType_n = MULTISIG;
-    dump_script("P2MS");
-    return true;
+bool    do_P2MS(void)                   ///< multisig
+{
+    auto msize_sym = script_ptr[script_size-2];
+    auto msize = msize_sym - 0x50;
+    //cout << msize << ": " << script_size << "==" << (5 + msize * 65) << endl;   //2:135=135,3:201=200, 16:1059=1045
+    if (
+        script_ptr[script_size-1] == OP_CHKMULTISIG     // 2nd signature
+        and script_ptr[0] <= msize_sym                  // required <= qty
+        and msize_sym <= OP_16                          // max 16 keys
+        and script_size == (3 + msize * 66)
+       )
+    {
+        CUR_ADDR.type = MULTISIG;
+        CUR_ADDR.qty = msize;
+        auto tmp_ptr = script_ptr+1;
+        for (auto i = 0; i < msize; i++, tmp_ptr += (tmp_ptr[0]+1))
+            hash160(tmp_ptr+1, 65, CUR_ADDR.addr[i]);
+        return true;
+    }
+    dump_script("Bad P2MS");
+    return false;
 }
 
-bool    do_P2W(void) {
+bool    do_P2W(void)
+{
     dump_script("Witness");
     return true;
 }
 
 bool    script_decode(uint8_t * script, const uint32_t size)
 {
-    ScriptType_n = NONSTANDARD;
+    CUR_ADDR.type = NONSTANDARD;
+    CUR_ADDR.qty = 0;
     if (size < 23)  // P2SH is smallest script
         return true;
     CUR_ADDR.qty = 0;
@@ -135,21 +150,21 @@ bool    script_decode(uint8_t * script, const uint32_t size)
         retvalue = do_P2PK(opcode);
         retvalue = true;    /// forse ok
         break;
-    case OP_DUP:            // 2. P2PKH
+    case OP_DUP:            // 2. P2PKH 0x76
         retvalue = do_P2PKH();
         retvalue = true;    /// forse ok
         break;
-    case OP_HASH160:        // 4. P2SH
+    case OP_HASH160:        // 3. P2SH 0xA9
         retvalue = do_P2SH();
         break;
-    case OP_1:              // 3. P2MS
+    case OP_1 ... OP_16:    // 4. P2MS 0x5x
         retvalue = do_P2MS();
         break;
-    case OP_RETURN:         // 5. NULL_DATA == nothing to do
+    case OP_RETURN:         // 5. NULL_DATA == nothing to do 0x6A
         // FIXME:
         retvalue = true;
         break;
-    case OP_0:              // x. witness*
+    case OP_0:              // 6. x. witness* 0x00
         retvalue = do_P2W();
         break;
     default:
