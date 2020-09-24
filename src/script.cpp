@@ -107,25 +107,28 @@ bool    do_P2SH(void)                   ///< scripthash
 
 bool    do_P2MS(void)                   ///< multisig
 {
-    auto msize_sym = script_ptr[script_size-2];
-    auto msize = msize_sym - 0x50;
+    auto keys_qty_ptr = script_ptr + script_size - 2;
+    auto keys_qty = *keys_qty_ptr - 0x50;
+    auto retvalue = false;
+    auto key_ptr = script_ptr + 1;
     //cout << msize << ": " << script_size << "==" << (5 + msize * 65) << endl;   //2:135=135,3:201=200, 16:1059=1045
     if (
         script_ptr[script_size-1] == OP_CHKMULTISIG     // 2nd signature
-        and script_ptr[0] <= msize_sym                  // required <= qty
-        and msize_sym <= OP_16                          // max 16 keys
-//        and script_size == (3 + msize * 66)
+        and script_ptr[0] <= *keys_qty_ptr                  // required <= qty
+        and *keys_qty_ptr <= OP_16                          // max 16 keys
+//        and script_size == (3 + msize_num * 66)
        )
     {
-        CUR_ADDR.type = MULTISIG;
-        CUR_ADDR.qty = msize;
-        auto tmp_ptr = script_ptr+1;
-        for (auto i = 0; i < msize; i++, tmp_ptr += (tmp_ptr[0]+1))
-            hash160(tmp_ptr+1, tmp_ptr[0], CUR_ADDR.addr[i]);
-        return true;
+        for (auto i = 0; i < keys_qty and *key_ptr == 0x41 and key_ptr < keys_qty_ptr; i++, key_ptr += (key_ptr[0]+1))
+            hash160(key_ptr+1, *key_ptr, CUR_ADDR.addr[i]);
     }
-    dump_script("Bad P2MS");
-    return false;
+    if (key_ptr != keys_qty_ptr) {
+        CUR_ADDR.type = MULTISIG;
+        CUR_ADDR.qty = keys_qty;
+        retvalue = true;
+    } else
+        dump_script("Bad P2MS");
+    return retvalue;
 }
 
 bool    do_P2W(void)
@@ -156,12 +159,14 @@ bool    script_decode(uint8_t *script, const uint32_t size)
         break;
     case OP_HASH160:        // 3. P2SH 0xA9
         retvalue = do_P2SH();
+        retvalue = true;    /// forse ok
         break;
     case OP_1 ... OP_16:    // 4. P2MS 0x5x
         retvalue = do_P2MS();
+        retvalue = true;
         break;
-    case OP_RETURN:         // 5. NULL_DATA == nothing to do 0x6A
-        // FIXME:
+    case OP_RETURN:         // 5. NULL_DATA
+        CUR_ADDR.type = NULLDATA;
         retvalue = true;
         break;
     case OP_0:              // 6. x. witness* 0x00
