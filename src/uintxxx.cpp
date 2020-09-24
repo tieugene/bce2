@@ -112,31 +112,3 @@ string      ripe2addr(const uint160_t &src, const uint8_t pfx)
     memcpy(tmp1+21, &(tmp2[0]), 4);             // 3. add crc
     return EncodeBase58(tmp1, tmp1+25);
 }
-
-/* 2.
-uint256_t   sha256(void *src, uint32_t size)
-{
-    uint256_t result;
-    SHA256_CTX context;
-    SHA256_Init(&context);
-    SHA256_Update(&context, src, size);
-    SHA256_Final(result.begin(), &context);
-    return result;
-}
-
-uint256_t   sha256(uint256_t &src)
-{
-    uint256_t result;
-    SHA256_CTX context;
-    SHA256_Init(&context);
-    SHA256_Update(&context, src.begin(), src.size());
-    SHA256_Final(result.begin(), &context);
-    return result;
-}
-
-uint256_t   hash256(void *src, uint32_t size)
-{
-    auto result = sha256(src, size);
-    return sha256(result);
-}
-*/

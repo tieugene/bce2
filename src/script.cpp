@@ -32,9 +32,21 @@ ADDRS_T CUR_ADDR;
 static uint8_t  *script_ptr;    // ptr to currently decoded opcode
 static uint32_t script_size;    // script size
 
-const char *get_cur_keytype(void)
+const char *get_addrs_type(void)
 {
     return ScriptType_s[CUR_ADDR.type];
+}
+
+string  get_addrs_str(void)
+{
+    string retvalue;
+    if (CUR_ADDR.qty) {
+        retvalue = ripe2addr(CUR_ADDR.addr[0], (CUR_ADDR.type == SCRIPTHASH) ? 5 : 0);
+        if (CUR_ADDR.type == MULTISIG)
+            for (auto i = 1; i < CUR_ADDR.qty; i++)
+                retvalue = retvalue + "," + ripe2addr(CUR_ADDR.addr[i]);
+    }
+    return retvalue;
 }
 
 void    dump_script(const string s)
@@ -110,11 +122,11 @@ bool    do_P2MS(void)                   ///< multisig
     auto keys_qty_ptr = script_ptr + script_size - 2;
     auto keys_qty = *keys_qty_ptr - 0x50;
     auto retvalue = false;
-    auto key_ptr = script_ptr + 1;
+    auto key_ptr = script_ptr + 1;  // key len
     //cout << msize << ": " << script_size << "==" << (5 + msize * 65) << endl;   //2:135=135,3:201=200, 16:1059=1045
     if (
         script_ptr[script_size-1] == OP_CHKMULTISIG     // 2nd signature
-        and script_ptr[0] <= *keys_qty_ptr                  // required <= qty
+        and script_ptr[0] <= *keys_qty_ptr                  // required (== opcode) <= qty
         and *keys_qty_ptr <= OP_16                          // max 16 keys
 //        and script_size == (3 + msize_num * 66)
        )
@@ -122,7 +134,7 @@ bool    do_P2MS(void)                   ///< multisig
         for (auto i = 0; i < keys_qty and *key_ptr == 0x41 and key_ptr < keys_qty_ptr; i++, key_ptr += (key_ptr[0]+1))
             hash160(key_ptr+1, *key_ptr, CUR_ADDR.addr[i]);
     }
-    if (key_ptr != keys_qty_ptr) {
+    if (key_ptr == keys_qty_ptr) {
         CUR_ADDR.type = MULTISIG;
         CUR_ADDR.qty = keys_qty;
         retvalue = true;

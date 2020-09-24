@@ -143,13 +143,11 @@ bool    parse_script(void)
         return false;    // !!! TERMPORARY !!!
         //printf("%d\t%d\t%d\tbad\t%s\n", COUNT.bk, LOCAL.tx, LOCAL.vout, get_cur_keytype());
     // <get_addrs>
-    printf("%d\t%d\t%d\t%s", COUNT.bk, LOCAL.tx, LOCAL.vout, get_cur_keytype());
-    if (CUR_ADDR.qty) {
-        printf("\t%s", ripe2addr(CUR_ADDR.addr[0], (CUR_ADDR.type == SCRIPTHASH) ? 5 : 0).c_str());
-        for (auto i = 1; i < CUR_ADDR.qty; i++)
-            printf(",%s", ripe2addr(CUR_ADDR.addr[i]).c_str());
-    };
-    printf("\n");
+    printf("%d\t%d\t%d\t%s", COUNT.bk, LOCAL.tx, LOCAL.vout, get_addrs_type());
+    if (CUR_ADDR.qty)
+        printf("\t%s\n", get_addrs_str().c_str());
+    else
+        printf("\n");
     // </get_addrs>
     // FIXME: cashless
     if (OPTS.cash)

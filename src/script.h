@@ -25,6 +25,7 @@ struct  ADDRS_T {
 extern ADDRS_T CUR_ADDR;
 
 bool        script_decode(uint8_t *, const uint32_t);
-const char *get_cur_keytype(void);
+std::string get_addrs_str(void);
+const char *get_addrs_type(void);
 
 #endif // SCRIPT_H
