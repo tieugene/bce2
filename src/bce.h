@@ -23,6 +23,14 @@ struct  OPT_T       ///< program CLI options
     int         verbose = 0;
 };
 
+enum    DBG_LVL_T
+{
+    DBG_NONE,
+    DBG_MIN,
+    DBG_MID,
+    DBG_MAX
+};
+
 struct  COUNT_T     ///< through counters
 {
     uint32_t    bk = 0;
@@ -115,6 +123,7 @@ union   UNIPTR_T    ///< Universal ptr
 };
 
 extern OPT_T    OPTS;
+extern DBG_LVL_T DBG_LVL;
 extern COUNT_T  COUNT;
 extern STAT_T   STAT;
 extern LOCAL_T  LOCAL;

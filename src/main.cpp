@@ -9,6 +9,7 @@
 
 // globals
 OPT_T       OPTS;
+DBG_LVL_T   DBG_LVL;
 COUNT_T     COUNT;
 STAT_T      STAT;
 LOCAL_T     LOCAL;

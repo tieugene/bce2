@@ -8,10 +8,6 @@
  * - 141460.13.0
  * - 150951.1.0 (empty P2PKH)
  * - 154012.25.2 - dirty PKH
-commit:
-- return strict pk[h] and sh check
-- pk: chk prefix
-- todo: ms: chk prefixes
  */
 #include <iostream>
 #include <cstring>
@@ -135,13 +131,18 @@ bool    do_P2MS(void)                   ///< multisig
     //cout << msize << ": " << script_size << "==" << (5 + msize * 65) << endl;   //2:135=135,3:201=200, 16:1059=1045
     if (
         script_ptr[script_size-1] == OP_CHKMULTISIG     // 2nd signature
-        and script_ptr[0] <= *keys_qty_ptr                  // required (== opcode) <= qty
-        and *keys_qty_ptr <= OP_16                          // max 16 keys
+        and script_ptr[0] <= *keys_qty_ptr              // required (== opcode) <= qty
+        and *keys_qty_ptr <= OP_16                      // max 16 keys
 //        and script_size == (3 + msize_num * 66)
        )
     {
-        for (auto i = 0; i < keys_qty and *key_ptr == 0x41 and key_ptr < keys_qty_ptr; i++, key_ptr += (key_ptr[0]+1))
-            hash160(key_ptr+1, *key_ptr, CUR_ADDR.addr[i]);
+        for (auto i = 0; i < keys_qty and key_ptr < keys_qty_ptr; i++, key_ptr += (key_ptr[0]+1)) {
+            if (((*key_ptr == 0x41) and (key_ptr[1] == 0x04))
+                or ((*key_ptr == 0x21) and ((key_ptr[1] & 0xFE) == 0x02)))
+                hash160(key_ptr+1, *key_ptr, CUR_ADDR.addr[i]);
+            else
+                break;
+        }
     }
     if (key_ptr == keys_qty_ptr) {
         CUR_ADDR.type = MULTISIG;
