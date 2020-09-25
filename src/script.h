@@ -6,14 +6,14 @@
 #include "uintxxx.h"
 
 enum    SCTYPE {
-    NONSTANDARD,
     NULLDATA,
     PUBKEY,
     PUBKEYHASH,
-    MULTISIG,
     SCRIPTHASH,
+    MULTISIG,
     W0SCRIPTHASH,
-    W0KEYHASH
+    W0KEYHASH,
+    NONSTANDARD
 };
 
 struct  ADDRS_T {

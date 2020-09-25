@@ -2,12 +2,6 @@
  * RTFM:
  * - https://en.bitcoin.it/wiki/Script
  * - https://learnmeabitcoin.com/guide/script
- * Excludes (bk tx vout):
- * - 71036
- * - 140921 (x3)
- * - 141460.13.0
- * - 150951.1.0 (empty P2PKH)
- * - 154012.25.2 - dirty PKH
  */
 #include <iostream>
 #include <cstring>
@@ -17,14 +11,14 @@
 #include "opcode.h"
 
 static const char * ScriptType_s[] = {  // for 0..550k
-    "nonstandard",
     "nulldata",
     "pubkey",
     "pubkeyhash",
-    "multisig",
     "scripthash",
+    "multisig",
     "witness_v0_scripthash",
-    "witness_v0_keyhash"
+    "witness_v0_keyhash",
+    "nonstandard"
 };
 
 ADDRS_T CUR_ADDR;
