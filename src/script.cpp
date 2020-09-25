@@ -161,14 +161,18 @@ bool    do_P2W(void)
 
 bool    script_decode(uint8_t *script, const uint32_t size)
 {
-    CUR_ADDR.type = NONSTANDARD;
+    /// FIXME: empty script
     CUR_ADDR.qty = 0;
+    auto opcode = *script;
+    if (opcode == OP_RETURN) {  // 0. NULL_DATA
+        CUR_ADDR.type = NULLDATA;
+        return true;
+    }
+    CUR_ADDR.type = NONSTANDARD;
     if (size < 23)  // P2SH is smallest script
         return true;
-    CUR_ADDR.qty = 0;
     script_ptr = script;
     script_size = size;
-    auto opcode = *script_ptr;
     bool retvalue = false;
     switch (opcode) {
     case 0x01 ... 0x46:     // 1. P2PK
@@ -187,15 +191,11 @@ bool    script_decode(uint8_t *script, const uint32_t size)
         retvalue = do_P2MS();
         retvalue = true;
         break;
-    case OP_RETURN:         // 5. NULL_DATA
-        CUR_ADDR.type = NULLDATA;
-        retvalue = true;
-        break;
-    case OP_0:              // 6. x. witness* 0x00
+    case OP_0:              // 5. witness* 0x00
         retvalue = do_P2W();
         break;
     default:
-        if (opcode <= 0xB9) { // last defined opcode
+        if (opcode <= 0xB9) { // x. last defined opcode
             dump_script("Not impl-d");
             retvalue = true;   /// false
         } else {

@@ -139,6 +139,8 @@ bool    parse_vout(const bool dojob)
 
 bool    parse_script(void)
 {
+    /// FIXME: nulldata is not spendable
+    /// FIXME: empty script
     if (!script_decode(CUR_VOUT.script, CUR_VOUT.ssize))
         return false;    // !!! TERMPORARY !!!
         //printf("%d\t%d\t%d\tbad\t%s\n", COUNT.bk, LOCAL.tx, LOCAL.vout, get_cur_keytype());
