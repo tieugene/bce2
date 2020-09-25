@@ -8,6 +8,10 @@
  * - 141460.13.0
  * - 150951.1.0 (empty P2PKH)
  * - 154012.25.2 - dirty PKH
+commit:
+- return strict pk[h] and sh check
+- pk: chk prefix
+- todo: ms: chk prefixes
  */
 #include <iostream>
 #include <cstring>
@@ -60,16 +64,21 @@ void    dump_script(const string s)
         << ")" << endl;
 }
 
-bool    do_P2PK(uint8_t const opcode)   ///< ?pubkey
+// FIXME: https://learnmeabitcoin.com/technical/public-key
+// 65x (uncompressed) - stars with 0x4
+// 33x (compressed) - starts with 0x2/0x3
+bool    do_P2PK(void)                   ///< pubkey
 {
     if ((
-            script_size == 67 and
-            opcode == 0x41 and
-            script_ptr[66] == OP_CHECKSIG
+            script_size == 67
+            and script_ptr[0] == 0x41           // uncompressed
+            and script_ptr[1] == 0x04           // prefix
+            and script_ptr[66] == OP_CHECKSIG   // end signature
         ) or (
-            script_size == 35 and
-            opcode == 0x21 and
-            script_ptr[34] == OP_CHECKSIG
+            script_size == 35                   // compressed
+            and script_ptr[0] == 0x21
+            and (script_ptr[1] & 0xFE) == 0x02  // prefix = 2..3
+            and script_ptr[34] == OP_CHECKSIG
         ))
     {
         CUR_ADDR.type = PUBKEY;
@@ -84,7 +93,7 @@ bool    do_P2PK(uint8_t const opcode)   ///< ?pubkey
 bool    do_P2PKH(void)                  ///< ?pubkeyhash
 {
     if (
-        script_size >= 25 and       // dirty hack for 71036.?.? and w/ OP_NOP @ end
+        script_size == 25 and       // was >= dirty hack for 71036.?.? and w/ OP_NOP @ end
         script_ptr[1] == OP_HASH160 and
         script_ptr[2] == 20 and
         script_ptr[23] == OP_EQUALVERIFY and
@@ -162,7 +171,7 @@ bool    script_decode(uint8_t *script, const uint32_t size)
     bool retvalue = false;
     switch (opcode) {
     case 0x01 ... 0x46:     // 1. P2PK
-        retvalue = do_P2PK(opcode);
+        retvalue = do_P2PK();
         retvalue = true;    /// forse ok
         break;
     case OP_DUP:            // 2. P2PKH 0x76
