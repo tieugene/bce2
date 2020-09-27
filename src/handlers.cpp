@@ -11,6 +11,7 @@ static uint32_t BK_GLITCH[] = {91722, 91842};    // dup 91880, 91812
 bool    parse_tx(void); // TODO: hash
 bool    parse_vin(const bool);
 bool    parse_vout(const bool);
+bool    parse_wit(const bool);
 bool    parse_script(void);
 
 bool    parse_bk(void)
@@ -41,17 +42,32 @@ bool    parse_tx(void) // TODO: hash
     BUSY.tx = true;
     auto h_beg = CUR_PTR.u8_ptr;
     CUR_TX.ver = read_32();
-    // 1. fast rewind
+    CUR_TX.segwit = (*CUR_PTR.u16_ptr == 0x0100);
+    //cerr << "Tx=" << LOCAL.tx << ", SegWit: " << *CUR_PTR.u16_ptr << ", " << CUR_TX.segwit << endl;
+    if (CUR_TX.segwit)
+        CUR_PTR.u16_ptr++;  // skip witness signature
     CUR_TX.vins = read_v();
-    auto tmp_ptr = CUR_PTR.v_ptr;
+    if (CUR_TX.vins == 0) {
+        cerr << "Vins == 0" << endl;
+        return false;
+    }
+    // TODO: put into calc_hash
+    auto tmp_ptr = CUR_PTR.v_ptr;    // tmp ptr to go back after hash calc
+    // 1. fast rewind
     for (uint32_t i = 0; i < CUR_TX.vins; i++)
         parse_vin(false);
     CUR_TX.vouts = read_v();
+    if (!CUR_TX.vouts) {
+        cerr << "Vouts == 0" << endl;
+        return false;
+    }
     for (uint32_t i = 0; i < CUR_TX.vouts; i++)
         parse_vout(false);
+    if (CUR_TX.segwit)
+        for (uint32_t i = 0; i < CUR_TX.vins; i++)
+            parse_wit(false);
     CUR_TX.locktime = read_32();
-    // real parse
-    if (OPTS.out or OPTS.cash)
+    if (OPTS.out or OPTS.cash)  // TODO: put into calc_hash
     {
         auto h_end = CUR_PTR.u8_ptr;
         hash256(h_beg, h_end - h_beg, CUR_TX.hash);
@@ -79,6 +95,10 @@ bool    parse_tx(void) // TODO: hash
     for (LOCAL.vout = 0; LOCAL.vout < CUR_TX.vouts; LOCAL.vout++)
         if (!parse_vout(true))
             return false;
+    if (CUR_TX.segwit)
+        for (LOCAL.wit = 0; LOCAL.wit < CUR_TX.vins; LOCAL.wit++)
+            if (!parse_wit(true))
+                return false;
     read_32();  // locktime
     STAT.vins += CUR_TX.vins;
     STAT.vouts += CUR_TX.vouts;
@@ -113,6 +133,14 @@ bool    parse_vin(const bool dojob)
     } else if (OPTS.out)
         __prn_vin();
     BUSY.vin = false;
+    return true;
+}
+
+bool    parse_wit(const bool dojob)
+{
+    auto count = read_v();
+    for (auto i = 0; i < count; i++)
+        CUR_PTR.u8_ptr += read_v();
     return true;
 }
 
