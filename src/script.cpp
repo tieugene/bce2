@@ -149,6 +149,19 @@ bool    do_P2MS(void)                   ///< multisig
 
 bool    do_P2W(void)
 {
+    switch (script_ptr[1]) {
+    case 0x14:  // P2WPKH
+        CUR_ADDR.type = W0KEYHASH;
+        CUR_ADDR.qty = 1;
+        break;
+    case 0x20:  // P2WSH
+        CUR_ADDR.type = W0SCRIPTHASH;
+        CUR_ADDR.qty = 1;
+        break;
+    default:
+        break;
+    }
+
     dump_script("Witness");
     return true;
 }
@@ -185,7 +198,7 @@ bool    script_decode(uint8_t *script, const uint32_t size)
         retvalue = do_P2MS();
         retvalue = true;
         break;
-    case OP_0:              // 5. witness* 0x00
+    case OP_0:              // 5. witness* ver.0 (BIP-141)
         retvalue = do_P2W();
         break;
     default:
