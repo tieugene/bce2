@@ -61,7 +61,8 @@ void        hash160(const void *src, const uint32_t size, uint160_t &dst)
     ripe160(tmp, dst);
 }
 
-/** Convert datum hash160 into base58 encoded string according to BIP-16 */
+// BIP-16
+/** Convert datum hash160 into base58 encoded string */
 string      ripe2addr(const uint160_t &src, const uint8_t pfx)
 {
     uint8_t tmp1[sizeof(uint160_t)+5];
@@ -98,6 +99,7 @@ bool ConvertBits(const O& outfn, I it, I end) {
     return true;
 }
 
+// BIP-173 (https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki)
 std::string wpkh2addr(const uint160_t & v) {
     std::vector<unsigned char> data = {0};
     data.reserve(33);
