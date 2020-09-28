@@ -1,4 +1,5 @@
 #include <vector>
+#include <cassert>
 #include "base58.h"
 
 static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
