@@ -9,6 +9,7 @@
 #include "misc.h"
 #include "script.h"
 #include "opcode.h"
+#include "bech32.h"
 
 static const char * ScriptType_s[] = {  // for 0..550k
     "nulldata",
@@ -16,8 +17,8 @@ static const char * ScriptType_s[] = {  // for 0..550k
     "pubkeyhash",
     "scripthash",
     "multisig",
-    "witness_v0_scripthash",
     "witness_v0_keyhash",
+    "witness_v0_scripthash",
     "nonstandard"
 };
 
@@ -34,11 +35,27 @@ const char *get_addrs_type(void)
 string  get_addrs_str(void)
 {
     string retvalue;
-    if (CUR_ADDR.qty) {
-        retvalue = ripe2addr(CUR_ADDR.addr[0], (CUR_ADDR.type == SCRIPTHASH) ? 5 : 0);
-        if (CUR_ADDR.type == MULTISIG)
-            for (auto i = 1; i < CUR_ADDR.qty; i++)
-                retvalue = retvalue + "," + ripe2addr(CUR_ADDR.addr[i]);
+    switch (CUR_ADDR.type) {
+    case PUBKEY:
+    case PUBKEYHASH:
+        retvalue = ripe2addr(CUR_ADDR.addr[0]);
+        break;
+    case SCRIPTHASH:
+        retvalue = ripe2addr(CUR_ADDR.addr[0], 5);
+        break;
+    case MULTISIG:
+        retvalue = ripe2addr(CUR_ADDR.addr[0]);
+        for (auto i = 1; i < CUR_ADDR.qty; i++)
+            retvalue = retvalue + "," + ripe2addr(CUR_ADDR.addr[i]);
+        break;
+    case W0KEYHASH:
+        retvalue = Bech32Encode(CUR_ADDR.addr[0]);
+        break;
+    case W0SCRIPTHASH:
+        // retvalue = Bech32Encode(static_cast<uint256_t>(&CUR_ADDR.addr[0]));
+        break;
+    default:    // nulldata, nonstandard
+        ;
     }
     return retvalue;
 }
@@ -149,21 +166,26 @@ bool    do_P2MS(void)                   ///< multisig
 
 bool    do_P2W(void)
 {
+    bool retvalue;
     switch (script_ptr[1]) {
     case 0x14:  // P2WPKH
         CUR_ADDR.type = W0KEYHASH;
-        CUR_ADDR.qty = 1;
+        retvalue = true;
         break;
     case 0x20:  // P2WSH
         CUR_ADDR.type = W0SCRIPTHASH;
-        CUR_ADDR.qty = 1;
+        retvalue = true;
         break;
     default:
+        retvalue = false;
         break;
     }
-
-    dump_script("Witness");
-    return true;
+    if (retvalue) {
+        memcpy(&CUR_ADDR.addr[0], script_ptr+2, script_ptr[1]); // !!! too much 4 P2WSH
+        CUR_ADDR.qty = 1;
+    } else
+        dump_script("Bad P2Wx");
+    return retvalue;
 }
 
 bool    script_decode(uint8_t *script, const uint32_t size)
@@ -176,7 +198,7 @@ bool    script_decode(uint8_t *script, const uint32_t size)
         return true;
     }
     CUR_ADDR.type = NONSTANDARD;
-    if (size < 23)  // P2SH is smallest script
+    if (size < 22)  // P2WPKH is smallest script
         return true;
     script_ptr = script;
     script_size = size;
@@ -196,10 +218,11 @@ bool    script_decode(uint8_t *script, const uint32_t size)
         break;
     case OP_1 ... OP_16:    // 4. P2MS 0x5x
         retvalue = do_P2MS();
-        retvalue = true;
+        retvalue = true;    /// forse ok
         break;
-    case OP_0:              // 5. witness* ver.0 (BIP-141)
+    case OP_0:              // 5. P2W* ver.0 (BIP-141)
         retvalue = do_P2W();
+        retvalue = true;    /// forse ok
         break;
     default:
         if (opcode <= 0xB9) { // x. last defined opcode
