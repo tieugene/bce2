@@ -18,7 +18,5 @@
 
 /** Encode a Bech32 string. If hrp contains uppercase characters, this will cause an assertion error. */
 std::string Bech32Encode(const std::vector<uint8_t> &);
-std::string Bech32Encode(const uint160_t &);
-std::string Bech32Encode(const uint256_t &);
 
 #endif // BECH32_H

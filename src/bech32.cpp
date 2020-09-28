@@ -92,13 +92,3 @@ std::string Bech32Encode(const data& values) {
     }
     return ret;
 }
-
-std::string Bech32Encode(const uint160_t & values) {
-    auto tmp_ptr = static_cast<const uint8_t*>(&values[0]);
-    return Bech32Encode(data(tmp_ptr, tmp_ptr + sizeof(uint160_t)));
-}
-
-std::string Bech32Encode(const uint256_t & values) {
-    auto tmp_ptr = static_cast<const uint8_t*>(&values[0]);
-    return Bech32Encode(data(tmp_ptr, tmp_ptr + sizeof(uint256_t)));
-}

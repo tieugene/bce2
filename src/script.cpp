@@ -2,6 +2,7 @@
  * RTFM:
  * - https://en.bitcoin.it/wiki/Script
  * - https://learnmeabitcoin.com/guide/script
+ * - bitcoin-core-x/src/key-io.cpp
  */
 #include <iostream>
 #include <cstring>
@@ -26,6 +27,7 @@ ADDRS_T CUR_ADDR;
 
 static uint8_t  *script_ptr;    // ptr to currently decoded opcode
 static uint32_t script_size;    // script size
+static uint256_t WSH;           // hack: for P2WSH only
 
 const char *get_addrs_type(void)
 {
@@ -49,10 +51,10 @@ string  get_addrs_str(void)
             retvalue = retvalue + "," + ripe2addr(CUR_ADDR.addr[i]);
         break;
     case W0KEYHASH:
-        retvalue = Bech32Encode(CUR_ADDR.addr[0]);
+        retvalue = wpkh2addr(CUR_ADDR.addr[0]);
         break;
     case W0SCRIPTHASH:
-        // retvalue = Bech32Encode(static_cast<uint256_t>(&CUR_ADDR.addr[0]));
+        retvalue = wsh2addr(WSH);
         break;
     default:    // nulldata, nonstandard
         ;
@@ -170,21 +172,20 @@ bool    do_P2W(void)
     switch (script_ptr[1]) {
     case 0x14:  // P2WPKH
         CUR_ADDR.type = W0KEYHASH;
+        CUR_ADDR.qty = 1;
+        memcpy(&CUR_ADDR.addr[0], script_ptr+2, script_ptr[1]); // !!! too much 4 P2WSH
         retvalue = true;
         break;
     case 0x20:  // P2WSH
         CUR_ADDR.type = W0SCRIPTHASH;
+        CUR_ADDR.qty = 1;
+        memcpy(&WSH, script_ptr+2, script_ptr[1]);
         retvalue = true;
         break;
     default:
-        retvalue = false;
-        break;
-    }
-    if (retvalue) {
-        memcpy(&CUR_ADDR.addr[0], script_ptr+2, script_ptr[1]); // !!! too much 4 P2WSH
-        CUR_ADDR.qty = 1;
-    } else
         dump_script("Bad P2Wx");
+        retvalue = false;
+    }
     return retvalue;
 }
 
