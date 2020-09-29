@@ -2,6 +2,7 @@
  * RTFM:
  * - https://en.bitcoin.it/wiki/Script
  * - https://learnmeabitcoin.com/guide/script
+ * - bitcoin-core-x/src/key-io.cpp
  */
 #include <iostream>
 #include <cstring>
@@ -9,6 +10,7 @@
 #include "misc.h"
 #include "script.h"
 #include "opcode.h"
+#include "bech32.h"
 
 static const char * ScriptType_s[] = {  // for 0..550k
     "nulldata",
@@ -16,8 +18,8 @@ static const char * ScriptType_s[] = {  // for 0..550k
     "pubkeyhash",
     "scripthash",
     "multisig",
-    "witness_v0_scripthash",
     "witness_v0_keyhash",
+    "witness_v0_scripthash",
     "nonstandard"
 };
 
@@ -25,6 +27,7 @@ ADDRS_T CUR_ADDR;
 
 static uint8_t  *script_ptr;    // ptr to currently decoded opcode
 static uint32_t script_size;    // script size
+static uint256_t WSH;           // hack: for P2WSH only
 
 const char *get_addrs_type(void)
 {
@@ -34,11 +37,27 @@ const char *get_addrs_type(void)
 string  get_addrs_str(void)
 {
     string retvalue;
-    if (CUR_ADDR.qty) {
-        retvalue = ripe2addr(CUR_ADDR.addr[0], (CUR_ADDR.type == SCRIPTHASH) ? 5 : 0);
-        if (CUR_ADDR.type == MULTISIG)
-            for (auto i = 1; i < CUR_ADDR.qty; i++)
-                retvalue = retvalue + "," + ripe2addr(CUR_ADDR.addr[i]);
+    switch (CUR_ADDR.type) {
+    case PUBKEY:
+    case PUBKEYHASH:
+        retvalue = ripe2addr(CUR_ADDR.addr[0]);
+        break;
+    case SCRIPTHASH:
+        retvalue = ripe2addr(CUR_ADDR.addr[0], 5);
+        break;
+    case MULTISIG:
+        retvalue = ripe2addr(CUR_ADDR.addr[0]);
+        for (auto i = 1; i < CUR_ADDR.qty; i++)
+            retvalue = retvalue + "," + ripe2addr(CUR_ADDR.addr[i]);
+        break;
+    case W0KEYHASH:
+        retvalue = wpkh2addr(CUR_ADDR.addr[0]);
+        break;
+    case W0SCRIPTHASH:
+        retvalue = wsh2addr(WSH);
+        break;
+    default:    // nulldata, nonstandard
+        ;
     }
     return retvalue;
 }
@@ -149,8 +168,25 @@ bool    do_P2MS(void)                   ///< multisig
 
 bool    do_P2W(void)
 {
-    dump_script("Witness");
-    return true;
+    bool retvalue;
+    switch (script_ptr[1]) {
+    case 0x14:  // P2WPKH
+        CUR_ADDR.type = W0KEYHASH;
+        CUR_ADDR.qty = 1;
+        memcpy(&CUR_ADDR.addr[0], script_ptr+2, script_ptr[1]); // !!! too much 4 P2WSH
+        retvalue = true;
+        break;
+    case 0x20:  // P2WSH
+        CUR_ADDR.type = W0SCRIPTHASH;
+        CUR_ADDR.qty = 1;
+        memcpy(&WSH, script_ptr+2, script_ptr[1]);
+        retvalue = true;
+        break;
+    default:
+        dump_script("Bad P2Wx");
+        retvalue = false;
+    }
+    return retvalue;
 }
 
 bool    script_decode(uint8_t *script, const uint32_t size)
@@ -163,7 +199,7 @@ bool    script_decode(uint8_t *script, const uint32_t size)
         return true;
     }
     CUR_ADDR.type = NONSTANDARD;
-    if (size < 23)  // P2SH is smallest script
+    if (size < 22)  // P2WPKH is smallest script
         return true;
     script_ptr = script;
     script_size = size;
@@ -171,31 +207,24 @@ bool    script_decode(uint8_t *script, const uint32_t size)
     switch (opcode) {
     case 0x01 ... 0x46:     // 1. P2PK
         retvalue = do_P2PK();
-        retvalue = true;    /// forse ok
         break;
     case OP_DUP:            // 2. P2PKH 0x76
         retvalue = do_P2PKH();
-        retvalue = true;    /// forse ok
         break;
     case OP_HASH160:        // 3. P2SH 0xA9
         retvalue = do_P2SH();
-        retvalue = true;    /// forse ok
         break;
     case OP_1 ... OP_16:    // 4. P2MS 0x5x
         retvalue = do_P2MS();
-        retvalue = true;
         break;
-    case OP_0:              // 5. witness* 0x00
+    case OP_0:              // 5. P2W* ver.0 (BIP-141)
         retvalue = do_P2W();
         break;
     default:
-        if (opcode <= 0xB9) { // x. last defined opcode
+        if (opcode <= 0xB9) // x. last defined opcode
             dump_script("Not impl-d");
-            retvalue = true;   /// false
-        } else {
+        else
             dump_script("Invalid");
-            retvalue = true;
-        }
     }
     return retvalue;
 }

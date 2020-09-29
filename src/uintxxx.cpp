@@ -6,50 +6,10 @@
 #include <openssl/ripemd.h>
 #include "uintxxx.h"
 #include "misc.h"
+#include "base58.h"
+#include "bech32.h"
 
 using namespace std;
-
-static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-
-string EncodeBase58(uint8_t* pbegin, const uint8_t* pend)    // bitcoin-core 0.19.1; pbegin must be const...
-{
-    // Skip & count leading zeroes.
-    int zeroes = 0;
-    int length = 0;
-    while (pbegin != pend && *pbegin == 0) {
-        pbegin++;
-        zeroes++;
-    }
-    // Allocate enough space in big-endian base58 representation.
-    int size = (pend - pbegin) * 138 / 100 + 1; // log(256) / log(58), rounded up.
-    vector<unsigned char> b58(size);
-    // Process the bytes.
-    while (pbegin != pend) {
-        int carry = *pbegin;
-        int i = 0;
-        // Apply "b58 = b58 * 256 + ch".
-        for (std::vector<unsigned char>::reverse_iterator it = b58.rbegin(); (carry != 0 || i < length) && (it != b58.rend()); it++, i++) {
-            carry += 256 * (*it);
-            *it = carry % 58;
-            carry /= 58;
-        }
-
-        assert(carry == 0);
-        length = i;
-        pbegin++;
-    }
-    // Skip leading zeroes in base58 result.
-    vector<unsigned char>::iterator it = b58.begin() + (size - length);
-    while (it != b58.end() && *it == 0)
-        it++;
-    // Translate the result into a string.
-    string str;
-    str.reserve(zeroes + (b58.end() - it));
-    str.assign(zeroes, '1');
-    while (it != b58.end())
-        str += pszBase58[*(it++)];
-    return str;
-}
 
 string      hash2hex(const uint256_t &h)
 {
@@ -101,6 +61,7 @@ void        hash160(const void *src, const uint32_t size, uint160_t &dst)
     ripe160(tmp, dst);
 }
 
+// BIP-16
 /** Convert datum hash160 into base58 encoded string */
 string      ripe2addr(const uint160_t &src, const uint8_t pfx)
 {
@@ -111,4 +72,44 @@ string      ripe2addr(const uint160_t &src, const uint8_t pfx)
     hash256(tmp1, sizeof (uint160_t)+1, tmp2);  // 2. 2 x sha256
     memcpy(tmp1+21, &(tmp2[0]), 4);             // 3. add crc
     return EncodeBase58(tmp1, tmp1+25);
+}
+
+/** Convert from one power-of-2 number base to another. */
+// bitcoin-core/src/util/strencodings.h
+template<int frombits, int tobits, bool pad, typename O, typename I>
+bool ConvertBits(const O& outfn, I it, I end) {
+    size_t acc = 0;
+    size_t bits = 0;
+    constexpr size_t maxv = (1 << tobits) - 1;
+    constexpr size_t max_acc = (1 << (frombits + tobits - 1)) - 1;
+    while (it != end) {
+        acc = ((acc << frombits) | *it) & max_acc;
+        bits += frombits;
+        while (bits >= tobits) {
+            bits -= tobits;
+            outfn((acc >> bits) & maxv);
+        }
+        ++it;
+    }
+    if (pad) {
+        if (bits) outfn((acc << (tobits - bits)) & maxv);
+    } else if (bits >= frombits || ((acc << (tobits - bits)) & maxv)) {
+        return false;
+    }
+    return true;
+}
+
+// BIP-173 (https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki)
+std::string wpkh2addr(const uint160_t & v) {
+    std::vector<unsigned char> data = {0};
+    data.reserve(33);
+    ConvertBits<8, 5, true>([&](unsigned char c) { data.push_back(c); }, v.begin(), v.end());
+    return Bech32Encode(data);
+}
+
+std::string wsh2addr(const uint256_t & v) {
+    std::vector<unsigned char> data = {0};
+    data.reserve(53);
+    ConvertBits<8, 5, true>([&](unsigned char c) { data.push_back(c); }, v.begin(), v.end());
+    return Bech32Encode(data);
 }

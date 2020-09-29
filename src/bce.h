@@ -54,6 +54,7 @@ struct  LOCAL_T     ///< per parent counters
     uint32_t    tx = 0;
     uint32_t    vin = 0;
     uint32_t    vout = 0;
+    uint32_t    wit = 0;
 };
 
 struct  BUSY_T
@@ -86,8 +87,10 @@ struct  TX_T        ///< tx variables w/o vins/vouts
     uint32_t    ver;        // FIXME: * (for hash)
     uint32_t    vins;
     uint32_t    vouts;
+    //uint32_t    wits;
     uint32_t    locktime;   // FIXME: * (for hash)
     uint256_t   hash;
+    bool        segwit;
 };
 
 struct  VIN_T       ///< vin data

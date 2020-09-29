@@ -1,7 +1,7 @@
 #ifndef BKIDX_H
 #define BKIDX_H
 
-const uint32_t  MAX_BK_SIZE = 2 << 20;  // 2MB enough
+const uint32_t  MAX_BK_SIZE = 4 << 20;  // 4MB enough
 
 struct  FOFF_T      ///< files-offset array
     { uint32_t  fileno, offset; };
