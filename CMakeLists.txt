@@ -26,4 +26,4 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(kyotocabinet REQUIRED IMPORTED_TARGET kyotocabinet)
 target_link_libraries(${PROJECT_NAME} PkgConfig::kyotocabinet)
 
-#install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)

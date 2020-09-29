@@ -6,8 +6,7 @@
 #include <cstdlib>
 #include <stdio.h>
 #include <unistd.h>
-// if linux
-#include "sys/resource.h"
+#include <sys/resource.h>
 #include "bce.h"
 #include "misc.h"
 #include "script.h" // cur_addr only
