@@ -207,32 +207,24 @@ bool    script_decode(uint8_t *script, const uint32_t size)
     switch (opcode) {
     case 0x01 ... 0x46:     // 1. P2PK
         retvalue = do_P2PK();
-        retvalue = true;    /// forse ok
         break;
     case OP_DUP:            // 2. P2PKH 0x76
         retvalue = do_P2PKH();
-        retvalue = true;    /// forse ok
         break;
     case OP_HASH160:        // 3. P2SH 0xA9
         retvalue = do_P2SH();
-        retvalue = true;    /// forse ok
         break;
     case OP_1 ... OP_16:    // 4. P2MS 0x5x
         retvalue = do_P2MS();
-        retvalue = true;    /// forse ok
         break;
     case OP_0:              // 5. P2W* ver.0 (BIP-141)
         retvalue = do_P2W();
-        retvalue = true;    /// forse ok
         break;
     default:
-        if (opcode <= 0xB9) { // x. last defined opcode
+        if (opcode <= 0xB9) // x. last defined opcode
             dump_script("Not impl-d");
-            retvalue = true;   /// false
-        } else {
+        else
             dump_script("Invalid");
-            retvalue = true;
-        }
     }
     return retvalue;
 }
