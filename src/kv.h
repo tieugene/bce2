@@ -52,27 +52,28 @@ public:
 struct VARRAY_T {
     uint16_t    size;
     uint8_t     data[];
-    bool operator==(const VARRAY_T &alien) const
-    {
-        return (size == alien.size && memcmp(data, alien.data, size) == 0);
-    }
+   //  bool operator==(const VARRAY_T &alien) const
+   //     { return (size == alien.size && memcmp(data, alien.data, size) == 0);}
 };
+//bool operator==(const VARRAY_T& one, const VARRAY_T& two)
+//    { return ((one.size == two.size) && (memcmp(one.data, two.data, one.size) == 0));}
 
 // Extend std and boost namespaces with our hash wrappers.
 //-----------------------------------------------------------------------------
 // get from libbitcoin-system/include/bitcoin/system/math/hash.hpp
-
+/*
 namespace std
 {
-template<>
-struct hash<VARRAY_T>
-{
-    size_t operator()(const VARRAY_T& hash) const
+    template<>
+    struct hash<VARRAY_T>
     {
-        return boost::hash_range(hash.data, hash.data + hash.size);
-    }
-};
+        size_t operator()(const VARRAY_T& hash) const
+        {
+            return boost::hash_range(hash.data, hash.data + hash.size);
+        }
+    };
 } // namespace std
+*/
 /*
 namespace boost
 {
@@ -86,10 +87,19 @@ struct hash<VARRAY_T>
 };
 } // namespace boost
 */
+/*
+struct AvHash {
+    size_t operator()(const VARRAY_T& k) const
+    { return boost::hash_range(k.data, k.data + k.size); }
+};*/
+auto MyHash = [](const VARRAY_T& k)
+    { return boost::hash_range(k.data, k.data + k.size); };
+auto AvEq = [](const VARRAY_T& one, const VARRAY_T& two)
+    { return ((one.size == two.size) && (memcmp(one.data, two.data, one.size) == 0));};
 
 class   KVMEM_T : public KV_T {
 private:
-    unordered_map <VARRAY_T, uint32_t> db; // FIXME: hash, equal funcs
+    unordered_map <VARRAY_T, uint32_t, decltype(MyHash), decltype(AvEq)> db; // FIXME: hash, equal funcs
     uint32_t      real_add(const uint8_t *, const uint16_t);
     uint32_t      real_get(const uint8_t *, const uint16_t);
 public:

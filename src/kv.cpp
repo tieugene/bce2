@@ -42,7 +42,7 @@ uint32_t    KVMEM_T::real_add(const uint8_t *raw_key, const uint16_t size)
         value = db.size();
         db.emplace(key, value);
     }
-    cerr << "added" << endl;
+    cerr << "added " << value << endl;
     return value;
 }
 
@@ -55,6 +55,6 @@ uint32_t    KVMEM_T::real_get(const uint8_t *raw_key, const uint16_t size)
     auto search = db.find(key);
     if (search != db.end())
         value = search->second;
-    cerr << "get" << endl;
+    cerr << "get " << value << endl;
     return value;
 }

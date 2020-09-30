@@ -16,7 +16,7 @@ struct  OPT_T       ///< program CLI options
 {
     string      datdir;
     string      cachedir;
-    uint32_t    from = 0;
+    int         from;
     uint32_t    num = 1;
     bool        out = false;
     bool        cash = false;

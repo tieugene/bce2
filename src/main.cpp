@@ -95,9 +95,8 @@ bool    set_cash(void)
 {
     OPTS.cash = !OPTS.cachedir.empty();
     if (OPTS.cash) {
-        cerr << "Cache init" << endl;
-        TxDB = new KVMEM_T();
-        AddrDB = new KVMEM_T();
+        TxDB = new KVDB_T();
+        AddrDB = new KVDB_T();
         if (OPTS.cachedir.back() != '/')
             OPTS.cachedir += '/';  // FIXME: native path separator
         auto s = OPTS.cachedir + "tx.kch";
@@ -110,10 +109,19 @@ bool    set_cash(void)
             cerr << "Can't open 'addr' cache " << s << endl;
             return false;
         }
-        if (OPTS.from == 0) {   // FIXME: undefined -f
+        if (OPTS.from == 0) {
           TxDB->clear();
           AddrDB->clear();
+        } else if (OPTS.from < 0) {
+            if (TxDB->count() or AddrDB->count()) {
+                cerr << "Tx or Addr key-value is not empty. Set -f option" << endl;
+                return false;
+            } else
+                OPTS.from = 0;
         }
+    } else {
+        if (OPTS.from < 0)
+            OPTS.from = 0;
     }
     return true;
 }

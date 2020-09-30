@@ -170,15 +170,14 @@ bool    parse_vout(const bool dojob)
     if (!dojob)
         return true;
     BUSY.vout = true;
-    if (!parse_script())
-        return false;
-    if (OPTS.out)
-    {
+    if (OPTS.out) {
         if (OPTS.cash)
             out_vout();
         else
             __prn_vout();
     }
+    if (!parse_script())
+        return false;
     BUSY.vout = false;
     return true;
 }
@@ -234,9 +233,7 @@ bool    parse_script(void)
                 COUNT.addr += 1;
             }
         } else if (OPTS.out)
-            __prn_addr();
-        // if (OPTS.out)
-        //    out_xaddr(addr_added);
+            __prn_addr(get_addrs_type(), get_addrs_str());
         STAT.addrs += 1;    // FIXME: if decoded and 1+
     }
     return true;

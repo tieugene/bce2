@@ -45,13 +45,40 @@ void        out_xaddr(uint32_t const id)
   // cout << "x" << TAB << CUR_TX.no << TAB << CUR_VOUT.no << TAB << id << endl;
 }
 
+void        __prn_bk(void)  // TODO: hash
+{
+    //time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);
+    cerr
+        << "Bk: " << COUNT.bk
+        << ", time: " << CUR_BK.head_ptr->time
+        << ", hash: " << hash2hex(CUR_BK.hash)
+        << ", ver: " << CUR_BK.head_ptr->ver
+        << ", txs: " << CUR_BK.txs
+        << endl;
+        // << " (" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << ")"
+}
+
+void        __prn_tx(void)
+{
+    cerr
+        << "  Tx: " << LOCAL.tx
+        << " (" << COUNT.tx << ")"
+        << ", hash: " << hash2hex(CUR_TX.hash)
+        << ", ins: "  << CUR_TX.vins
+        << ", outs: " << CUR_TX.vouts
+        << ", ver: " << CUR_TX.ver
+        << ", lock: " << CUR_TX.locktime
+        << endl;
+}
+
 void        __prn_vin(void)
 {
-    cerr << TAB << TAB << "Vin: ";
+    cerr << "    Vin: " << LOCAL.vin
+        << ", src: ";
     if (CUR_VIN.vout == 0xFFFFFFFF)
         cerr << "<coinbase>";
     else
-        cerr << " vout: " << CUR_VIN.txno << " " << CUR_VIN.vout;
+        cerr << "(Tx: " << CUR_VIN.txno << ", vout: " << CUR_VIN.vout << ")";
     cerr
         << ", ssize: " << CUR_VIN.ssize
         << ", seq: " << CUR_VIN.seq
@@ -61,57 +88,16 @@ void        __prn_vin(void)
 void        __prn_vout(void)
 {
     cerr
-        << TAB << TAB << "Vout: "
-        << "tx: " << COUNT.tx
+        << "    Vout: " << LOCAL.vout
         << ", no: " << LOCAL.vout
         << ", $: " << CUR_VOUT.satoshi
         << ", ssize: " << CUR_VOUT.ssize
         << endl;
-    //<< " " << ptr2hex(CUR_VOUT.script, CUR_VOUT.ssize)
-    return;
-    cerr << "\t\tVout:" << endl;
-    if (OPTS.verbose > 2) {
-        cerr
-            << "\t\t\t$:\t" << CUR_VOUT.satoshi << endl
-            << "\t\t\tSSize:\t" << CUR_VOUT.ssize << endl;
-    }
 }
 
-void        __prn_addr(void)    // FIXME:
+void        __prn_addr(const string &t, const string& v)
 {
-    cerr
-        << "Addr:"
-        << "tx: " << COUNT.tx
-        << ", vout: " << LOCAL.vout
-        << ", ripe160: " << ripe2addr(CUR_ADDR.addr[0])
-        << endl;
-}
-
-void        __prn_tx(void)
-{
-    cerr
-        << "\tTx: " << COUNT.tx
-        << ", hash: " << hash2hex(CUR_TX.hash)
-        << ", in: "  << CUR_TX.vins
-        << ", out: " << CUR_TX.vouts
-        << ", ver: " << CUR_TX.ver
-        << ", lock: " << CUR_TX.locktime
-        << endl;
-    // ver
-    //        << "\t\tlock:\t" << CUR_TX.locktime << endl;
-}
-
-void        __prn_bk(void)  // TODO: hash
-{
-    //time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);
-    cerr
-        << "Block: " << COUNT.bk
-        << ", time: " << CUR_BK.head_ptr->time
-        << ", hash: " << hash2hex(CUR_BK.hash)
-        << ", ver: " << CUR_BK.head_ptr->ver
-        << ", txs: " << CUR_BK.txs
-        << endl;
-        // << " (" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << ")"
+    cerr << "      Addr: " << t << " " << v << endl;
 }
 
 // ====
@@ -139,7 +125,7 @@ void    __prn_interim(void) {
     "\n";
 }
 
-void        __prn_summary(void)
+void    __prn_summary(void)
 {
     cerr << "= Summary =" << endl
         << "Blocks:" << TAB << COUNT.bk << endl; //
@@ -155,7 +141,7 @@ void        __prn_summary(void)
             << "Addrs/vout max:" << TAB << STAT.max_addrs << endl;
 }
 
-bool        __prn_trace(void)
+bool    __prn_trace(void)
 {
     cerr << "*** <Trace> ***" << endl;
     if (BUSY.bk)

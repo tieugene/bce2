@@ -13,9 +13,9 @@ void        __prn_bk(void);
 void        __prn_tx(void);
 void        __prn_vin(void);
 void        __prn_vout(void);
-void        __prn_addr(void);
+void        __prn_addr(const string&, const string&);
 
-void        __prn_file(string const &);
+void        __prn_file(const string&);
 void        __prn_head(void);
 void        __prn_tail(void);
 void        __prn_interim(void);
