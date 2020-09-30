@@ -95,9 +95,13 @@ void        __prn_vout(void)
         << endl;
 }
 
-void        __prn_addr(const string &t, const string& v)
+void        __prn_addr(void)
 {
-    cerr << "      Addr: " << t << " " << v << endl;
+    auto v = get_addrs_str();
+    cerr << "      Addr: " << get_addrs_type();
+    if (!v.empty())
+        cerr << " " << v;
+    cerr << endl;
 }
 
 // ====

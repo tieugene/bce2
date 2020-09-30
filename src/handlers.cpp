@@ -233,7 +233,7 @@ bool    parse_script(void)
                 COUNT.addr += 1;
             }
         } else if (OPTS.out)
-            __prn_addr(get_addrs_type(), get_addrs_str());
+            __prn_addr();
         STAT.addrs += 1;    // FIXME: if decoded and 1+
     }
     return true;
