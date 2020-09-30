@@ -93,7 +93,7 @@ bool    parse_tx(void) // TODO: hash
         if (!hash_tx(tx_beg))
             return false;
         if (OPTS.cash) {
-            auto tx_added = TxDB.add(CUR_TX.hash);
+            auto tx_added = TxDB->add(CUR_TX.hash);
             if (tx_added == NOT_FOUND_U32) {
                     cerr << "Can't add tx " << hash2hex(CUR_TX.hash) << endl;
                     return false;
@@ -140,7 +140,7 @@ bool    parse_vin(const bool dojob)
     if (OPTS.cash)
     {
         if (CUR_VIN.vout != COINBASE_vout) {
-            CUR_VIN.txno = TxDB.get(*CUR_VIN.txid);
+            CUR_VIN.txno = TxDB->get(*CUR_VIN.txid);
             if (CUR_VIN.txno == NOT_FOUND_U32) {
                 cerr << "txid " << hash2hex(*CUR_VIN.txid) << " not found." << endl;
                 return false;
@@ -196,15 +196,16 @@ bool    parse_script(void)
 {
     /// FIXME: nulldata is not spendable
     /// FIXME: empty script
-    auto script_ok = script_decode(CUR_VOUT.script, CUR_VOUT.ssize);
+    // auto script_ok =
+    script_decode(CUR_VOUT.script, CUR_VOUT.ssize);
     return true;
     // if (!script_ok) return false;    // !!! TERMPORARY !!!
     //__debug_addr();
     // FIXME: cashless
     if (OPTS.cash) {
-        auto addr_added = AddrDB.get(CUR_ADDR.addr[0]);
+        auto addr_added = AddrDB->get(CUR_ADDR.addr[0]);
         if (addr_added == NOT_FOUND_U32) {
-            addr_added = AddrDB.add(CUR_ADDR.addr[0]);
+            addr_added = AddrDB->add(CUR_ADDR.addr[0]);
             if (addr_added == NOT_FOUND_U32) {
                 cerr << "Can not find nor add addr " << ripe2hex(CUR_ADDR.addr[0]) << endl;
                 return false;

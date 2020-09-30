@@ -20,8 +20,8 @@ VIN_T       CUR_VIN;
 VOUT_T      CUR_VOUT;
 UNIPTR_T    CUR_PTR;
 BUFFER_T    BUFFER;
-KV_T        TxDB;
-KV_T        AddrDB;
+KV_T        *TxDB;
+KV_T        *AddrDB;
 long        start_mem;
 time_t      start_time;
 // locals
@@ -93,25 +93,25 @@ int     main(int argc, char *argv[])
 
 bool    set_cash(void)
 {
-    TxDB = KVDB_T();
-    AddrDB = KVDB_T();
+    TxDB = new KVDB_T();
+    AddrDB = new KVDB_T();
     OPTS.cash = !OPTS.cachedir.empty();
     if (OPTS.cash) {
         if (OPTS.cachedir.back() != '/')
             OPTS.cachedir += '/';  // FIXME: native path separator
         auto s = OPTS.cachedir + "tx.kch";
-        if (!TxDB.init(s)) {
+        if (!TxDB->init(s)) {
             cerr << "Can't open 'tx' cache: " << s << endl;
             return false;
         }
         s = OPTS.cachedir + "addr.kch";
-        if (!AddrDB.init(s)) {
+        if (!AddrDB->init(s)) {
             cerr << "Can't open 'addr' cache " << s << endl;
             return false;
         }
         if (OPTS.from == 0) {
-          TxDB.clear();
-          AddrDB.clear();
+          TxDB->clear();
+          AddrDB->clear();
         }
     }
     return true;

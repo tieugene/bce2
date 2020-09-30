@@ -15,12 +15,13 @@ using namespace std;
 
 class KV_T {
 protected:
-    virtual uint32_t  real_add(const uint8_t *, const size_t);
-    virtual uint32_t  real_get(const uint8_t *, const size_t);
+    virtual uint32_t  real_add(const uint8_t *, const size_t) = 0;
+    virtual uint32_t  real_get(const uint8_t *, const size_t) = 0;
 public:
-    virtual bool        init(const string &);
-    virtual void        clear(void);
-    virtual uint32_t    count(void);
+    // KV_T(void) {}
+    virtual bool        init(const string &) = 0;
+    virtual void        clear(void) = 0;
+    virtual uint32_t    count(void) = 0;
     uint32_t    add(const uint256_t &key)
                 { return real_add(key.begin(), sizeof(uint256_t)); }
     uint32_t    add(const uint160_t &key)
@@ -42,6 +43,7 @@ private:
   uint32_t      real_add(const uint8_t *, const size_t);
   uint32_t      real_get(const uint8_t *, const size_t);
 public:
+  // KVDB_T(void) {}
   bool          init(const string &);
   void          clear(void) { db.clear(); }
   uint32_t      count(void);
