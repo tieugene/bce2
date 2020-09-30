@@ -110,7 +110,7 @@ bool    set_cash(void)
             cerr << "Can't open 'addr' cache " << s << endl;
             return false;
         }
-        if (OPTS.from == 0) {
+        if (OPTS.from == 0) {   // FIXME: undefined -f
           TxDB->clear();
           AddrDB->clear();
         }

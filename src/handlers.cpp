@@ -197,30 +197,47 @@ bool    parse_script(void)
     /// FIXME: nulldata is not spendable
     /// FIXME: empty script
     auto script_ok = script_decode(CUR_VOUT.script, CUR_VOUT.ssize);
-    return true;
-    // if (!script_ok) return false;    // !!! TERMPORARY !!!
-    //__debug_addr();
-    // FIXME: cashless
-    if (OPTS.cash) {
-        auto addr_added = AddrDB->get(CUR_ADDR.addr[0]);
-        if (addr_added == NOT_FOUND_U32) {
-            addr_added = AddrDB->add(CUR_ADDR.addr[0]);
+    if (script_ok and CUR_ADDR.qty) {
+        if (OPTS.cash) {
+            uint32_t addr_added;
+            switch (CUR_ADDR.type) {
+            case W0SCRIPTHASH:
+                addr_added = AddrDB->get(WSH);
+                break;
+            case MULTISIG:
+                addr_added = AddrDB->get(CUR_ADDR.addr, CUR_ADDR.qty);
+                break;
+            default:
+                addr_added = AddrDB->get(CUR_ADDR.addr[0]);
+            }
             if (addr_added == NOT_FOUND_U32) {
-                cerr << "Can not find nor add addr " << ripe2hex(CUR_ADDR.addr[0]) << endl;
-                return false;
-            }
-            if (addr_added != COUNT.addr) {
-                    cerr << "Addr added as " << addr_added << " against waiting " << COUNT.addr << endl;
+                switch (CUR_ADDR.type) {
+                case W0SCRIPTHASH:
+                    addr_added = AddrDB->add(WSH);
+                    break;
+                case MULTISIG:
+                    addr_added = AddrDB->add(CUR_ADDR.addr, CUR_ADDR.qty);
+                    break;
+                default:
+                    addr_added = AddrDB->add(CUR_ADDR.addr[0]);
+                }
+                if (addr_added == NOT_FOUND_U32) {
+                    cerr << "Can not find nor add addr " << get_addrs_str() << endl;
                     return false;
+                }
+                if (addr_added != COUNT.addr) {
+                        cerr << "Addr added as " << addr_added << " against waiting " << COUNT.addr << endl;
+                        return false;
+                }
+                if (OPTS.out)
+                    out_addr(addr_added, CUR_ADDR.addr[0]); // FIXME:
+                COUNT.addr += 1;
             }
-            if (OPTS.out)
-                out_addr(addr_added, CUR_ADDR.addr[0]);
-            COUNT.addr += 1;
-        }
-    } else if (OPTS.out)
-        __prn_addr();
-    // if (OPTS.out)
-    //    out_xaddr(addr_added);
-    STAT.addrs += 1;    // FIXME: if decoded and 1+
+        } else if (OPTS.out)
+            __prn_addr();
+        // if (OPTS.out)
+        //    out_xaddr(addr_added);
+        STAT.addrs += 1;    // FIXME: if decoded and 1+
+    }
     return true;
 }

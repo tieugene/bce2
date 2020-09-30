@@ -12,6 +12,9 @@
 #include "opcode.h"
 #include "bech32.h"
 
+ADDRS_T CUR_ADDR;
+uint256_t WSH;           // hack: for P2WSH only
+
 static const char * ScriptType_s[] = {  // for 0..550k
     "nulldata",
     "pubkey",
@@ -22,12 +25,8 @@ static const char * ScriptType_s[] = {  // for 0..550k
     "witness_v0_scripthash",
     "nonstandard"
 };
-
-ADDRS_T CUR_ADDR;
-
 static uint8_t  *script_ptr;    // ptr to currently decoded opcode
 static uint32_t script_size;    // script size
-static uint256_t WSH;           // hack: for P2WSH only
 
 const char *get_addrs_type(void)
 {

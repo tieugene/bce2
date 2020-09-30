@@ -77,7 +77,7 @@ void        __prn_vout(void)
     }
 }
 
-void        __prn_addr(void)
+void        __prn_addr(void)    // FIXME:
 {
     cerr
         << "Addr:"
