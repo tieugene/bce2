@@ -20,13 +20,8 @@ VIN_T       CUR_VIN;
 VOUT_T      CUR_VOUT;
 UNIPTR_T    CUR_PTR;
 BUFFER_T    BUFFER;
-#ifdef MEM
-TxMAP_T     TxDB;
-AddrMAP_T   AddrDB;
-#else
-TxDB_T      TxDB;
-AddrDB_T    AddrDB;
-#endif
+KV_T        TxDB;
+KV_T        AddrDB;
 long        start_mem;
 time_t      start_time;
 // locals
@@ -98,6 +93,8 @@ int     main(int argc, char *argv[])
 
 bool    set_cash(void)
 {
+    TxDB = KVDB_T();
+    AddrDB = KVDB_T();
     OPTS.cash = !OPTS.cachedir.empty();
     if (OPTS.cash) {
         if (OPTS.cachedir.back() != '/')

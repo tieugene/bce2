@@ -4,52 +4,48 @@
 
 #include "uintxxx.h"
 #include <kcpolydb.h>
-#include <array>    // FIXME:
+#include <array>
 #include <unordered_map>
 
-#define MEM
+//#define MEM
 
 const uint32_t NOT_FOUND_U32 = 0xFFFFFFFF;
 
 using namespace std;
 
-// kyotocabinet
-template <typename T> class   KVDB_T {
+class KV_T {
 protected:
-  kyotocabinet::PolyDB     db;
+    virtual uint32_t  real_add(const uint8_t *, const size_t);
+    virtual uint32_t  real_get(const uint8_t *, const size_t);
 public:
-  bool        init(const string &s) {
-      return db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE | kyotocabinet::PolyDB::OTRUNCATE); // TODO:
-  }
-  void        clear(void) { db.clear(); }
-  uint32_t    count(void) {
-      auto retvalue = db.count();
-      return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
-  }
-  uint32_t    add(T &key) {
-      //auto value = map.emplace(key, value);   // FIXME: emplace() w/ checking retvalue
-      auto value = count();
-      if (value != NOT_FOUND_U32) {
-          void *k_ptr = static_cast<void *>(&key);
-          void *v_ptr = static_cast<void *>(&value);
-          if (!db.add(static_cast<char *>(k_ptr), sizeof(T), static_cast<char *>(v_ptr), sizeof(uint32_t)))
-              value = NOT_FOUND_U32;
-      }
-      return value;
-  }
-  uint32_t    get(T &key) {
-      uint32_t value;
-      void *k_ptr = static_cast<void *>(&key);
-      void *v_ptr = static_cast<void *>(&value);
-      auto result = db.get(static_cast<char *>(k_ptr), sizeof(T), static_cast<char *>(v_ptr), sizeof(uint32_t));
-      if (result != sizeof(uint32_t))
-          value = NOT_FOUND_U32;
-      return value;
-  }
+    virtual bool        init(const string &);
+    virtual void        clear(void);
+    virtual uint32_t    count(void);
+    uint32_t    add(const uint256_t &key)
+                { return real_add(key.begin(), sizeof(uint256_t)); }
+    uint32_t    add(const uint160_t &key)
+                { return real_add(key.begin(), sizeof(uint160_t)); }
+    uint32_t    add(const uint160_t key[], const size_t len)
+                { return real_add(key[0].begin(), sizeof(uint160_t) * len); }
+    uint32_t    get(const uint256_t &key)
+                { return real_get(key.begin(), sizeof(uint256_t)); }
+    uint32_t    get(const uint160_t &key)
+                { return real_get(key.begin(), sizeof(uint160_t)); }
+    uint32_t    get(const uint160_t key[], const size_t len)
+                { return real_get(key[0].begin(), sizeof(uint160_t) * len); }
 };
 
-typedef KVDB_T <uint256_t> TxDB_T;
-typedef KVDB_T <uint160_t> AddrDB_T;
+// kyotocabinet
+class   KVDB_T : public KV_T {
+private:
+  kyotocabinet::PolyDB     db;
+  uint32_t      real_add(const uint8_t *, const size_t);
+  uint32_t      real_get(const uint8_t *, const size_t);
+public:
+  bool          init(const string &);
+  void          clear(void) { db.clear(); }
+  uint32_t      count(void);
+};
 
 // inmemory
 template <typename T> class KVMAP_T {

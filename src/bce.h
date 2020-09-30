@@ -137,13 +137,8 @@ extern VIN_T    CUR_VIN;
 extern VOUT_T   CUR_VOUT;
 extern UNIPTR_T CUR_PTR;
 extern BUFFER_T BUFFER;
-#ifdef MEM
-extern TxMAP_T   TxDB;
-extern AddrMAP_T AddrDB;
-#else
-extern TxDB_T   TxDB;
-extern AddrDB_T AddrDB;
-#endif
+extern KV_T     TxDB;
+extern KV_T     AddrDB;
 
 extern time_t   start_time;
 extern long     start_mem;
