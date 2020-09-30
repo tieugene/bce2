@@ -110,14 +110,14 @@ bool    parse_tx(void) // TODO: hash
     for (LOCAL.vin = 0; LOCAL.vin < CUR_TX.vins; LOCAL.vin++)
         if (!parse_vin(true))
             return false;
-    read_v();   // vouts
+    CUR_TX.vouts = read_v();   // vouts
     for (LOCAL.vout = 0; LOCAL.vout < CUR_TX.vouts; LOCAL.vout++)
         if (!parse_vout(true))
             return false;
     if (CUR_TX.segwit)
         for (LOCAL.wit = 0; LOCAL.wit < CUR_TX.vins; LOCAL.wit++)
             parse_wit();
-    read_32();  // locktime
+    CUR_TX.locktime = read_32();  // locktime
     STAT.vins += CUR_TX.vins;
     STAT.vouts += CUR_TX.vouts;
     STAT.max_vins = max(STAT.max_vins, CUR_TX.vins);
@@ -196,8 +196,7 @@ bool    parse_script(void)
 {
     /// FIXME: nulldata is not spendable
     /// FIXME: empty script
-    // auto script_ok =
-    script_decode(CUR_VOUT.script, CUR_VOUT.ssize);
+    auto script_ok = script_decode(CUR_VOUT.script, CUR_VOUT.ssize);
     return true;
     // if (!script_ok) return false;    // !!! TERMPORARY !!!
     //__debug_addr();
@@ -222,6 +221,6 @@ bool    parse_script(void)
         __prn_addr();
     // if (OPTS.out)
     //    out_xaddr(addr_added);
-    STAT.addrs += 1;
+    STAT.addrs += 1;    // FIXME: if decoded and 1+
     return true;
 }

@@ -93,10 +93,11 @@ int     main(int argc, char *argv[])
 
 bool    set_cash(void)
 {
-    TxDB = new KVDB_T();
-    AddrDB = new KVDB_T();
     OPTS.cash = !OPTS.cachedir.empty();
     if (OPTS.cash) {
+        cerr << "Cashe init" << endl;
+        TxDB = new KVDB_T();
+        AddrDB = new KVDB_T();
         if (OPTS.cachedir.back() != '/')
             OPTS.cachedir += '/';  // FIXME: native path separator
         auto s = OPTS.cachedir + "tx.kch";
