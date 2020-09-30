@@ -11,7 +11,7 @@ uint32_t    KVDB_T::count(void)
     return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
 }
 
-uint32_t    KVDB_T::real_add(const uint8_t *key, const size_t size)
+uint32_t    KVDB_T::real_add(const uint8_t *key, const uint16_t size)
 {
     //auto value = map.emplace(key, value);   // FIXME: emplace() w/ checking retvalue
     auto value = count();
@@ -21,7 +21,7 @@ uint32_t    KVDB_T::real_add(const uint8_t *key, const size_t size)
     return value;
 }
 
-uint32_t    KVDB_T::real_get(const uint8_t *key, const size_t size)
+uint32_t    KVDB_T::real_get(const uint8_t *key, const uint16_t size)
 {
     uint32_t value;
     auto result = db.get((const char *)key, size, (char *)&value, sizeof(uint32_t));
@@ -30,3 +30,31 @@ uint32_t    KVDB_T::real_get(const uint8_t *key, const size_t size)
     return value;
 }
 
+// ====
+uint32_t    KVMEM_T::real_add(const uint8_t *raw_key, const uint16_t size)
+{
+    VARRAY_T key;
+    key.size = size;
+    key.data[size] = raw_key[size];
+    auto value = NOT_FOUND_U32;
+    cerr << "want to add" << endl;
+    if (db.find(key) == db.end()) {
+        value = db.size();
+        db.emplace(key, value);
+    }
+    cerr << "added" << endl;
+    return value;
+}
+
+uint32_t    KVMEM_T::real_get(const uint8_t *raw_key, const uint16_t size)
+{
+    VARRAY_T key;
+    key.size = size;
+    key.data[size] = raw_key[size];
+    auto value = NOT_FOUND_U32;
+    auto search = db.find(key);
+    if (search != db.end())
+        value = search->second;
+    cerr << "get" << endl;
+    return value;
+}
