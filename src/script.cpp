@@ -12,6 +12,9 @@
 #include "opcode.h"
 #include "bech32.h"
 
+ADDRS_T CUR_ADDR;
+uint256_t WSH;           // hack: for P2WSH only
+
 static const char * ScriptType_s[] = {  // for 0..550k
     "nulldata",
     "pubkey",
@@ -22,39 +25,34 @@ static const char * ScriptType_s[] = {  // for 0..550k
     "witness_v0_scripthash",
     "nonstandard"
 };
-
-ADDRS_T CUR_ADDR;
-
 static uint8_t  *script_ptr;    // ptr to currently decoded opcode
 static uint32_t script_size;    // script size
-static uint256_t WSH;           // hack: for P2WSH only
 
 const char *get_addrs_type(void)
 {
     return ScriptType_s[CUR_ADDR.type];
 }
 
-string  get_addrs_str(void)
+vector<string>  get_addrs_strs(void)
 {
-    string retvalue;
+    vector<string> retvalue;
     switch (CUR_ADDR.type) {
     case PUBKEY:
     case PUBKEYHASH:
-        retvalue = ripe2addr(CUR_ADDR.addr[0]);
+        retvalue.push_back(ripe2addr(CUR_ADDR.addr[0]));
         break;
     case SCRIPTHASH:
-        retvalue = ripe2addr(CUR_ADDR.addr[0], 5);
+        retvalue.push_back(ripe2addr(CUR_ADDR.addr[0], 5));
         break;
     case MULTISIG:
-        retvalue = ripe2addr(CUR_ADDR.addr[0]);
-        for (auto i = 1; i < CUR_ADDR.qty; i++)
-            retvalue = retvalue + "," + ripe2addr(CUR_ADDR.addr[i]);
+        for (auto i = 0; i < CUR_ADDR.qty; i++)
+            retvalue.push_back(ripe2addr(CUR_ADDR.addr[i]));
         break;
     case W0KEYHASH:
-        retvalue = wpkh2addr(CUR_ADDR.addr[0]);
+        retvalue.push_back(wpkh2addr(CUR_ADDR.addr[0]));
         break;
     case W0SCRIPTHASH:
-        retvalue = wsh2addr(WSH);
+        retvalue.push_back(wsh2addr(WSH));
         break;
     default:    // nulldata, nonstandard
         ;
@@ -64,13 +62,14 @@ string  get_addrs_str(void)
 
 void    dump_script(const string s)
 {
-    cerr
-        << "Script err: " << s << "\t("
-        << "bk = " << COUNT.bk
-        << ", tx = " << LOCAL.tx << " (" << COUNT.tx << ")"
-        << ", vout = " << LOCAL.vout
-        << ", script: " << ptr2hex(script_ptr, script_size)
-        << ")" << endl;
+    if (OPTS.verbose == DBG_MAX)
+        cerr
+            << "Script err: " << s << "\t("
+            << "bk = " << COUNT.bk
+            << ", tx = " << LOCAL.tx << " (" << COUNT.tx << ")"
+            << ", vout = " << LOCAL.vout
+            << ", script: " << ptr2hex(script_ptr, script_size)
+            << ")" << endl;
 }
 
 // FIXME: https://learnmeabitcoin.com/technical/public-key

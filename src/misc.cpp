@@ -44,7 +44,7 @@ bool        cli(int argc, char *argv[])
     int opt;
     bool retvalue = false;
 
-    OPTS.from = 0;
+    OPTS.from = -1;
     OPTS.num = 1;
     OPTS.datdir = "";
     // OPTS.cachedir = ".";
@@ -55,6 +55,8 @@ bool        cli(int argc, char *argv[])
         switch (opt) {
             case 'f':   // FIXME: optarg < 0 | > 999999
                 OPTS.from = atoi(optarg);
+                if (OPTS.from < 0)
+                    OPTS.from = 0;
                 break;
             case 'n':   // FIXME: optarg < 1 | > 999999
                 //OPTS.num = *optarg == '*' ? 999999 : atoi(optarg);
