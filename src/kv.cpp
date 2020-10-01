@@ -31,6 +31,7 @@ uint32_t    KVDB_T::real_get(const uint8_t *key, const uint16_t size)
 }
 
 // ====
+/*
 uint32_t    KVMEM_T::real_add(const uint8_t *raw_key, const uint16_t size)
 {
     VARRAY_T key;
@@ -58,3 +59,4 @@ uint32_t    KVMEM_T::real_get(const uint8_t *raw_key, const uint16_t size)
     cerr << "get " << value << endl;
     return value;
 }
+*/

@@ -3,8 +3,8 @@
 #define KV_H
 
 #include <kcpolydb.h>
-#include <array>
-#include <unordered_map>
+//include <array>
+//include <unordered_map>
 #include <stdio.h>
 #include "uintxxx.h"
 
@@ -47,7 +47,7 @@ public:
   void          clear(void) { db.clear(); }
   uint32_t      count(void);
 };
-
+/*
 // inmemory
 struct VARRAY_T {
     uint16_t    size;
@@ -61,7 +61,7 @@ struct VARRAY_T {
 // Extend std and boost namespaces with our hash wrappers.
 //-----------------------------------------------------------------------------
 // get from libbitcoin-system/include/bitcoin/system/math/hash.hpp
-/*
+
 namespace std
 {
     template<>
@@ -73,8 +73,7 @@ namespace std
         }
     };
 } // namespace std
-*/
-/*
+
 namespace boost
 {
 template<>
@@ -86,12 +85,12 @@ struct hash<VARRAY_T>
     }
 };
 } // namespace boost
-*/
-/*
+
+
 struct AvHash {
     size_t operator()(const VARRAY_T& k) const
     { return boost::hash_range(k.data, k.data + k.size); }
-};*/
+};
 auto MyHash = [](const VARRAY_T& k)
     { return boost::hash_range(k.data, k.data + k.size); };
 auto AvEq = [](const VARRAY_T& one, const VARRAY_T& two)
@@ -107,5 +106,6 @@ public:
     void          clear(void) { db.clear(); }
     uint32_t      count(void) { return db.size(); }
 };
-
+*/
 #endif // KV_H
+
