@@ -119,6 +119,8 @@ bool    set_cash(void)
             } else
                 OPTS.from = 0;
         }
+        COUNT.tx = TxDB->count();
+        COUNT.addr = AddrDB->count();
     } else {
         if (OPTS.from < 0)
             OPTS.from = 0;

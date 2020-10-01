@@ -80,8 +80,6 @@ bool    parse_tx(void) // TODO: hash
     auto tx_beg = CUR_PTR.u8_ptr;
     CUR_TX.ver = read_32();
     CUR_TX.segwit = (*CUR_PTR.u16_ptr == 0x0100);
-    //if (CUR_TX.segwit)
-    //    cerr << "segwit" << endl; // "Tx=" << LOCAL.tx << ", SegWit: " << *CUR_PTR.u16_ptr << ", " << CUR_TX.segwit << endl;
     if (CUR_TX.segwit)
         CUR_PTR.u16_ptr++;  // skip witness signature
     CUR_TX.vins = read_v();
