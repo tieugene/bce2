@@ -83,8 +83,8 @@ int     main(int argc, char *argv[])
     if (OPTS.verbose) {
       __prn_tail();
       __prn_interim();
-      //if (OPTS.verbose >= 2)
-      //  __prn_summary();
+      if (OPTS.verbose > DBG_MIN)
+        __prn_summary();
     }
     if (BUFFER.beg)
         delete BUFFER.beg;

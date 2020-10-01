@@ -12,6 +12,14 @@
 #include "uintxxx.h"
 #include "kv.h"
 
+enum    DBG_LVL_T
+{
+    DBG_NONE,
+    DBG_MIN,
+    DBG_MID,
+    DBG_MAX
+};
+
 struct  OPT_T       ///< program CLI options
 {
     string      datdir;
@@ -21,14 +29,6 @@ struct  OPT_T       ///< program CLI options
     bool        out = false;
     bool        cash = false;
     int         verbose = 0;
-};
-
-enum    DBG_LVL_T
-{
-    DBG_NONE,
-    DBG_MIN,
-    DBG_MID,
-    DBG_MAX
 };
 
 struct  COUNT_T     ///< through counters

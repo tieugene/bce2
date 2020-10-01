@@ -43,15 +43,9 @@ void        out_addr(void)
             v += "\"]";
         }
     }
-  printf("a\t%u\t%s\n", COUNT.addr, v.c_str());
+    printf("a\t%u\t%s\n", COUNT.addr, v.c_str());
 }
-/*
-void        out_xaddr(uint32_t const id)
-{
-  printf("x\t%u\t%u\t%u\n", COUNT.tx, LOCAL.vout, id);
-  // cout << "x" << TAB << CUR_TX.no << TAB << CUR_VOUT.no << TAB << id << endl;
-}
-*/
+
 void        __prn_bk(void)  // TODO: hash
 {
     //time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);

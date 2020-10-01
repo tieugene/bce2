@@ -62,13 +62,14 @@ vector<string>  get_addrs_strs(void)
 
 void    dump_script(const string s)
 {
-    cerr
-        << "Script err: " << s << "\t("
-        << "bk = " << COUNT.bk
-        << ", tx = " << LOCAL.tx << " (" << COUNT.tx << ")"
-        << ", vout = " << LOCAL.vout
-        << ", script: " << ptr2hex(script_ptr, script_size)
-        << ")" << endl;
+    if (OPTS.verbose == DBG_MAX)
+        cerr
+            << "Script err: " << s << "\t("
+            << "bk = " << COUNT.bk
+            << ", tx = " << LOCAL.tx << " (" << COUNT.tx << ")"
+            << ", vout = " << LOCAL.vout
+            << ", script: " << ptr2hex(script_ptr, script_size)
+            << ")" << endl;
 }
 
 // FIXME: https://learnmeabitcoin.com/technical/public-key
