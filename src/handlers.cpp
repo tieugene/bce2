@@ -80,8 +80,6 @@ bool    parse_tx(void) // TODO: hash
     auto tx_beg = CUR_PTR.u8_ptr;
     CUR_TX.ver = read_32();
     CUR_TX.segwit = (*CUR_PTR.u16_ptr == 0x0100);
-    //if (CUR_TX.segwit)
-    //    cerr << "segwit" << endl; // "Tx=" << LOCAL.tx << ", SegWit: " << *CUR_PTR.u16_ptr << ", " << CUR_TX.segwit << endl;
     if (CUR_TX.segwit)
         CUR_PTR.u16_ptr++;  // skip witness signature
     CUR_TX.vins = read_v();
@@ -93,7 +91,7 @@ bool    parse_tx(void) // TODO: hash
         if (!hash_tx(tx_beg))
             return false;
         if (OPTS.cash) {
-            auto tx_added = TxDB.add(CUR_TX.hash);
+            auto tx_added = TxDB->add(CUR_TX.hash);
             if (tx_added == NOT_FOUND_U32) {
                     cerr << "Can't add tx " << hash2hex(CUR_TX.hash) << endl;
                     return false;
@@ -110,14 +108,14 @@ bool    parse_tx(void) // TODO: hash
     for (LOCAL.vin = 0; LOCAL.vin < CUR_TX.vins; LOCAL.vin++)
         if (!parse_vin(true))
             return false;
-    read_v();   // vouts
+    CUR_TX.vouts = read_v();   // vouts
     for (LOCAL.vout = 0; LOCAL.vout < CUR_TX.vouts; LOCAL.vout++)
         if (!parse_vout(true))
             return false;
     if (CUR_TX.segwit)
         for (LOCAL.wit = 0; LOCAL.wit < CUR_TX.vins; LOCAL.wit++)
             parse_wit();
-    read_32();  // locktime
+    CUR_TX.locktime = read_32();  // locktime
     STAT.vins += CUR_TX.vins;
     STAT.vouts += CUR_TX.vouts;
     STAT.max_vins = max(STAT.max_vins, CUR_TX.vins);
@@ -140,7 +138,7 @@ bool    parse_vin(const bool dojob)
     if (OPTS.cash)
     {
         if (CUR_VIN.vout != COINBASE_vout) {
-            CUR_VIN.txno = TxDB.get(*CUR_VIN.txid);
+            CUR_VIN.txno = TxDB->get(*CUR_VIN.txid);
             if (CUR_VIN.txno == NOT_FOUND_U32) {
                 cerr << "txid " << hash2hex(*CUR_VIN.txid) << " not found." << endl;
                 return false;
@@ -170,19 +168,18 @@ bool    parse_vout(const bool dojob)
     if (!dojob)
         return true;
     BUSY.vout = true;
-    if (!parse_script())
-        return false;
-    if (OPTS.out)
-    {
+    if (OPTS.out) {
         if (OPTS.cash)
             out_vout();
         else
             __prn_vout();
     }
+    if (!parse_script())
+        return false;
     BUSY.vout = false;
     return true;
 }
-
+/*
 void    __debug_addr(void)
 {
     printf("%d\t%d\t%d\t%s", COUNT.bk, LOCAL.tx, LOCAL.vout, get_addrs_type());
@@ -191,36 +188,51 @@ void    __debug_addr(void)
     else
         printf("\n");
 }
-
+*/
 bool    parse_script(void)
 {
     /// FIXME: nulldata is not spendable
     /// FIXME: empty script
     auto script_ok = script_decode(CUR_VOUT.script, CUR_VOUT.ssize);
-    return true;
-    // if (!script_ok) return false;    // !!! TERMPORARY !!!
-    //__debug_addr();
-    // FIXME: cashless
-    if (OPTS.cash) {
-        auto addr_added = AddrDB.get(CUR_ADDR.addr[0]);
-        if (addr_added == NOT_FOUND_U32) {
-            addr_added = AddrDB.add(CUR_ADDR.addr[0]);
+    if (script_ok and CUR_ADDR.qty) {
+        if (OPTS.cash) {
+            uint32_t addr_added;
+            switch (CUR_ADDR.type) {
+            case W0SCRIPTHASH:
+                addr_added = AddrDB->get(WSH);
+                break;
+            case MULTISIG:
+                addr_added = AddrDB->get(CUR_ADDR.addr, CUR_ADDR.qty);
+                break;
+            default:
+                addr_added = AddrDB->get(CUR_ADDR.addr[0]);
+            }
             if (addr_added == NOT_FOUND_U32) {
-                cerr << "Can not find nor add addr " << ripe2hex(CUR_ADDR.addr[0]) << endl;
-                return false;
-            }
-            if (addr_added != COUNT.addr) {
-                    cerr << "Addr added as " << addr_added << " against waiting " << COUNT.addr << endl;
+                switch (CUR_ADDR.type) {
+                case W0SCRIPTHASH:
+                    addr_added = AddrDB->add(WSH);
+                    break;
+                case MULTISIG:
+                    addr_added = AddrDB->add(CUR_ADDR.addr, CUR_ADDR.qty);
+                    break;
+                default:
+                    addr_added = AddrDB->add(CUR_ADDR.addr[0]);
+                }
+                if (addr_added == NOT_FOUND_U32) {
+                    cerr << "Can not find nor add addr " << endl;
                     return false;
+                }
+                if (addr_added != COUNT.addr) {
+                        cerr << "Addr added as " << addr_added << " against waiting " << COUNT.addr << endl;
+                        return false;
+                }
+                if (OPTS.out)
+                    out_addr(); // FIXME:
+                COUNT.addr += 1;
             }
-            if (OPTS.out)
-                out_addr(addr_added, CUR_ADDR.addr[0]);
-            COUNT.addr += 1;
-        }
-    } else if (OPTS.out)
-        __prn_addr();
-    // if (OPTS.out)
-    //    out_xaddr(addr_added);
-    STAT.addrs += 1;
+        } else if (OPTS.out)
+            __prn_addr();
+        STAT.addrs += 1;    // FIXME: if decoded and 1+
+    }
     return true;
 }

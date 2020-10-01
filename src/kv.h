@@ -2,80 +2,110 @@
 #ifndef KV_H
 #define KV_H
 
-#include "uintxxx.h"
 #include <kcpolydb.h>
-#include <array>    // FIXME:
+#include <array>
 #include <unordered_map>
+#include <stdio.h>
+#include "uintxxx.h"
 
-#define MEM
+//#define MEM
 
 const uint32_t NOT_FOUND_U32 = 0xFFFFFFFF;
 
 using namespace std;
 
-// kyotocabinet
-template <typename T> class   KVDB_T {
+class KV_T {
 protected:
-  kyotocabinet::PolyDB     db;
+    virtual uint32_t    real_add(const uint8_t *, const uint16_t) = 0;
+    virtual uint32_t    real_get(const uint8_t *, const uint16_t) = 0;
 public:
-  bool        init(const string &s) {
-      return db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE | kyotocabinet::PolyDB::OTRUNCATE); // TODO:
-  }
-  void        clear(void) { db.clear(); }
-  uint32_t    count(void) {
-      auto retvalue = db.count();
-      return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
-  }
-  uint32_t    add(T &key) {
-      //auto value = map.emplace(key, value);   // FIXME: emplace() w/ checking retvalue
-      auto value = count();
-      if (value != NOT_FOUND_U32) {
-          void *k_ptr = static_cast<void *>(&key);
-          void *v_ptr = static_cast<void *>(&value);
-          if (!db.add(static_cast<char *>(k_ptr), sizeof(T), static_cast<char *>(v_ptr), sizeof(uint32_t)))
-              value = NOT_FOUND_U32;
-      }
-      return value;
-  }
-  uint32_t    get(T &key) {
-      uint32_t value;
-      void *k_ptr = static_cast<void *>(&key);
-      void *v_ptr = static_cast<void *>(&value);
-      auto result = db.get(static_cast<char *>(k_ptr), sizeof(T), static_cast<char *>(v_ptr), sizeof(uint32_t));
-      if (result != sizeof(uint32_t))
-          value = NOT_FOUND_U32;
-      return value;
-  }
+    virtual bool        init(const string &) = 0;
+    virtual void        clear(void) = 0;
+    virtual uint32_t    count(void) = 0;
+    uint32_t    add(const uint256_t &key)
+                { return real_add(key.begin(), sizeof(uint256_t)); }
+    uint32_t    add(const uint160_t &key)
+                { return real_add(key.begin(), sizeof(uint160_t)); }
+    uint32_t    add(const uint160_t key[], const uint8_t len)
+                { return real_add(key[0].begin(), sizeof(uint160_t) * len); }
+    uint32_t    get(const uint256_t &key)
+                { return real_get(key.begin(), sizeof(uint256_t)); }
+    uint32_t    get(const uint160_t &key)
+                { return real_get(key.begin(), sizeof(uint160_t)); }
+    uint32_t    get(const uint160_t key[], const uint8_t len)
+                { return real_get(key[0].begin(), sizeof(uint160_t) * len); }
 };
 
-typedef KVDB_T <uint256_t> TxDB_T;
-typedef KVDB_T <uint160_t> AddrDB_T;
+// kyotocabinet
+class   KVDB_T : public KV_T {
+private:
+  kyotocabinet::PolyDB     db;
+  uint32_t      real_add(const uint8_t *, const uint16_t);
+  uint32_t      real_get(const uint8_t *, const uint16_t);
+public:
+  bool          init(const string &);
+  void          clear(void) { db.clear(); }
+  uint32_t      count(void);
+};
 
 // inmemory
-template <typename T> class KVMAP_T {
-    unordered_map <T, uint32_t> db; // FIXME: hash, equal funcs
-  public:
-    bool        init(const string &) { return true; }
-    void        clear(void) { db.clear(); }
-    uint32_t    count(void) { return db.size(); }
-    uint32_t    get(const T &key) {
-      auto value = NOT_FOUND_U32;
-      auto search = db.find(key);
-      if (search != db.end())
-          value = search->second;
-      return value;
-    }
-    uint32_t    add(const T &key) {
-      auto value = NOT_FOUND_U32;
-      if (db.find(key) == db.end()) {
-        value = db.size();
-        db.emplace(key, value);
-      }
-      return value;
+struct VARRAY_T {
+    uint16_t    size;
+    uint8_t     data[];
+   //  bool operator==(const VARRAY_T &alien) const
+   //     { return (size == alien.size && memcmp(data, alien.data, size) == 0);}
+};
+//bool operator==(const VARRAY_T& one, const VARRAY_T& two)
+//    { return ((one.size == two.size) && (memcmp(one.data, two.data, one.size) == 0));}
+
+// Extend std and boost namespaces with our hash wrappers.
+//-----------------------------------------------------------------------------
+// get from libbitcoin-system/include/bitcoin/system/math/hash.hpp
+/*
+namespace std
+{
+    template<>
+    struct hash<VARRAY_T>
+    {
+        size_t operator()(const VARRAY_T& hash) const
+        {
+            return boost::hash_range(hash.data, hash.data + hash.size);
+        }
+    };
+} // namespace std
+*/
+/*
+namespace boost
+{
+template<>
+struct hash<VARRAY_T>
+{
+    size_t operator()(const VARRAY_T& hash) const
+    {
+        return boost::hash_range(hash.data, hash.data + hash.size);
     }
 };
+} // namespace boost
+*/
+/*
+struct AvHash {
+    size_t operator()(const VARRAY_T& k) const
+    { return boost::hash_range(k.data, k.data + k.size); }
+};*/
+auto MyHash = [](const VARRAY_T& k)
+    { return boost::hash_range(k.data, k.data + k.size); };
+auto AvEq = [](const VARRAY_T& one, const VARRAY_T& two)
+    { return ((one.size == two.size) && (memcmp(one.data, two.data, one.size) == 0));};
 
-typedef KVMAP_T <uint256_t> TxMAP_T;
-typedef KVMAP_T <uint160_t> AddrMAP_T;
+class   KVMEM_T : public KV_T {
+private:
+    unordered_map <VARRAY_T, uint32_t, decltype(MyHash), decltype(AvEq)> db; // FIXME: hash, equal funcs
+    uint32_t      real_add(const uint8_t *, const uint16_t);
+    uint32_t      real_get(const uint8_t *, const uint16_t);
+public:
+    bool          init(const string &) { return true; }
+    void          clear(void) { db.clear(); }
+    uint32_t      count(void) { return db.size(); }
+};
 
 #endif // KV_H

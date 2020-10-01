@@ -20,13 +20,8 @@ VIN_T       CUR_VIN;
 VOUT_T      CUR_VOUT;
 UNIPTR_T    CUR_PTR;
 BUFFER_T    BUFFER;
-#ifdef MEM
-TxMAP_T     TxDB;
-AddrMAP_T   AddrDB;
-#else
-TxDB_T      TxDB;
-AddrDB_T    AddrDB;
-#endif
+KV_T        *TxDB;
+KV_T        *AddrDB;
 long        start_mem;
 time_t      start_time;
 // locals
@@ -88,8 +83,8 @@ int     main(int argc, char *argv[])
     if (OPTS.verbose) {
       __prn_tail();
       __prn_interim();
-      //if (OPTS.verbose >= 2)
-      //  __prn_summary();
+      if (OPTS.verbose > DBG_MIN)
+        __prn_summary();
     }
     if (BUFFER.beg)
         delete BUFFER.beg;
@@ -100,22 +95,35 @@ bool    set_cash(void)
 {
     OPTS.cash = !OPTS.cachedir.empty();
     if (OPTS.cash) {
+        TxDB = new KVDB_T();
+        AddrDB = new KVDB_T();
         if (OPTS.cachedir.back() != '/')
             OPTS.cachedir += '/';  // FIXME: native path separator
         auto s = OPTS.cachedir + "tx.kch";
-        if (!TxDB.init(s)) {
+        if (!TxDB->init(s)) {
             cerr << "Can't open 'tx' cache: " << s << endl;
             return false;
         }
         s = OPTS.cachedir + "addr.kch";
-        if (!AddrDB.init(s)) {
+        if (!AddrDB->init(s)) {
             cerr << "Can't open 'addr' cache " << s << endl;
             return false;
         }
         if (OPTS.from == 0) {
-          TxDB.clear();
-          AddrDB.clear();
+          TxDB->clear();
+          AddrDB->clear();
+        } else if (OPTS.from < 0) {
+            if (TxDB->count() or AddrDB->count()) {
+                cerr << "Tx or Addr key-value is not empty. Set -f option" << endl;
+                return false;
+            } else
+                OPTS.from = 0;
         }
+        COUNT.tx = TxDB->count();
+        COUNT.addr = AddrDB->count();
+    } else {
+        if (OPTS.from < 0)
+            OPTS.from = 0;
     }
     return true;
 }
