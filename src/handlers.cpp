@@ -179,7 +179,7 @@ bool    parse_vout(const bool dojob)
     BUSY.vout = false;
     return true;
 }
-
+/*
 void    __debug_addr(void)
 {
     printf("%d\t%d\t%d\t%s", COUNT.bk, LOCAL.tx, LOCAL.vout, get_addrs_type());
@@ -188,7 +188,7 @@ void    __debug_addr(void)
     else
         printf("\n");
 }
-
+*/
 bool    parse_script(void)
 {
     /// FIXME: nulldata is not spendable
@@ -219,7 +219,7 @@ bool    parse_script(void)
                     addr_added = AddrDB->add(CUR_ADDR.addr[0]);
                 }
                 if (addr_added == NOT_FOUND_U32) {
-                    cerr << "Can not find nor add addr " << get_addrs_str() << endl;
+                    cerr << "Can not find nor add addr " << endl;
                     return false;
                 }
                 if (addr_added != COUNT.addr) {
@@ -227,7 +227,7 @@ bool    parse_script(void)
                         return false;
                 }
                 if (OPTS.out)
-                    out_addr(addr_added, CUR_ADDR.addr[0]); // FIXME:
+                    out_addr(); // FIXME:
                 COUNT.addr += 1;
             }
         } else if (OPTS.out)

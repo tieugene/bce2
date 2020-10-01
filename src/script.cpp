@@ -33,27 +33,26 @@ const char *get_addrs_type(void)
     return ScriptType_s[CUR_ADDR.type];
 }
 
-string  get_addrs_str(void)
+vector<string>  get_addrs_strs(void)
 {
-    string retvalue;
+    vector<string> retvalue;
     switch (CUR_ADDR.type) {
     case PUBKEY:
     case PUBKEYHASH:
-        retvalue = ripe2addr(CUR_ADDR.addr[0]);
+        retvalue.push_back(ripe2addr(CUR_ADDR.addr[0]));
         break;
     case SCRIPTHASH:
-        retvalue = ripe2addr(CUR_ADDR.addr[0], 5);
+        retvalue.push_back(ripe2addr(CUR_ADDR.addr[0], 5));
         break;
     case MULTISIG:
-        retvalue = ripe2addr(CUR_ADDR.addr[0]);
-        for (auto i = 1; i < CUR_ADDR.qty; i++)
-            retvalue = retvalue + "," + ripe2addr(CUR_ADDR.addr[i]);
+        for (auto i = 0; i < CUR_ADDR.qty; i++)
+            retvalue.push_back(ripe2addr(CUR_ADDR.addr[i]));
         break;
     case W0KEYHASH:
-        retvalue = wpkh2addr(CUR_ADDR.addr[0]);
+        retvalue.push_back(wpkh2addr(CUR_ADDR.addr[0]));
         break;
     case W0SCRIPTHASH:
-        retvalue = wsh2addr(WSH);
+        retvalue.push_back(wsh2addr(WSH));
         break;
     default:    // nulldata, nonstandard
         ;

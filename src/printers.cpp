@@ -5,46 +5,53 @@
 #include "script.h"
 
 void        out_bk(void)    ///< Output bk data for DB
-{
+{   // FIXME: hash can be w/o 's
     time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);
     char dt[20];
     strftime(dt, 20, "%Y-%m-%d %OH:%OM:%OS", gmtime(&t));
-    printf("b\t%u\t'%s'\t%s\n", COUNT.bk, dt, hash2hex(CUR_BK.hash).c_str());
-    // cout << "b" << TAB << CUR_BK.no << TAB << "'" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << "'" << TAB << hash2hex(CUR_BK.hash) << endl;
+    printf("b\t%u\t'%s'\t'%s'\n", COUNT.bk, dt, hash2hex(CUR_BK.hash).c_str());
 }
 
 void        out_tx(void)
 {
   printf("t\t%u\t%u\t%s\n", COUNT.tx, COUNT.bk, hash2hex(CUR_TX.hash).c_str());
-  // cout << "t" << TAB << CUR_TX.no << TAB << CUR_BK.no << TAB << hash2hex(CUR_TX.hash) << endl;
 }
 
 void        out_vin(void)   // FIXME: compare w/ COINBASE_txid too
 {
     if (CUR_VIN.vout != COINBASE_vout)  // skip coinbase
-      printf("i\t%u\t%llu\t%u\n", COUNT.tx, CUR_VIN.txno, CUR_VIN.vout);
-      // cout << "i" << TAB << CUR_TX.no << TAB << CUR_VIN.txno << TAB << CUR_VIN.vout << endl;
-      // hash2hex(*CUR_VIN.txid)
+        printf("i\t%u\t%llu\t%u\n", COUNT.tx, CUR_VIN.txno, CUR_VIN.vout);
 }
 
 void        out_vout(void)
 {
   printf("o\t%u\t%u\t%llu\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi);
-  // cout << "o" << TAB << CUR_TX.no << TAB << CUR_VOUT.no << TAB << CUR_VOUT.satoshi << endl;
 }
 
-void        out_addr(uint32_t const id, uint160_t const &ripe)
-{
-  printf("a\t%u\t%s\n", id, ripe2addr(ripe).c_str());
-  // cout << "a" << TAB << id << TAB << ripe2addr(ripe) << endl;
+void        out_addr(void)
+{   // single:      "symbols"
+    // multisign:   ["one", "two"]
+    auto alist = get_addrs_strs();
+    string v;
+    if (alist.size()) {
+        if (alist.size() == 1)
+            v = "\"" + alist[0] + "\"";
+        else {
+            v = "[\"" + alist[0] + "\"";
+            for (size_t i = 1; i < alist.size(); i++)
+                v = v + "\", \"" + alist[i];
+            v += "\"]";
+        }
+    }
+  printf("a\t%u\t%s\n", COUNT.addr, v.c_str());
 }
-
+/*
 void        out_xaddr(uint32_t const id)
 {
   printf("x\t%u\t%u\t%u\n", COUNT.tx, LOCAL.vout, id);
   // cout << "x" << TAB << CUR_TX.no << TAB << CUR_VOUT.no << TAB << id << endl;
 }
-
+*/
 void        __prn_bk(void)  // TODO: hash
 {
     //time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);
@@ -97,7 +104,13 @@ void        __prn_vout(void)
 
 void        __prn_addr(void)
 {
-    auto v = get_addrs_str();
+    auto alist = get_addrs_strs();
+    string v;
+    if (alist.size()) {
+        v = alist[0];
+        for (size_t i = 1; i < alist.size(); i++)
+            v = v + "," + alist[i];
+    }
     cerr << "      Addr: " << get_addrs_type();
     if (!v.empty())
         cerr << " " << v;

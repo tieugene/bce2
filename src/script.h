@@ -26,7 +26,7 @@ extern ADDRS_T CUR_ADDR;
 extern uint256_t WSH;           // hack: for P2WSH only
 
 bool        script_decode(uint8_t *, const uint32_t);
-std::string get_addrs_str(void);
+std::vector<std::string> get_addrs_strs(void);
 const char *get_addrs_type(void);
 
 #endif // SCRIPT_H
