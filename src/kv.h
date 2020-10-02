@@ -20,7 +20,7 @@ protected:
 public:
     virtual void        clear(void) = 0;
     virtual uint32_t    count(void) = 0;
-    virtual bool        cp(KV_T *, bool) = 0;
+    virtual bool        cpto(KV_T *, bool) = 0;
     virtual bool        add(const string&, const uint32_t) = 0;
     uint32_t    add(const uint256_t &key)
                 { return real_add(key.begin(), sizeof(uint256_t)); }
@@ -47,14 +47,14 @@ public:
   // virt replacings
   void          clear(void) { db.clear(); }
   uint32_t      count(void);
-  bool          cp(KV_T *, bool = false);
+  bool          cpto(KV_T *, bool = false);
   bool          add(const string&, const uint32_t);
   // spec
   bool          init(const string &);
 };
 
 // == inmem ==
-// 150k = 12" 2337716 addrs)
+// 150k = 12" (combo +17") 2337716 addrs)
 class   KVMEM_T : public KV_T {
 private:
     unordered_map <string, uint32_t> db;
@@ -63,7 +63,7 @@ private:
 public:
     void          clear(void) { db.clear(); }
     uint32_t      count(void) { return db.size(); }
-    bool          cp(KV_T *, bool = false);
+    bool          cpto(KV_T *, bool = false);
     bool          add(const string&, const uint32_t);
 };
 

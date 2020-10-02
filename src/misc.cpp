@@ -53,7 +53,7 @@ bool        cli(int argc, char *argv[])
     OPTS.inmem = false;
     OPTS.out = false;
     OPTS.verbose = DBG_NONE;
-    while ((opt = getopt(argc, argv, "f:n:d:k:m:ov::")) != -1)
+    while ((opt = getopt(argc, argv, "f:n:d:k:mov::")) != -1)
     {
         switch (opt) {
             case 'f':   // FIXME: optarg < 0 | > 999999
@@ -165,4 +165,9 @@ string      ptr2hex(void const *vptr, size_t const size)
         s.push_back(hex_chars[(*cptr & 0x0F)]);
     }
     return s;
+}
+
+string      str2hex(const string &s)
+{
+    return ptr2hex(s.c_str(), s.size());
 }

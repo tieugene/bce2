@@ -1,4 +1,5 @@
 #include "kv.h"
+#include "misc.h"
 
 // == file based ==
 
@@ -32,18 +33,15 @@ uint32_t    KVKC_T::real_get(const uint8_t *key, const uint16_t size)
     return value;
 }
 
-bool        KVKC_T::cp(KV_T *dst, bool erase)
+bool        KVKC_T::cpto(KV_T *dst, bool erase)
 {
     if (erase)
         dst->clear();
     auto cur = db.cursor();
     cur->jump();
     string key, cvalue;
-    while (cur->get(&key, &cvalue, true)) {    // string:string
-        uint32_t *value = (uint32_t *) cvalue.c_str();
-        dst->add(key, *value);
-        //cout << ckey << ":" << cvalue << endl;
-    }
+    while (cur->get(&key, &cvalue, true))    // string:string
+        dst->add(key, *((uint32_t *) cvalue.c_str()));
     delete cur;
     return true;
 }
@@ -77,7 +75,7 @@ uint32_t    KVMEM_T::real_get(const uint8_t *raw_key, const uint16_t size)
     return value;
 }
 
-bool        KVMEM_T::cp(KV_T *dst, bool erase)
+bool        KVMEM_T::cpto(KV_T *dst, bool erase)
 {
     if (erase)
         dst->clear();

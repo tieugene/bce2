@@ -87,8 +87,21 @@ int     main(int argc, char *argv[])
         __prn_summary();
     }
     if (OPTS.inmem and OPTS.cash) { // flush
-        TxMEM->cp(TxKC);
-        AddrMEM->cp(AddrKC);
+        if (OPTS.verbose) {
+            // tx
+            cerr << "Flush tx   (" << TxKC->count() << " => ";
+            auto t = time(nullptr);
+            TxMEM->cpto(TxKC);
+            cerr << TxKC->count() << " @ " << time(nullptr)-t << "s OK." << endl;
+            // addr
+            cerr << "Flush addr (" << AddrKC->count() << " => ";
+            t = time(nullptr);
+            AddrMEM->cpto(AddrKC);
+            cerr << AddrKC->count() << " @ " << time(nullptr)-t << "s OK." << endl;
+        } else {
+            TxMEM->cpto(TxKC);
+            AddrMEM->cpto(AddrKC);
+        }
     }
     if (BUFFER.beg)
         delete BUFFER.beg;
@@ -122,7 +135,7 @@ bool    set_cash(void)
             }
             if (tx_full or addr_full) {
                 if (OPTS.from < 0) {
-                    cerr << "Tx or Addr k-v is not empty. Set -f option." << endl;;
+                    cerr << "Tx (" << TxKC->count() << ") or Addr ("<< AddrKC->count() << ") k-v is not empty. Set -f option." << endl;;
                     return false;
                 } else if (OPTS.from == 0) {
                     TxKC->clear();
@@ -132,16 +145,20 @@ bool    set_cash(void)
                 }
             }
             if (!OPTS.inmem) {
-                TxDB = TxKC;
-                AddrDB = AddrKC;
+                if (OPTS.verbose) {
+                    TxDB = TxKC;
+                    AddrDB = AddrKC;
+                }
             }
         }
         if (OPTS.inmem) {
+            TxMEM = new KVMEM_T();
+            AddrMEM = new KVMEM_T();
             if (OPTS.cash) {
                 if (tx_full) {
                     if (OPTS.verbose)
                         cerr << "Loading txs ...";
-                    if (!TxKC->cp(TxMEM)) {
+                    if (!TxKC->cpto(TxMEM)) {
                         cerr << "Loading tx Error." << endl;
                         return false;
                     }
@@ -151,7 +168,7 @@ bool    set_cash(void)
                 if (addr_full) {
                     if (OPTS.verbose)
                         cerr << "Loading addrs ...";
-                    if (!AddrKC->cp(AddrMEM)) {
+                    if (!AddrKC->cpto(AddrMEM)) {
                         cerr << "Error." << endl;
                         return false;
                     }
