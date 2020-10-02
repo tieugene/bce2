@@ -17,7 +17,8 @@ Options:\n\
 -f n      - block starts from (default=0)\n\
 -n n      - blocks to process (default=1, 0=all)\n\
 -d <path> - *.dat folder (default='' - current folder)\n\
--c <path> - cache data folder\n\
+-k <path> - key-value folder\n\
+-m        - use inmem key-value\n\
 -o        - output results\n\
 -v[n]     - verbose (debug info to stderr):\n\
     0 - errors only (default)\n\
@@ -36,6 +37,7 @@ void        __prn_opts(void)
         << TAB << "Debug:" << TAB << OPTS.verbose << endl
         << TAB << "DatDir:" << TAB << OPTS.datdir << endl
         << TAB << "Cache:" << TAB << OPTS.cachedir << endl
+        << TAB << "InMem:" << TAB << OPTS.inmem << endl
     ;
 }
 
@@ -48,9 +50,10 @@ bool        cli(int argc, char *argv[])
     OPTS.num = 1;
     OPTS.datdir = "";
     // OPTS.cachedir = ".";
+    OPTS.inmem = false;
     OPTS.out = false;
-    OPTS.verbose = 0;
-    while ((opt = getopt(argc, argv, "f:n:d:c:ov::")) != -1)
+    OPTS.verbose = DBG_NONE;
+    while ((opt = getopt(argc, argv, "f:n:d:k:m:ov::")) != -1)
     {
         switch (opt) {
             case 'f':   // FIXME: optarg < 0 | > 999999
@@ -67,14 +70,18 @@ bool        cli(int argc, char *argv[])
             case 'd':
                 OPTS.datdir = optarg;
                 break;
-            case 'c':
+            case 'k':
                 OPTS.cachedir = optarg;
+                OPTS.cash = !OPTS.cachedir.empty();
+                break;
+            case 'm':
+                OPTS.inmem = true;
                 break;
             case 'o':
                 OPTS.out = true;
                 break;
             case 'v':   // FIXME: optarg = 0..5
-                OPTS.verbose = (optarg) ? atoi(optarg) : 1;
+                OPTS.verbose = (optarg) ? (DBG_LVL_T)atoi(optarg) : DBG_MIN;
                 break;
             case '?':   // can handle optopt
                 cerr << help_txt << endl;
@@ -92,7 +99,7 @@ bool        cli(int argc, char *argv[])
     return retvalue;
 }
 
-long memused(void)
+long        memused(void)
 {
     rusage rused;
     long retvalue = 0;

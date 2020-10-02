@@ -2,18 +2,18 @@
 
 // == file based ==
 
-bool        KVDB_T::init(const string &s)
+bool        KVKC_T::init(const string &s)
 {
     return db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE); // | kyotocabinet::PolyDB::OTRUNCATE); // TODO:
 }
 
-uint32_t    KVDB_T::count(void)
+uint32_t    KVKC_T::count(void)
 {
     auto retvalue = db.count();
     return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
 }
 
-uint32_t    KVDB_T::real_add(const uint8_t *key, const uint16_t size)
+uint32_t    KVKC_T::real_add(const uint8_t *key, const uint16_t size)
 {
     //auto value = map.emplace(key, value);   // FIXME: emplace() w/ checking retvalue
     auto value = count();
@@ -23,13 +23,23 @@ uint32_t    KVDB_T::real_add(const uint8_t *key, const uint16_t size)
     return value;
 }
 
-uint32_t    KVDB_T::real_get(const uint8_t *key, const uint16_t size)
+uint32_t    KVKC_T::real_get(const uint8_t *key, const uint16_t size)
 {
     uint32_t value;
     auto result = db.get((const char *)key, size, (char *)&value, sizeof(uint32_t));
     if (result != sizeof(uint32_t))
         value = NOT_FOUND_U32;
     return value;
+}
+
+bool          KVKC_T::cp(KV_T *dst, bool erase)
+{
+    if (erase)
+        dst->clear();
+    auto cur = db.cursor();
+    cur->jump();
+    //while ()
+    return true;
 }
 
 // == inmem ==
@@ -55,3 +65,12 @@ uint32_t    KVMEM_T::real_get(const uint8_t *raw_key, const uint16_t size)
     return value;
 }
 
+bool        KVMEM_T::cp(KV_T *dst, bool erase)
+{
+    if (erase)
+        dst->clear();
+    //auto cur = db.cursor();
+    //cur->jump();
+    //while ()
+    return true;
+}

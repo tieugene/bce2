@@ -18,9 +18,9 @@ protected:
     virtual uint32_t    real_add(const uint8_t *, const uint16_t) = 0;
     virtual uint32_t    real_get(const uint8_t *, const uint16_t) = 0;
 public:
-    virtual bool        init(const string &) = 0;
     virtual void        clear(void) = 0;
     virtual uint32_t    count(void) = 0;
+    virtual bool        cp(KV_T *, bool = false) = 0;
     uint32_t    add(const uint256_t &key)
                 { return real_add(key.begin(), sizeof(uint256_t)); }
     uint32_t    add(const uint160_t &key)
@@ -37,15 +37,18 @@ public:
 
 // == kyotocabinet ==
 // 150k = 117" (2337716 addrs)
-class   KVDB_T : public KV_T {
+class   KVKC_T : public KV_T {
 private:
   kyotocabinet::PolyDB     db;
   uint32_t      real_add(const uint8_t *, const uint16_t);
   uint32_t      real_get(const uint8_t *, const uint16_t);
 public:
-  bool          init(const string &);
+  // virt replacings
   void          clear(void) { db.clear(); }
   uint32_t      count(void);
+  bool          cp(KV_T *, bool);
+  // spec
+  bool          init(const string &);
 };
 
 // == inmem ==
@@ -56,9 +59,9 @@ private:
     uint32_t      real_add(const uint8_t *, const uint16_t);
     uint32_t      real_get(const uint8_t *, const uint16_t);
 public:
-    bool          init(const string &) { return true; }
     void          clear(void) { db.clear(); }
     uint32_t      count(void) { return db.size(); }
+    bool          cp(KV_T *, bool);
 };
 
 #endif // KV_H
