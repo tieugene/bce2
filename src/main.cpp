@@ -54,14 +54,14 @@ int     main(int argc, char *argv[])
     if (!OPTS.datdir.empty() and OPTS.datdir.back() != '/')
         OPTS.datdir += '/';  // FIXME: native OS path separator
     DATFARM_T datfarm(bk_qty, OPTS.datdir);
-    // 1.3. prepare k-v storages
-    if (!set_cash())
-        return 1;
     // 1.4. last prestart
     BUFFER.beg = new char[MAX_BK_SIZE];
+    // 1.3. prepare k-v storages
+    start_mem = memused();
+    if (!set_cash())
+        return 1;
     // 2. main loop
     start_time = time(nullptr);
-    start_mem = memused();
     if (OPTS.verbose)
       __prn_head();
     for (COUNT.bk = OPTS.from; COUNT.bk < bk_no_upto; COUNT.bk++)
@@ -110,7 +110,7 @@ int     main(int argc, char *argv[])
 
 bool    set_cash(void)
 {
-    if (OPTS.cash or OPTS.inmem) {
+    if (kv_mode()) {
         bool tx_full = false, addr_full = false;
         if (OPTS.cash) {
             TxKC = new KVKC_T();

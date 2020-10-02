@@ -143,6 +143,8 @@ extern KV_T     *TxDB, *AddrDB;
 extern time_t   start_time;
 extern long     start_mem;
 
+inline bool     kv_mode(void) {return (OPTS.cash or OPTS.inmem);}
+
 const string TAB = "\t";
 const uint32_t COINBASE_vout = 0xFFFFFFFF;
 
