@@ -8,12 +8,11 @@
 #include <stdio.h>
 #include "uintxxx.h"
 
-//#define MEM
-
 const uint32_t NOT_FOUND_U32 = 0xFFFFFFFF;
 
 using namespace std;
 
+// == common ==
 class KV_T {
 protected:
     virtual uint32_t    real_add(const uint8_t *, const uint16_t) = 0;
@@ -36,7 +35,8 @@ public:
                 { return real_get(key[0].begin(), sizeof(uint160_t) * len); }
 };
 
-// kyotocabinet
+// == kyotocabinet ==
+// 150k = 117" (2337716 addrs)
 class   KVDB_T : public KV_T {
 private:
   kyotocabinet::PolyDB     db;
@@ -47,58 +47,12 @@ public:
   void          clear(void) { db.clear(); }
   uint32_t      count(void);
 };
-/*
-// inmemory
-struct VARRAY_T {
-    uint16_t    size;
-    uint8_t     data[];
-   //  bool operator==(const VARRAY_T &alien) const
-   //     { return (size == alien.size && memcmp(data, alien.data, size) == 0);}
-};
-//bool operator==(const VARRAY_T& one, const VARRAY_T& two)
-//    { return ((one.size == two.size) && (memcmp(one.data, two.data, one.size) == 0));}
 
-// Extend std and boost namespaces with our hash wrappers.
-//-----------------------------------------------------------------------------
-// get from libbitcoin-system/include/bitcoin/system/math/hash.hpp
-
-namespace std
-{
-    template<>
-    struct hash<VARRAY_T>
-    {
-        size_t operator()(const VARRAY_T& hash) const
-        {
-            return boost::hash_range(hash.data, hash.data + hash.size);
-        }
-    };
-} // namespace std
-
-namespace boost
-{
-template<>
-struct hash<VARRAY_T>
-{
-    size_t operator()(const VARRAY_T& hash) const
-    {
-        return boost::hash_range(hash.data, hash.data + hash.size);
-    }
-};
-} // namespace boost
-
-
-struct AvHash {
-    size_t operator()(const VARRAY_T& k) const
-    { return boost::hash_range(k.data, k.data + k.size); }
-};
-auto MyHash = [](const VARRAY_T& k)
-    { return boost::hash_range(k.data, k.data + k.size); };
-auto AvEq = [](const VARRAY_T& one, const VARRAY_T& two)
-    { return ((one.size == two.size) && (memcmp(one.data, two.data, one.size) == 0));};
-
+// == inmem ==
+// 150k = 12" 2337716 addrs)
 class   KVMEM_T : public KV_T {
 private:
-    unordered_map <VARRAY_T, uint32_t, decltype(MyHash), decltype(AvEq)> db; // FIXME: hash, equal funcs
+    unordered_map <string, uint32_t> db;
     uint32_t      real_add(const uint8_t *, const uint16_t);
     uint32_t      real_get(const uint8_t *, const uint16_t);
 public:
@@ -106,6 +60,6 @@ public:
     void          clear(void) { db.clear(); }
     uint32_t      count(void) { return db.size(); }
 };
-*/
+
 #endif // KV_H
 

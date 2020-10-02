@@ -1,5 +1,7 @@
 #include "kv.h"
 
+// == file based ==
+
 bool        KVDB_T::init(const string &s)
 {
     return db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE); // | kyotocabinet::PolyDB::OTRUNCATE); // TODO:
@@ -30,33 +32,26 @@ uint32_t    KVDB_T::real_get(const uint8_t *key, const uint16_t size)
     return value;
 }
 
-// ====
-/*
+// == inmem ==
+
 uint32_t    KVMEM_T::real_add(const uint8_t *raw_key, const uint16_t size)
 {
-    VARRAY_T key;
-    key.size = size;
-    key.data[size] = raw_key[size];
+    auto key = string((const char *)raw_key, size);
     auto value = NOT_FOUND_U32;
-    cerr << "want to add" << endl;
     if (db.find(key) == db.end()) {
         value = db.size();
         db.emplace(key, value);
     }
-    cerr << "added " << value << endl;
     return value;
 }
 
 uint32_t    KVMEM_T::real_get(const uint8_t *raw_key, const uint16_t size)
 {
-    VARRAY_T key;
-    key.size = size;
-    key.data[size] = raw_key[size];
+    auto key = string((const char *)raw_key, size);
     auto value = NOT_FOUND_U32;
     auto search = db.find(key);
     if (search != db.end())
         value = search->second;
-    cerr << "get " << value << endl;
     return value;
 }
-*/
+

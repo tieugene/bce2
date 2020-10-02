@@ -95,8 +95,8 @@ bool    set_cash(void)
 {
     OPTS.cash = !OPTS.cachedir.empty();
     if (OPTS.cash) {
-        TxDB = new KVDB_T();
-        AddrDB = new KVDB_T();
+        TxDB = new KVMEM_T();
+        AddrDB = new KVMEM_T();
         if (OPTS.cachedir.back() != '/')
             OPTS.cachedir += '/';  // FIXME: native path separator
         auto s = OPTS.cachedir + "tx.kch";
