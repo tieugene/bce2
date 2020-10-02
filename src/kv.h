@@ -20,7 +20,8 @@ protected:
 public:
     virtual void        clear(void) = 0;
     virtual uint32_t    count(void) = 0;
-    virtual bool        cp(KV_T *, bool = false) = 0;
+    virtual bool        cp(KV_T *, bool) = 0;
+    virtual bool        add(const string&, const uint32_t) = 0;
     uint32_t    add(const uint256_t &key)
                 { return real_add(key.begin(), sizeof(uint256_t)); }
     uint32_t    add(const uint160_t &key)
@@ -46,7 +47,8 @@ public:
   // virt replacings
   void          clear(void) { db.clear(); }
   uint32_t      count(void);
-  bool          cp(KV_T *, bool);
+  bool          cp(KV_T *, bool = false);
+  bool          add(const string&, const uint32_t);
   // spec
   bool          init(const string &);
 };
@@ -61,7 +63,8 @@ private:
 public:
     void          clear(void) { db.clear(); }
     uint32_t      count(void) { return db.size(); }
-    bool          cp(KV_T *, bool);
+    bool          cp(KV_T *, bool = false);
+    bool          add(const string&, const uint32_t);
 };
 
 #endif // KV_H

@@ -87,8 +87,8 @@ int     main(int argc, char *argv[])
         __prn_summary();
     }
     if (OPTS.inmem and OPTS.cash) { // flush
-        //TxMEM->cp(TxKC);
-        //AddrMEM->cp(AddrKC);
+        TxMEM->cp(TxKC);
+        AddrMEM->cp(AddrKC);
     }
     if (BUFFER.beg)
         delete BUFFER.beg;
@@ -141,20 +141,20 @@ bool    set_cash(void)
                 if (tx_full) {
                     if (OPTS.verbose)
                         cerr << "Loading txs ...";
-                    /*if (!TxKC->cp(TxMEM)) {
+                    if (!TxKC->cp(TxMEM)) {
                         cerr << "Loading tx Error." << endl;
                         return false;
-                    }*/
+                    }
                     if (OPTS.verbose)
                         cerr << "OK." << endl;
                 }
                 if (addr_full) {
                     if (OPTS.verbose)
                         cerr << "Loading addrs ...";
-                    /*if (!AddrKC->cp(AddrMEM)) {
+                    if (!AddrKC->cp(AddrMEM)) {
                         cerr << "Error." << endl;
                         return false;
-                    }*/
+                    }
                     if (OPTS.verbose)
                         cerr << "OK." << endl;
                 }

@@ -32,13 +32,25 @@ uint32_t    KVKC_T::real_get(const uint8_t *key, const uint16_t size)
     return value;
 }
 
-bool          KVKC_T::cp(KV_T *dst, bool erase)
+bool        KVKC_T::cp(KV_T *dst, bool erase)
 {
     if (erase)
         dst->clear();
     auto cur = db.cursor();
     cur->jump();
-    //while ()
+    string key, cvalue;
+    while (cur->get(&key, &cvalue, true)) {    // string:string
+        uint32_t *value = (uint32_t *) cvalue.c_str();
+        dst->add(key, *value);
+        //cout << ckey << ":" << cvalue << endl;
+    }
+    delete cur;
+    return true;
+}
+
+bool        KVKC_T::add(const string &key, const uint32_t value)
+{
+    db.add(key, string((const char *)&value, sizeof(value)));
     return true;
 }
 
@@ -69,8 +81,13 @@ bool        KVMEM_T::cp(KV_T *dst, bool erase)
 {
     if (erase)
         dst->clear();
-    //auto cur = db.cursor();
-    //cur->jump();
-    //while ()
+    for(const auto& kv : db)
+        dst->add(kv.first, kv.second);    // string:uint32_t
+    return true;
+}
+
+bool        KVMEM_T::add(const string &key, const uint32_t value)
+{
+    db.emplace(key, value);
     return true;
 }
