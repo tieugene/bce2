@@ -20,15 +20,15 @@ VIN_T       CUR_VIN;
 VOUT_T      CUR_VOUT;
 UNIPTR_T    CUR_PTR;
 BUFFER_T    BUFFER;
-KV_T        *TxDB;
-KV_T        *AddrDB;
+KV_T        *TxDB = nullptr, *AddrDB = nullptr;
 long        start_mem;
 time_t      start_time;
 // locals
+KVMEM_T     *TxMEM = nullptr, *AddrMEM = nullptr;
+KVKC_T      *TxKC = nullptr, *AddrKC = nullptr;
 // consts
 const uint32_t  BULK_SIZE = 1000;
 // forwards
-
 bool    set_cash(void); ///< setup k-v storages
 
 int     main(int argc, char *argv[])
@@ -54,14 +54,14 @@ int     main(int argc, char *argv[])
     if (!OPTS.datdir.empty() and OPTS.datdir.back() != '/')
         OPTS.datdir += '/';  // FIXME: native OS path separator
     DATFARM_T datfarm(bk_qty, OPTS.datdir);
-    // 1.3. prepare k-v storages
-    if (!set_cash())
-        return 1;
     // 1.4. last prestart
     BUFFER.beg = new char[MAX_BK_SIZE];
+    // 1.3. prepare k-v storages
+    start_mem = memused();
+    if (!set_cash())
+        return 1;
     // 2. main loop
     start_time = time(nullptr);
-    start_mem = memused();
     if (OPTS.verbose)
       __prn_head();
     for (COUNT.bk = OPTS.from; COUNT.bk < bk_no_upto; COUNT.bk++)
@@ -86,6 +86,23 @@ int     main(int argc, char *argv[])
       if (OPTS.verbose > DBG_MIN)
         __prn_summary();
     }
+    if (OPTS.inmem and OPTS.cash) { // flush
+        if (OPTS.verbose) {
+            // tx
+            cerr << "Flush tx   (" << TxKC->count() << " => ";
+            auto t = time(nullptr);
+            TxMEM->cpto(TxKC);
+            cerr << TxKC->count() << " @ " << time(nullptr)-t << "s OK." << endl;
+            // addr
+            cerr << "Flush addr (" << AddrKC->count() << " => ";
+            t = time(nullptr);
+            AddrMEM->cpto(AddrKC);
+            cerr << AddrKC->count() << " @ " << time(nullptr)-t << "s OK." << endl;
+        } else {
+            TxMEM->cpto(TxKC);
+            AddrMEM->cpto(AddrKC);
+        }
+    }
     if (BUFFER.beg)
         delete BUFFER.beg;
     return 0;
@@ -93,35 +110,84 @@ int     main(int argc, char *argv[])
 
 bool    set_cash(void)
 {
-    OPTS.cash = !OPTS.cachedir.empty();
-    if (OPTS.cash) {
-        TxDB = new KVDB_T();
-        AddrDB = new KVDB_T();
-        if (OPTS.cachedir.back() != '/')
-            OPTS.cachedir += '/';  // FIXME: native path separator
-        auto s = OPTS.cachedir + "tx.kch";
-        if (!TxDB->init(s)) {
-            cerr << "Can't open 'tx' cache: " << s << endl;
-            return false;
-        }
-        s = OPTS.cachedir + "addr.kch";
-        if (!AddrDB->init(s)) {
-            cerr << "Can't open 'addr' cache " << s << endl;
-            return false;
-        }
-        if (OPTS.from == 0) {
-          TxDB->clear();
-          AddrDB->clear();
-        } else if (OPTS.from < 0) {
-            if (TxDB->count() or AddrDB->count()) {
-                cerr << "Tx or Addr key-value is not empty. Set -f option" << endl;
+    if (kv_mode()) {
+        bool tx_full = false, addr_full = false;
+        if (OPTS.cash) {
+            TxKC = new KVKC_T();
+            AddrKC = new KVKC_T();
+            if (OPTS.cachedir.back() != '/')
+                OPTS.cachedir += '/';  // FIXME: native path separator
+            auto s = OPTS.cachedir + "tx.kch";
+            if (!TxKC->init(s)) {
+                cerr << "Can't open 'tx' cache: " << s << endl;
                 return false;
-            } else
-                OPTS.from = 0;
+            }
+            s = OPTS.cachedir + "addr.kch";
+            if (!AddrKC->init(s)) {
+                cerr << "Can't open 'addr' cache " << s << endl;
+                return false;
+            }
+            tx_full = bool(TxKC->count());
+            addr_full = bool(AddrKC->count());
+            if (tx_full != addr_full and OPTS.from > 0) {
+                cerr << "-f > 0 but Tx and/or Addr k-v is/are empty. Use '-f 0' to clean." << endl;
+                return false;
+            }
+            if (tx_full or addr_full) {
+                if (OPTS.from < 0) {
+                    cerr << "Tx (" << TxKC->count() << ") or Addr ("<< AddrKC->count() << ") k-v is not empty. Set -f option." << endl;;
+                    return false;
+                } else if (OPTS.from == 0) {
+                    TxKC->clear();
+                    tx_full = false;
+                    AddrKC->clear();
+                    addr_full = false;
+                }
+            }
+            if (!OPTS.inmem) {
+                if (OPTS.verbose) {
+                    TxDB = TxKC;
+                    AddrDB = AddrKC;
+                }
+            }
+        }
+        if (OPTS.inmem) {
+            TxMEM = new KVMEM_T();
+            AddrMEM = new KVMEM_T();
+            if (OPTS.cash) {
+                if (tx_full) {
+                    if (OPTS.verbose)
+                        cerr << "Loading txs ...";
+                    if (!TxKC->cpto(TxMEM)) {
+                        cerr << "Loading tx Error." << endl;
+                        return false;
+                    }
+                    if (OPTS.verbose)
+                        cerr << "OK." << endl;
+                }
+                if (addr_full) {
+                    if (OPTS.verbose)
+                        cerr << "Loading addrs ...";
+                    if (!AddrKC->cpto(AddrMEM)) {
+                        cerr << "Error." << endl;
+                        return false;
+                    }
+                    if (OPTS.verbose)
+                        cerr << "OK." << endl;
+                }
+            } else {    // mem-only
+                if (OPTS.from > 0) {
+                    cerr << "Can't start from -f > 0 in memory-only mode." << endl;
+                    return false;
+                } else if (OPTS.from < 0)
+                    OPTS.from = 0;
+            }
+            TxDB = TxMEM;
+            AddrDB = AddrMEM;
         }
         COUNT.tx = TxDB->count();
         COUNT.addr = AddrDB->count();
-    } else {
+    } else {    // not k-v mode
         if (OPTS.from < 0)
             OPTS.from = 0;
     }

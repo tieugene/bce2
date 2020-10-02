@@ -1,17 +1,20 @@
 #include "kv.h"
+#include "misc.h"
 
-bool        KVDB_T::init(const string &s)
+// == file based ==
+
+bool        KVKC_T::init(const string &s)
 {
     return db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE); // | kyotocabinet::PolyDB::OTRUNCATE); // TODO:
 }
 
-uint32_t    KVDB_T::count(void)
+uint32_t    KVKC_T::count(void)
 {
     auto retvalue = db.count();
     return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
 }
 
-uint32_t    KVDB_T::real_add(const uint8_t *key, const uint16_t size)
+uint32_t    KVKC_T::real_add(const uint8_t *key, const uint16_t size)
 {
     //auto value = map.emplace(key, value);   // FIXME: emplace() w/ checking retvalue
     auto value = count();
@@ -21,7 +24,7 @@ uint32_t    KVDB_T::real_add(const uint8_t *key, const uint16_t size)
     return value;
 }
 
-uint32_t    KVDB_T::real_get(const uint8_t *key, const uint16_t size)
+uint32_t    KVKC_T::real_get(const uint8_t *key, const uint16_t size)
 {
     uint32_t value;
     auto result = db.get((const char *)key, size, (char *)&value, sizeof(uint32_t));
@@ -30,31 +33,59 @@ uint32_t    KVDB_T::real_get(const uint8_t *key, const uint16_t size)
     return value;
 }
 
-// ====
+bool        KVKC_T::cpto(KV_T *dst, bool erase)
+{
+    if (erase)
+        dst->clear();
+    auto cur = db.cursor();
+    cur->jump();
+    string key, cvalue;
+    while (cur->get(&key, &cvalue, true))    // string:string
+        dst->add(key, *((uint32_t *) cvalue.c_str()));
+    delete cur;
+    return true;
+}
+
+bool        KVKC_T::add(const string &key, const uint32_t value)
+{
+    db.add(key, string((const char *)&value, sizeof(value)));
+    return true;
+}
+
+// == inmem ==
+
 uint32_t    KVMEM_T::real_add(const uint8_t *raw_key, const uint16_t size)
 {
-    VARRAY_T key;
-    key.size = size;
-    key.data[size] = raw_key[size];
+    auto key = string((const char *)raw_key, size);
     auto value = NOT_FOUND_U32;
-    cerr << "want to add" << endl;
     if (db.find(key) == db.end()) {
         value = db.size();
         db.emplace(key, value);
     }
-    cerr << "added " << value << endl;
     return value;
 }
 
 uint32_t    KVMEM_T::real_get(const uint8_t *raw_key, const uint16_t size)
 {
-    VARRAY_T key;
-    key.size = size;
-    key.data[size] = raw_key[size];
+    auto key = string((const char *)raw_key, size);
     auto value = NOT_FOUND_U32;
     auto search = db.find(key);
     if (search != db.end())
         value = search->second;
-    cerr << "get " << value << endl;
     return value;
+}
+
+bool        KVMEM_T::cpto(KV_T *dst, bool erase)
+{
+    if (erase)
+        dst->clear();
+    for(const auto& kv : db)
+        dst->add(kv.first, kv.second);    // string:uint32_t
+    return true;
+}
+
+bool        KVMEM_T::add(const string &key, const uint32_t value)
+{
+    db.emplace(key, value);
+    return true;
 }
