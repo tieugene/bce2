@@ -28,7 +28,8 @@ struct  OPT_T       ///< program CLI options
     uint32_t    num = 1;
     bool        out = false;
     bool        cash = false;
-    int         verbose = 0;
+    bool        inmem = false;
+    DBG_LVL_T   verbose = DBG_NONE;
 };
 
 struct  COUNT_T     ///< through counters
@@ -137,11 +138,12 @@ extern VIN_T    CUR_VIN;
 extern VOUT_T   CUR_VOUT;
 extern UNIPTR_T CUR_PTR;
 extern BUFFER_T BUFFER;
-extern KV_T     *TxDB;
-extern KV_T     *AddrDB;
+extern KV_T     *TxDB, *AddrDB;
 
 extern time_t   start_time;
 extern long     start_mem;
+
+inline bool     kv_mode(void) {return (OPTS.cash or OPTS.inmem);}
 
 const string TAB = "\t";
 const uint32_t COINBASE_vout = 0xFFFFFFFF;
