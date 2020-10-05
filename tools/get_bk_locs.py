@@ -113,8 +113,8 @@ def walk(ldn: str, ofn: str, qty: int, verbose: bool):
     bk_dict = dict()
     db = plyvel.DB(ldn, create_if_missing=False)
     for rec in db.iterator(include_key=False, prefix=b'\x62'):  # ^'b'
-        rec = decode_rec(rec[:-80], qty)
         bk_count += 1
+        rec = decode_rec(rec[:-80], qty)
         if not rec:
             continue
         r = bk_dict.get(rec.h, None)

@@ -2,6 +2,13 @@
 Blockchain export.
 CLI utility to export blockchain data into plain text format
 
+## Utility
+```
+#!/bin/sh
+# get bk by height
+bitcoin-cli getblock `bitcoin-cli getblockhash $1` 2 > $1.jso
+```
+
 ## Modes:
 Walk and count depending on -c & -o:
 - ~~c~~/~~o~~: btio (w/o uniq addrs)
