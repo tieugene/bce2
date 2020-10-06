@@ -168,14 +168,14 @@ bool    parse_vout(const bool dojob)
     if (!dojob)
         return true;
     BUSY.vout = true;
+    if (!parse_script())
+        return false;
     if (OPTS.out) {
         if (kv_mode())
             out_vout();
         else
             __prn_vout();
     }
-    if (!parse_script())
-        return false;
     BUSY.vout = false;
     return true;
 }

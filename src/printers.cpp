@@ -6,10 +6,10 @@
 
 void        out_bk(void)    ///< Output bk data for DB
 {   // FIXME: hash can be w/o 's
-    time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);
+    time_t t = static_cast<time_t>(CUR_BK.head_ptr->time + 3 * 3600);   ///FUTURE: back into GMT
     char dt[20];
     strftime(dt, 20, "%Y-%m-%d %OH:%OM:%OS", gmtime(&t));
-    printf("b\t%u\t'%s'\t'%s'\n", COUNT.bk, dt, hash2hex(CUR_BK.hash).c_str());
+    printf("b\t%u\t'%s'\t'%s'\n", COUNT.bk, dt, hash2hex(CUR_BK.hash).c_str()); ///FUTURE: s/'hash'/hash/
 }
 
 void        out_tx(void)
@@ -20,12 +20,15 @@ void        out_tx(void)
 void        out_vin(void)   // FIXME: compare w/ COINBASE_txid too
 {
     if (CUR_VIN.vout != COINBASE_vout)  // skip coinbase
-        printf("i\t%u\t%llu\t%u\n", COUNT.tx, CUR_VIN.txno, CUR_VIN.vout);
+        printf("i\t%lu\t%u\t%u\n", CUR_VIN.txno, CUR_VIN.vout, COUNT.tx);
 }
 
 void        out_vout(void)
 {
-  printf("o\t%u\t%u\t%llu\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi);
+  if (CUR_ADDR.qty)
+    printf("o\t%u\t%u\t%lu\t%u\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi, COUNT.addr);
+  else
+    printf("o\t%u\t%u\t%lu\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi);
 }
 
 void        out_addr(void)
@@ -43,7 +46,7 @@ void        out_addr(void)
             v += "\"]";
         }
     }
-    printf("a\t%u\t%s\n", COUNT.addr, v.c_str());
+    printf("a\t%u\t%s\t%u\n", COUNT.addr, v.c_str(), CUR_ADDR.qty);
 }
 
 void        __prn_bk(void)  // TODO: hash
