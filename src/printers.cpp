@@ -6,9 +6,9 @@
 
 void        out_bk(void)    ///< Output bk data for DB
 {   // FIXME: hash can be w/o 's
-    time_t t = static_cast<time_t>(CUR_BK.head_ptr->time + 3 * 3600);   ///FUTURE: back into GMT
+    time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);
     char dt[20];
-    strftime(dt, 20, "%Y-%m-%d %OH:%OM:%OS", gmtime(&t));
+    strftime(dt, 20, "%Y-%m-%d %OH:%OM:%OS", localtime(&t));   ///FUTURE: back into gmtime
     printf("b\t%u\t'%s'\t'%s'\n", COUNT.bk, dt, hash2hex(CUR_BK.hash).c_str()); ///FUTURE: s/'hash'/hash/
 }
 
@@ -26,7 +26,7 @@ void        out_vin(void)   // FIXME: compare w/ COINBASE_txid too
 void        out_vout(void)
 {
   if (CUR_ADDR.qty)
-    printf("o\t%u\t%u\t%lu\t%u\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi, COUNT.addr);
+    printf("o\t%u\t%u\t%lu\t%u\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi, CUR_ADDR.id);
   else
     printf("o\t%u\t%u\t%lu\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi);
 }
@@ -46,7 +46,7 @@ void        out_addr(void)
             v += "\"]";
         }
     }
-    printf("a\t%u\t%s\t%u\n", COUNT.addr, v.c_str(), CUR_ADDR.qty);
+    printf("a\t%u\t%s\t%u\n", COUNT.addr, v.c_str(), CUR_ADDR.qty);   ///FUTURE: -qty
 }
 
 void        __prn_bk(void)  // TODO: hash

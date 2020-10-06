@@ -17,6 +17,7 @@ enum    SCTYPE {
 };
 
 struct  ADDRS_T {
+    uint32_t    id;
     SCTYPE      type;
     char        qty;
     uint160_t   addr[16];

@@ -226,6 +226,7 @@ bool    parse_script(void)
                         cerr << "Addr added as " << addr_added << " against waiting " << COUNT.addr << endl;
                         return false;
                 }
+                CUR_ADDR.id = addr_added;
                 if (OPTS.out)
                     out_addr(); // FIXME:
                 COUNT.addr += 1;
