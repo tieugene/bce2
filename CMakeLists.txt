@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 aux_source_directory(src SRC_LIST)
 
-include_directories(src)
+include_directories(include)
 
 add_executable(${PROJECT_NAME} ${SRC_LIST})
 
