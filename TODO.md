@@ -3,6 +3,7 @@
 - memused()
 - try: kc.occupy()
 - try: kc.memhash
+- PR.host002: create LXC F32 + shared btc dir
 
 ## Try
 - man join
