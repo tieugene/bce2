@@ -1,4 +1,4 @@
-# bce
+# bce2 - BlockChain Export 2
 Blockchain export.
 CLI utility to export blockchain data into plain text format
 
@@ -15,21 +15,24 @@ CLI utility to export blockchain data into plain text format
 Plaintext with records:
 - `b	id	'datetime'	'hash'`
 - `t	id	b.id	hash`
-- `i	<t.id	vout	t.id`
+- `i	t.id	vout	t.id`
 - `o	t.id	vout	$`
 - `a	id	"addr"|["addr",…]	qty`
 
 
 ## FIXME
 Comparing to bcepy out:
-- b: time is GMT (must be +03:00:00)
+- o: +[a.id] # 540 diffs @ 0..50k
+- b: &check; time is GMT (must be localtime (+03w/+02s)
 - t: &check;
-- i:
-- o: +[a.id]
-- a:
-  - before 'o'
-  - +qty
+- i: &check; t.id - <t.id - v => <t.id - v -t.id
+- a: &check; before 'o'; +qty
 
+## FUTURE:
+- b: s/'hash'/hash/
+- b: GMT
+- o: [a.id] => \N
+- a: -qty
 
 ## Utility
 ```
