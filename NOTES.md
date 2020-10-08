@@ -131,3 +131,9 @@ addr: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
 ## Timer:
 (w/o addresses)
 - 200k - 
+
+## Usual:
+- [Stat](bitinfocharts.com/ru/bitcoin/)
+- [Bitcoin API](https://www.blockchain.com/api/blockchain_api)
+- Use Blochain Explorer API for test addrs (https://www.blockchain.com/api)
+- [jq](https://stedolan.github.io/jq/)
