@@ -98,7 +98,7 @@ bool    do_P2PK(void)                   ///< pubkey
     return false;
 }
 
-bool    do_P2PKH(void)                  ///< ?pubkeyhash
+bool    do_P2PKH(void)                  ///< pubkeyhash
 {
     if (
         script_size == 25 and       // was >= dirty hack for 71036.?.? and w/ OP_NOP @ end
@@ -165,7 +165,7 @@ bool    do_P2MS(void)                   ///< multisig
     return retvalue;
 }
 
-bool    do_P2W(void)
+bool    do_P2W(void)                    ///< witness_v0_*
 {
     bool retvalue;
     switch (script_ptr[1]) {

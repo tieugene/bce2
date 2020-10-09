@@ -25,11 +25,11 @@ public:
     bool        cpto(KV_T *, bool = false);
     bool        add(const string &key, const uint32_t value)
                 { db.add(key, string((const char *)&value, sizeof(value))); return true; }
-    uint32_t    add(const uint256_t &key)
+    uint32_t    add(const uint256_t &key)                     // tx, WSH
                 { return real_add(key.begin(), sizeof(uint256_t)); }
-    uint32_t    add(const uint160_t &key)
+    uint32_t    add(const uint160_t &key)                     // PK, PKH, ?SH, WPKH
                 { return real_add(key.begin(), sizeof(uint160_t)); }
-    uint32_t    add(const uint160_t key[], const uint8_t len)
+    uint32_t    add(const uint160_t key[], const uint8_t len) // MULTISIG
                 { return real_add(key[0].begin(), sizeof(uint160_t) * len); }
     uint32_t    get(const uint256_t &key)
                 { return real_get(key.begin(), sizeof(uint256_t)); }

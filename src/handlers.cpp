@@ -204,7 +204,7 @@ bool    parse_script(void)
             case MULTISIG:
                 addr_added = AddrDB->get(CUR_ADDR.addr, CUR_ADDR.qty);
                 break;
-            default:
+            default:  // PK, PKH, ?SH, WPKH
                 addr_added = AddrDB->get(CUR_ADDR.addr[0]);
             }
             if (addr_added == NOT_FOUND_U32) {
