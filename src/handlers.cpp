@@ -230,7 +230,8 @@ bool    parse_script(void)
                 if (OPTS.out)
                     out_addr(); // FIXME:
                 COUNT.addr += 1;
-            }
+            } else
+              CUR_ADDR.id = addr_added;
         } else if (OPTS.out)
             __prn_addr();
         STAT.addrs += 1;    // FIXME: if decoded and 1+
