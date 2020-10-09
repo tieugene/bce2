@@ -11,11 +11,6 @@ include_directories(include)
 
 add_executable(${PROJECT_NAME} ${SRC_LIST})
 
-# Boost
-find_package(Boost REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARY})
-
 ## openssl
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})

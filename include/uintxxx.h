@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <string>
 #include <array>
-#include <boost/functional/hash.hpp>
 
 template <size_t Size>
 using byte_array = std::array<uint8_t, Size>;
@@ -20,29 +19,5 @@ std::string     wsh2addr(const uint256_t &);
 
 void        hash256(const void *, const uint32_t, uint256_t &); // 1.
 void        hash160(const void *, const uint32_t, uint160_t &);
-
-namespace std
-{
-template <size_t Size>
-struct hash<byte_array<Size>>
-{
-    size_t operator()(const byte_array<Size>& hash) const
-    {
-        return boost::hash_range(hash.begin(), hash.end());
-    }
-};
-}// namespace std
-
-namespace boost
-{
-template <size_t Size>
-struct hash<byte_array<Size>>
-{
-    size_t operator()(const byte_array<Size>& hash) const
-    {
-        return boost::hash_range(hash.begin(), hash.end());
-    }
-};
-} // namespace boost
 
 #endif // UINTXXX_H
