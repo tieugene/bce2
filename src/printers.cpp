@@ -28,7 +28,7 @@ void        out_vout(void)
   if (CUR_ADDR.qty)
     printf("o\t%u\t%u\t%lu\t%u\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi, CUR_ADDR.id);
   else
-    printf("o\t%u\t%u\t%lu\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi);
+    printf("o\t%u\t%u\t%lu\t\\N\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi);
 }
 
 void        out_addr(void)
@@ -40,7 +40,7 @@ void        out_addr(void)
         if (alist.size() == 1)
             v = "\"" + alist[0] + "\"";
         else {
-            v = "[\"" + alist[0] + "\"";
+            v = "[\"" + alist[0];
             for (size_t i = 1; i < alist.size(); i++)
                 v = v + "\", \"" + alist[i];
             v += "\"]";
