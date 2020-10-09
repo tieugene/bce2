@@ -24,8 +24,8 @@ KV_T        *TxDB = nullptr, *AddrDB = nullptr;
 long        start_mem;
 time_t      start_time;
 // locals
-KVMEM_T     *TxMEM = nullptr, *AddrMEM = nullptr;
-KVKC_T      *TxKC = nullptr, *AddrKC = nullptr;
+static KVMEM_T     *TxMEM = nullptr, *AddrMEM = nullptr;
+static KVKC_T      *TxKC = nullptr, *AddrKC = nullptr;
 // consts
 const uint32_t  BULK_SIZE = 1000;
 // forwards
@@ -41,8 +41,11 @@ int     main(int argc, char *argv[])
     // 1.1. handle CLI
     if (!cli(argc, argv))  // no file defined
         return 1;
+    // 1.2. prepare k-v storages (and normalize OPTS.from)
+    if (!set_cash())
+        return 1;
     auto bk_no_upto = OPTS.from + OPTS.num;
-    // 1.2.1. prepare bk info
+    // 1.3.1. prepare bk info
     auto bk_qty = load_fileoffsets(argv[argc-1]);
     if (!bk_qty)
         return 1;
@@ -50,16 +53,13 @@ int     main(int argc, char *argv[])
         cerr << "Loaded blocks (" << bk_qty << ") < max wanted " << bk_no_upto << endl;
         return 1;
     }
-    // 1.2.2. prepare dat
+    // 1.3.2. prepare dat
     if (!OPTS.datdir.empty() and OPTS.datdir.back() != '/')
         OPTS.datdir += '/';  // FIXME: native OS path separator
     DATFARM_T datfarm(bk_qty, OPTS.datdir);
     // 1.4. last prestart
     BUFFER.beg = new char[MAX_BK_SIZE];
-    // 1.3. prepare k-v storages
     start_mem = memused();
-    if (!set_cash())
-        return 1;
     // 2. main loop
     start_time = time(nullptr);
     if (OPTS.verbose)
@@ -115,16 +115,21 @@ bool    set_cash(void)
         if (OPTS.cash) {
             TxKC = new KVKC_T();
             AddrKC = new KVKC_T();
-            if (OPTS.cachedir.back() != '/')
-                OPTS.cachedir += '/';  // FIXME: native path separator
-            auto s = OPTS.cachedir + "tx.kch";
-            if (!TxKC->init(s)) {
-                cerr << "Can't open 'tx' cache: " << s << endl;
+            string tpath, apath;
+            if (OPTS.cachedir.size() == 1)  {   // on-memory
+                tpath = apath = OPTS.cachedir;
+            } else {
+                if (OPTS.cachedir.back() != '/')
+                    OPTS.cachedir += '/';  // FIXME: native path separator
+                tpath = OPTS.cachedir + "tx.kch";
+                apath = OPTS.cachedir + "addr.kch";
+            }
+            if (!TxKC->init(tpath)) {
+                cerr << "Can't open 'tx' cache: " << tpath << endl;
                 return false;
             }
-            s = OPTS.cachedir + "addr.kch";
-            if (!AddrKC->init(s)) {
-                cerr << "Can't open 'addr' cache " << s << endl;
+            if (!AddrKC->init(apath)) {
+                cerr << "Can't open 'addr' cache " << apath << endl;
                 return false;
             }
             tx_full = bool(TxKC->count());
@@ -135,7 +140,7 @@ bool    set_cash(void)
             }
             if (tx_full or addr_full) {
                 if (OPTS.from < 0) {
-                    cerr << "Tx (" << TxKC->count() << ") or Addr ("<< AddrKC->count() << ") k-v is not empty. Set -f option." << endl;;
+                    cerr << "Tx (" << TxKC->count() << ") or Addr ("<< AddrKC->count() << ") k-v is not empty. Set -f option." << endl;
                     return false;
                 } else if (OPTS.from == 0) {
                     TxKC->clear();
