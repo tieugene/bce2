@@ -134,7 +134,7 @@ void    __prn_interim(void) {
          TAB << STAT.vouts <<
          TAB << STAT.addrs <<
          TAB << COUNT.addr <<
-         TAB << (memused() - start_mem) / 1048576 <<
+         TAB << ((memused() - start_mem) >> 10) <<
          TAB << time(nullptr) - start_time <<
     "\n";
 }

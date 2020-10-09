@@ -6,7 +6,6 @@
 #include <cstdlib>
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/resource.h>
 #include "bce.h"
 #include "misc.h"
 #include "script.h" // cur_addr only
@@ -99,13 +98,21 @@ bool        cli(int argc, char *argv[])
     return retvalue;
 }
 
+long        get_statm(void)   ///< returns used memory in kilobytes
+{
+    long    total = 0;  // rss, shared, text, lib, data, dt; man proc
+#if defined (__linux__)
+    ifstream statm("/proc/self/statm");
+    statm >> total; // >> rss...
+    statm.close();
+    total *= (sysconf(_SC_PAGE_SIZE) >> 10);  // pages-ze = 4k in F32_x64
+#endif
+    return total;
+}
+
 long        memused(void)
 {
-    rusage rused;
-    long retvalue = 0;
-    if (getrusage(RUSAGE_SELF, &rused) == 0)
-      retvalue = rused.ru_maxrss;
-    return retvalue;
+    return get_statm();
 }
 
 uint32_t    read_v(void)   ///<read 1..4-byte int and forward;
