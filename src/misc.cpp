@@ -9,6 +9,9 @@
 #include "bce.h"
 #include "misc.h"
 #include "script.h" // cur_addr only
+#if defined(__APPLE__)
+#include <mach/mach.h>
+#endif
 
 static string  help_txt = "\
 Usage: [options] <file-offset_file>\n\
@@ -106,6 +109,13 @@ long        get_statm(void)   ///< returns used memory in kilobytes
     statm >> total; // >> rss...
     statm.close();
     total *= (sysconf(_SC_PAGE_SIZE) >> 10);  // pages-ze = 4k in F32_x64
+#elif defined(__APPLE__)
+    struct task_basic_info t_info;
+    mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
+    if (KERN_SUCCESS == task_info(mach_task_self(),
+        TASK_BASIC_INFO, (task_info_t)&t_info,
+        &t_info_count))
+        total = t_info.virtual_size >> 10;
 #endif
     return total;
 }
