@@ -25,8 +25,8 @@ void        out_vin(void)   // FIXME: compare w/ COINBASE_txid too
 
 void        out_vout(void)
 {
-  if (CUR_ADDR.qty)
-    printf("o\t%u\t%u\t%lu\t%u\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi, CUR_ADDR.id);
+  if (CUR_ADDR.get_qty())
+    printf("o\t%u\t%u\t%lu\t%u\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi, CUR_ADDR.get_id());
   else
     printf("o\t%u\t%u\t%lu\t\\N\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi);
 }
@@ -34,7 +34,7 @@ void        out_vout(void)
 void        out_addr(void)
 {   // single:      "symbols"
     // multisign:   ["one", "two"]
-    auto alist = get_addrs_strs();
+    auto alist = CUR_ADDR.get_strings();
     string v;
     if (alist.size()) {
         if (alist.size() == 1)
@@ -46,7 +46,7 @@ void        out_addr(void)
             v += "\"]";
         }
     }
-    printf("a\t%u\t%s\t%u\n", COUNT.addr, v.c_str(), CUR_ADDR.qty);   ///FUTURE: -qty
+    printf("a\t%u\t%s\t%u\n", COUNT.addr, v.c_str(), CUR_ADDR.get_qty());   ///FUTURE: -qty
 }
 
 void        __prn_bk(void)  // TODO: hash
@@ -101,14 +101,14 @@ void        __prn_vout(void)
 
 void        __prn_addr(void)
 {
-    auto alist = get_addrs_strs();
+    auto alist = CUR_ADDR.get_strings();
     string v;
     if (alist.size()) {
         v = alist[0];
         for (size_t i = 1; i < alist.size(); i++)
             v = v + "," + alist[i];
     }
-    cerr << "      Addr: " << get_addrs_type();
+    cerr << "      Addr: " << CUR_ADDR.get_type_name();
     if (!v.empty())
         cerr << " " << v;
     cerr << endl;
