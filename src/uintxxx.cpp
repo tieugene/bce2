@@ -29,8 +29,7 @@ string      ripe2hex(const uint160_t &r)
     return string(tmp);
 }
 
-/** Inner function */
-void        sha256(const void *src, const uint32_t size, uint256_t &dst)
+void        __sha256(const void *src, const uint32_t size, uint256_t &dst)    ///< inner
 {
     SHA256_CTX context;
     SHA256_Init(&context);
@@ -41,33 +40,32 @@ void        sha256(const void *src, const uint32_t size, uint256_t &dst)
 void        hash256(const void *src, const uint32_t size, uint256_t &dst)
 {
     uint256_t tmp;
-    sha256(src, size, tmp);
-    sha256(&tmp, sizeof(uint256_t), dst);
+    __sha256(src, size, tmp);
+    __sha256(&tmp, sizeof(uint256_t), dst);
 }
 
-/** Inner function */
-void        ripe160(const uint256_t &src, uint160_t &dst)
+void        __ripe160(const uint256_t &src, uint8_t *dst)   ///< inner
 {
     RIPEMD160_CTX context;
     RIPEMD160_Init(&context);
     RIPEMD160_Update(&context, reinterpret_cast<void const *>(&src), sizeof(uint256_t));
-    RIPEMD160_Final(dst.begin(), &context);
+    RIPEMD160_Final(dst, &context);
 }
 
-void        hash160(const void *src, const uint32_t size, uint160_t &dst)
+void        hash160(const void *src, const uint32_t size, uint8_t *dst)
 {
     uint256_t tmp;
-    sha256(src, size, tmp);
-    ripe160(tmp, dst);
+    __sha256(src, size, tmp);
+    __ripe160(tmp, dst);
 }
 
 // BIP-16
 /** Convert datum hash160 into base58 encoded string */
-string      ripe2addr(const uint160_t &src, const uint8_t pfx)
+string      ripe2addr(const uint8_t *src, const uint8_t pfx)
 {
     uint8_t tmp1[sizeof(uint160_t)+5];
     tmp1[0] = pfx;
-    memcpy(tmp1+1, &src, sizeof (uint160_t));   // 1. add leading 0
+    memcpy(tmp1+1, src, sizeof (uint160_t));   // 1. add leading 0
     uint256_t tmp2;
     hash256(tmp1, sizeof (uint160_t)+1, tmp2);  // 2. 2 x sha256
     memcpy(tmp1+21, &(tmp2[0]), 4);             // 3. add crc
@@ -77,7 +75,7 @@ string      ripe2addr(const uint160_t &src, const uint8_t pfx)
 /** Convert from one power-of-2 number base to another. */
 // bitcoin-core/src/util/strencodings.h
 template<int frombits, int tobits, bool pad, typename O, typename I>
-bool ConvertBits(const O& outfn, I it, I end) {
+bool __ConvertBits(const O& outfn, I it, I end) {
     size_t acc = 0;
     size_t bits = 0;
     constexpr size_t maxv = (1 << tobits) - 1;
@@ -100,16 +98,16 @@ bool ConvertBits(const O& outfn, I it, I end) {
 }
 
 // BIP-173 (https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki)
-std::string wpkh2addr(const uint160_t & v) {
+std::string wpkh2addr(const uint8_t *v) {
     std::vector<unsigned char> data = {0};
     data.reserve(33);
-    ConvertBits<8, 5, true>([&](unsigned char c) { data.push_back(c); }, v.begin(), v.end());
+    __ConvertBits<8, 5, true>([&](unsigned char c) { data.push_back(c); }, v, v + sizeof (uint160_t));
     return Bech32Encode(data);
 }
 
-std::string wsh2addr(const uint256_t & v) {
+std::string wsh2addr(const uint8_t *v) {
     std::vector<unsigned char> data = {0};
     data.reserve(53);
-    ConvertBits<8, 5, true>([&](unsigned char c) { data.push_back(c); }, v.begin(), v.end());
+    __ConvertBits<8, 5, true>([&](unsigned char c) { data.push_back(c); }, v, v + sizeof (uint256_t));
     return Bech32Encode(data);
 }

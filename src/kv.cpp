@@ -7,7 +7,7 @@ uint32_t    KV_T::count(void)
     return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
 }
 
-uint32_t    KV_T::real_add(const uint8_t *key, const uint16_t size)
+uint32_t    KV_T::add_raw(const uint8_t *key, const uint16_t size)
 {
     //auto value = map.emplace(key, value);   // FIXME: emplace() w/ checking retvalue
     auto value = count();
@@ -17,7 +17,7 @@ uint32_t    KV_T::real_add(const uint8_t *key, const uint16_t size)
     return value;
 }
 
-uint32_t    KV_T::real_get(const uint8_t *key, const uint16_t size)
+uint32_t    KV_T::get_raw(const uint8_t *key, const uint16_t size)
 {
     uint32_t value;
     auto result = db.get((const char *)key, size, (char *)&value, sizeof(uint32_t));
