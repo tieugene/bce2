@@ -5,7 +5,6 @@
 #include "uintxxx.h"
 
 bool        cli(int const, char *[]); ///< Handle CLI. Return 0 if error, argv's index of 1st filename on success.
-// inline bool job_mode(void) { return(!OPTS.cachedir.empty()); }
 long        memused(void);
 
 uint32_t    read_v(void);

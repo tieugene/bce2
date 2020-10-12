@@ -3,6 +3,7 @@
 #ifndef SCRIPT_H
 #define SCRIPT_H
 
+#include <vector>
 #include "uintxxx.h"
 
 typedef std::vector<std::string> string_list;
@@ -44,20 +45,5 @@ public:
 bool        script_decode(uint8_t *, const uint32_t);
 
 extern ADDR_FOUND_T CUR_ADDR;
-
-/*
-struct  ADDRS_T {
-    uint32_t    id;
-    SCTYPE      type;
-    char        qty;
-    uint160_t   addr[16];
-};
-
-const char *get_addrs_type(void);
-std::vector<std::string> get_addrs_strs(void);
-
-extern ADDRS_T    CUR_ADDR;
-extern uint256_t  WSH;           // hack: for P2WSH only
-*/
 
 #endif // SCRIPT_H

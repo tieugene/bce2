@@ -3,7 +3,6 @@
 #define KV_H
 
 #include <kcpolydb.h>
-#include <stdio.h>
 #include "uintxxx.h"
 
 const uint32_t NOT_FOUND_U32 = 0xFFFFFFFF;
@@ -25,17 +24,9 @@ public:
     uint32_t    add_raw(const uint8_t *, const uint16_t);
     uint32_t    add(const uint256_t &key)                     // tx, WSH
                 { return add_raw(key.begin(), sizeof(uint256_t)); }
-    uint32_t    add(const uint160_t &key)                     // PK, PKH, ?SH, WPKH
-                { return add_raw(key.begin(), sizeof(uint160_t)); }
-    uint32_t    add(const uint160_t key[], const uint8_t len) // MULTISIG
-                { return add_raw(key[0].begin(), sizeof(uint160_t) * len); }
     uint32_t    get_raw(const uint8_t *, const uint16_t);
     uint32_t    get(const uint256_t &key)
                 { return get_raw(key.begin(), sizeof(uint256_t)); }
-    uint32_t    get(const uint160_t &key)
-                { return get_raw(key.begin(), sizeof(uint160_t)); }
-    uint32_t    get(const uint160_t key[], const uint8_t len)
-                { return get_raw(key[0].begin(), sizeof(uint160_t) * len); }
 };
 
 #endif // KV_H

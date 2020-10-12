@@ -70,7 +70,7 @@ const string_list ADDR_FOUND_T::get_strings(void)
         retvalue.push_back(wsh2addr(buffer));
         break;
     case MULTISIG:
-        for (auto i = 0; i < CUR_ADDR.qty; i++)
+        for (uint8_t i = 0; i < CUR_ADDR.qty; i++)
             retvalue.push_back(ripe2addr(buffer + i * sizeof(uint160_t)));
         break;
     default:    // nulldata, nonstandard
@@ -116,10 +116,12 @@ void ADDR_FOUND_T::add_data(const SCTYPE t, const uint8_t *src)
         len = sizeof (uint160_t) + 1;
         buffer[0] = KEY_W;
         memcpy(buffer + 1, src, sizeof (uint160_t));
+        break;
     case W0SCRIPTHASH:
         qty = 1;
         len = sizeof (uint256_t);
         memcpy(buffer, src, sizeof (uint256_t));
+        break;
     case MULTISIG:
         hash160(src + 1, src[0], buffer + qty * sizeof(uint160_t));
         qty++;
@@ -136,9 +138,6 @@ bool    do_P2PKu(void)                   ///< pubkey (uncompressed)
         and script_ptr[66] == OP_CHECKSIG   // end signature
         )
     {
-        //CUR_ADDR.type = PUBKEY;
-        //CUR_ADDR.qty = 1;
-        //hash160(script_ptr+1, script_size-2, CUR_ADDR.addr[0]);
         CUR_ADDR.add_data(PUBKEYu, script_ptr+1);
         return true;
     }
@@ -167,10 +166,6 @@ bool    do_P2PKH(void)                  ///< pubkeyhash
         script_ptr[23] == OP_EQUALVERIFY and
         script_ptr[24] == OP_CHECKSIG)
     {
-
-        //CUR_ADDR.type = PUBKEYHASH;
-        //CUR_ADDR.qty = 1;
-        //memcpy(&CUR_ADDR.addr[0], script_ptr+3, sizeof (uint160_t));
         CUR_ADDR.add_data(PUBKEYHASH, script_ptr+3);
         return true;
     }
@@ -186,9 +181,6 @@ bool    do_P2SH(void)                   ///< scripthash
         script_ptr[22] == OP_EQUAL
         )
     {
-        //CUR_ADDR.type = SCRIPTHASH;
-        //CUR_ADDR.qty = 1;
-        //memcpy(&CUR_ADDR.addr[0], script_ptr+2, sizeof (uint160_t));
         CUR_ADDR.add_data(SCRIPTHASH, script_ptr+2);
         return true;
     }
@@ -198,14 +190,12 @@ bool    do_P2SH(void)                   ///< scripthash
 
 bool    do_P2WPKH(void)                 ///< witness_v0_*
 {
-    //memcpy(&CUR_ADDR.addr[0], script_ptr+2, script_ptr[1]);
     CUR_ADDR.add_data(W0KEYHASH, script_ptr+2);
     return true;
 }
 
 bool    do_P2WSH(void)                 ///< witness_v0_*
 {
-    // memcpy(&WSH, script_ptr+2, script_ptr[1]);
     CUR_ADDR.add_data(W0SCRIPTHASH, script_ptr+2);
     return true;
 }

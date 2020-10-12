@@ -1,6 +1,10 @@
 #ifndef BKIDX_H
 #define BKIDX_H
 
+#include <cstdint>
+#include <iostream>
+#include <fstream>
+
 const uint32_t  MAX_BK_SIZE = 4 << 20;  // 4MB enough
 
 struct  FOFF_T      ///< files-offset array

@@ -179,16 +179,7 @@ bool    parse_vout(const bool dojob)
     BUSY.vout = false;
     return true;
 }
-/*
-void    __debug_addr(void)
-{
-    printf("%d\t%d\t%d\t%s", COUNT.bk, LOCAL.tx, LOCAL.vout, get_addrs_type());
-    if (CUR_ADDR.qty)
-        printf("\t%s\n", get_addrs_str().c_str());
-    else
-        printf("\n");
-}
-*/
+
 bool    parse_script(void)
 {
     /// FIXME: nulldata is not spendable
