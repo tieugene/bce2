@@ -28,7 +28,11 @@ private:
     SCTYPE      type;
     uint8_t     qty;
     uint16_t    len;
-    uint8_t     buffer[sizeof (uint160_t) * 16];    // max P2MS size
+    union   {
+        uint8_t     u8[16 * sizeof (uint160_t)];    // max P2MS size
+        uint160_t   *u160;
+        uint256_t   *u256;
+    } buffer;
 public:
     void                reset(void);
     inline void         set_id(const uint32_t v) { id = v; }
@@ -39,7 +43,7 @@ public:
     const string_list   get_strings(void);
     void                add_data(const SCTYPE, const uint8_t *);
     inline uint16_t     get_len(void) { return len; }
-    inline uint8_t      *get_data() { return buffer; }
+    inline uint8_t      *get_data() { return buffer.u8; }
 };
 
 bool        script_decode(uint8_t *, const uint32_t);

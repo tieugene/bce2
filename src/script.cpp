@@ -5,7 +5,7 @@
  * - bitcoin-core-x/src/key-io.cpp
  */
 #include <iostream>
-#include <cstring>
+#include <cstring>  // memset
 #include "bce.h"
 #include "misc.h"
 #include "script.h"
@@ -48,7 +48,7 @@ void ADDR_FOUND_T::reset(void)
     type = NONSTANDARD;
     qty = 0;
     len = 0;
-    memset(buffer, 0, sizeof (buffer));
+    memset(buffer.u8, 0, sizeof (buffer.u8));
 }
 
 const string_list ADDR_FOUND_T::get_strings(void)
@@ -58,20 +58,20 @@ const string_list ADDR_FOUND_T::get_strings(void)
     case PUBKEYu:
     case PUBKEYc:
     case PUBKEYHASH:
-        retvalue.push_back(ripe2addr(buffer + 1));
+        retvalue.push_back(ripe2addr(buffer.u8 + 1));
         break;
     case SCRIPTHASH:
-        retvalue.push_back(ripe2addr(buffer + 1, 5));
+        retvalue.push_back(ripe2addr(buffer.u8 + 1, 5));
         break;
     case W0KEYHASH:
-        retvalue.push_back(wpkh2addr(buffer));
+        retvalue.push_back(wpkh2addr(buffer.u8));
         break;
     case W0SCRIPTHASH:
-        retvalue.push_back(wsh2addr(buffer));
+        retvalue.push_back(wsh2addr(buffer.u8));
         break;
     case MULTISIG:
         for (uint8_t i = 0; i < CUR_ADDR.qty; i++)
-            retvalue.push_back(ripe2addr(buffer + i * sizeof(uint160_t)));
+            retvalue.push_back(ripe2addr(buffer.u8 + i * sizeof(uint160_t)));
         break;
     default:    // nulldata, nonstandard
         ;
@@ -90,40 +90,40 @@ void ADDR_FOUND_T::add_data(const SCTYPE t, const uint8_t *src)
     case PUBKEYu:
         qty = 1;
         len = sizeof (uint160_t) + 1;
-        buffer[0] = KEY_0;
-        hash160(src, 65, buffer + 1);
+        buffer.u8[0] = KEY_0;
+        hash160(src, 65, buffer.u8 + 1);
         break;
     case PUBKEYc:
         qty = 1;
         len = sizeof (uint160_t) + 1;
-        buffer[0] = KEY_0;
-        hash160(src, 33, buffer + 1);
+        buffer.u8[0] = KEY_0;
+        hash160(src, 33, buffer.u8 + 1);
         break;
     case PUBKEYHASH:
         qty = 1;
         len = sizeof (uint160_t) + 1;
-        buffer[0] = KEY_0;
-        memcpy(buffer + 1, src, sizeof (uint160_t));
+        buffer.u8[0] = KEY_0;
+        memcpy(buffer.u8 + 1, src, sizeof (uint160_t));
         break;
     case SCRIPTHASH:
         qty = 1;
         len = sizeof (uint160_t) + 1;
-        buffer[0] = KEY_S;  // !!! 1 => add 0x05 on base58
-        memcpy(buffer + 1, src, sizeof (uint160_t));
+        buffer.u8[0] = KEY_S;  // !!! 1 => add 0x05 on base58
+        memcpy(buffer.u8 + 1, src, sizeof (uint160_t));
         break;
     case W0KEYHASH:
         qty = 1;
         len = sizeof (uint160_t) + 1;
-        buffer[0] = KEY_W;
-        memcpy(buffer + 1, src, sizeof (uint160_t));
+        buffer.u8[0] = KEY_W;
+        memcpy(buffer.u8 + 1, src, sizeof (uint160_t));
         break;
     case W0SCRIPTHASH:
         qty = 1;
         len = sizeof (uint256_t);
-        memcpy(buffer, src, sizeof (uint256_t));
+        memcpy(buffer.u8, src, sizeof (uint256_t));
         break;
     case MULTISIG:  // starting from key_len (!)
-        hash160(src + 1, src[0], buffer + qty * sizeof(uint160_t));
+        hash160(src + 1, src[0], buffer.u8 + qty * sizeof(uint160_t));
         qty++;
         len += sizeof (uint160_t);
         break;
