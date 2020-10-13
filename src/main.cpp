@@ -125,14 +125,8 @@ bool    set_cash(void)
                 tpath = OPTS.cachedir + "tx.kch";
                 apath = OPTS.cachedir + "addr.kch";
             }
-            if (!TxKC->init(tpath)) {
-                cerr << "Can't open 'tx' cache: " << tpath << endl;
+            if (!(TxKC->init(tpath)) or (!AddrKC->init(apath)))
                 return false;
-            }
-            if (!AddrKC->init(apath)) {
-                cerr << "Can't open 'addr' cache " << apath << endl;
-                return false;
-            }
             tx_full = bool(TxKC->count());
             addr_full = bool(AddrKC->count());
             if (tx_full != addr_full and OPTS.from > 0) {
@@ -166,22 +160,24 @@ bool    set_cash(void)
                 if (tx_full) {
                     if (OPTS.verbose)
                         cerr << "Loading txs ...";
+                    auto t = time(nullptr);
                     if (!TxKC->cpto(TxMEM)) {
                         cerr << "Loading tx Error." << endl;
                         return false;
                     }
                     if (OPTS.verbose)
-                        cerr << "OK." << endl;
+                        cerr << time(nullptr)-t << "s OK." << endl;
                 }
                 if (addr_full) {
                     if (OPTS.verbose)
                         cerr << "Loading addrs ...";
+                    auto t = time(nullptr);
                     if (!AddrKC->cpto(AddrMEM)) {
                         cerr << "Error." << endl;
                         return false;
                     }
                     if (OPTS.verbose)
-                        cerr << "OK." << endl;
+                        cerr << time(nullptr)-t << "s OK." << endl;
                 }
             } else {    // mem-only
                 if (OPTS.from > 0) {

@@ -12,7 +12,7 @@ import json
 MAXDELTA = 1
 
 def walk(f):
-    data = dict()   # id: (str, qty)
+    data = dict()   # id: (str/list, orig_str, qty)
     tpl = re.compile(r"^[-+]a\t\d+\t")  # id | str | qty
     l1 = l2 = None
     for line in f:
@@ -24,7 +24,7 @@ def walk(f):
             repr = json.loads(part[2])
             if (type(repr) == list):
                 repr.sort()
-            val = (repr, int(part[3]))
+            val = (repr, part[2], int(part[3]))
             if line[0] == '-':  # -was
                 data[key] = val
             else:               # +new
@@ -32,14 +32,14 @@ def walk(f):
                 if was:
                     del data[key]
                     if val[0] != was[0]:    # eq
-                        print("-a\t{}\t{}\t{}".format(key, was[0], was[1]))
+                        print("-a\t{}\t{}\t{}".format(key, was[1], was[2]))
                         print(line)
                 else:
                     print(line)
         else:
             print(line)
     for k, v in data.items():
-        print("-a\t{}\t{}\t{}".format(k, v[0], v[1]))
+        print("-a\t{}\t{}\t{}".format(k, v[1], v[2]))
 
 def main():
     if len(sys.argv) > 1:

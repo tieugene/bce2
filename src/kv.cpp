@@ -1,6 +1,14 @@
 #include "kv.h"
 #include "misc.h"
 
+bool        KV_T::init(const string &s)
+{
+    auto retvalue = db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE);
+    if (not retvalue)
+        cerr << "Can't oprn db '" << s << "'." << endl;
+    return retvalue;
+}
+
 uint32_t    KV_T::count(void)
 {
     auto retvalue = db.count();

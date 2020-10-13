@@ -14,8 +14,7 @@ class KV_T {
 private:
     kyotocabinet::PolyDB     db;
 public:
-    bool        init(const string &s)
-                { return db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE); }
+    bool        init(const string &);
     void        clear(void) { db.clear(); }
     uint32_t    count(void);
     bool        cpto(KV_T *, bool = false);

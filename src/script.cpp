@@ -122,7 +122,7 @@ void ADDR_FOUND_T::add_data(const SCTYPE t, const uint8_t *src)
         len = sizeof (uint256_t);
         memcpy(buffer, src, sizeof (uint256_t));
         break;
-    case MULTISIG:
+    case MULTISIG:  // starting from key_len (!)
         hash160(src + 1, src[0], buffer + qty * sizeof(uint160_t));
         qty++;
         len += sizeof (uint160_t);
@@ -130,15 +130,32 @@ void ADDR_FOUND_T::add_data(const SCTYPE t, const uint8_t *src)
     }
 }
 
+inline bool chk_PKu_pfx(const uint8_t pfx)    // check PKu prefix
+{
+    /*
+     * Prefix byte must be 0x04, but there are some exceptions, e.g.
+     * bk 230217
+     * tx 657aecafe66d729d2e2f6f325fcc4acb8501d8f02512d1f5042a36dd1bbd21d1
+     * vouts 34 (7), 100 (6), 158 (7), 360 (6)
+     * but *not* 5 (vouts 189, 242)
+     */
+    return (pfx & 0xFC) == 0x04 and pfx != 0x05;
+}
+
+inline bool chk_PKc_pfx(const uint8_t pfx)    // check PKu prefix
+{
+    // prefix byte == 2..3
+    return (pfx & 0xFE) == 0x02;
+}
+
 bool    do_P2PKu(void)                   ///< pubkey (uncompressed)
 {
     // https://learnmeabitcoin.com/technical/public-key
     if (script_size == 67
-        and script_ptr[1] == 0x04           // prefix
-        and script_ptr[66] == OP_CHECKSIG   // end signature
-        )
+        and chk_PKu_pfx(script_ptr[1])
+        and script_ptr[66] == OP_CHECKSIG)   // end signature
     {
-        CUR_ADDR.add_data(PUBKEYu, script_ptr+1);
+        CUR_ADDR.add_data(PUBKEYu, script_ptr+1);   // &pfx_byte
         return true;
     }
     dump_script("Bad P2PKu");
@@ -148,7 +165,7 @@ bool    do_P2PKu(void)                   ///< pubkey (uncompressed)
 bool    do_P2PKc(void)                   ///< pubkey (compressed)
 {
     if (script_size == 35                   // compressed
-        and (script_ptr[1] & 0xFE) == 0x02  // prefix = 2..3
+        and chk_PKc_pfx(script_ptr[1])
         and script_ptr[34] == OP_CHECKSIG)
     {
         CUR_ADDR.add_data(PUBKEYc, script_ptr+1);
@@ -207,23 +224,22 @@ bool    do_P2MS(void)                   ///< multisig
     auto retvalue = false;
     auto key_ptr = script_ptr + 1;  // key len
     //cout << msize << ": " << script_size << "==" << (5 + msize * 65) << endl;   //2:135=135,3:201=200, 16:1059=1045
-    if (
-        script_ptr[script_size-1] == OP_CHKMULTISIG     // 2nd signature
+    if (script_ptr[script_size-1] == OP_CHKMULTISIG     // 2nd signature
         and script_ptr[0] <= *keys_qty_ptr              // required (== opcode) <= qty
-        and *keys_qty_ptr <= OP_16                      // max 16 keys
-//        and script_size == (3 + msize_num * 66)
-       )
+        and *keys_qty_ptr <= OP_16)                     // max 16 keys
     {
         for (auto i = 0; i < keys_qty and key_ptr < keys_qty_ptr; i++, key_ptr += (key_ptr[0]+1)) {
-            if (((*key_ptr == 0x41) and (key_ptr[1] == 0x04))
-                or ((*key_ptr == 0x21) and ((key_ptr[1] & 0xFE) == 0x02)))
-                //hash160(key_ptr+1, *key_ptr, CUR_ADDR.addr[i]);
-                CUR_ADDR.add_data(MULTISIG, key_ptr);
-            else
+            if (((*key_ptr == 0x41) and chk_PKu_pfx(key_ptr[1]))
+             or ((*key_ptr == 0x21) and chk_PKc_pfx(key_ptr[1]))) {
+                if (keys_qty == 1)    // special case: 1-in-1
+                    CUR_ADDR.add_data((*key_ptr == 0x41) ? PUBKEYu : PUBKEYc, key_ptr+1);   // starting from byte_pfx
+                else
+                    CUR_ADDR.add_data(MULTISIG, key_ptr);   // starting from key_len
+             } else
                 break;
         }
     }
-    if (key_ptr == keys_qty_ptr)
+    if (key_ptr == keys_qty_ptr)    // final chk
         retvalue = true;
     else
         dump_script("Bad P2MS");
