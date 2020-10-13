@@ -17,7 +17,7 @@ public:
     bool        init(const string &);
     void        clear(void) { db.clear(); }
     uint32_t    count(void);
-    bool        cpto(KV_T *, bool = false);
+    bool        cpto(KV_T *);
     bool        add(const string &key, const uint32_t value)
                 { db.add(key, string((const char *)&value, sizeof(value))); return true; }
     uint32_t    add_raw(const uint8_t *, const uint16_t);

@@ -34,15 +34,18 @@ uint32_t    KV_T::get_raw(const uint8_t *key, const uint16_t size)
     return value;
 }
 
-bool        KV_T::cpto(KV_T *dst, bool erase)
+bool        KV_T::cpto(KV_T *dst)
 {
-    if (erase)
-        dst->clear();
-    auto cur = db.cursor();
-    cur->jump();
-    string key, cvalue;
-    while (cur->get(&key, &cvalue, true))    // string:string
-        dst->add(key, *((uint32_t *) cvalue.c_str()));
-    delete cur;
+    /*
+        auto cur = db.cursor();
+        cur->jump();
+        string key, cvalue;
+        while (cur->get(&key, &cvalue, true))    // string:string
+            dst->add(key, *((uint32_t *) cvalue.c_str()));
+        delete cur;
+    */
+    kyotocabinet::BasicDB *tmp[1];
+    tmp[0] = &db;
+    dst->db.merge(tmp, 1, kyotocabinet::PolyDB::MADD);
     return true;
 }

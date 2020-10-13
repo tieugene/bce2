@@ -52,7 +52,7 @@ void        out_addr(void)
 void        __prn_bk(void)  // TODO: hash
 {
     //time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);
-    cerr
+    cout
         << "Bk: " << COUNT.bk
         << ", time: " << CUR_BK.head_ptr->time
         << ", hash: " << hash2hex(CUR_BK.hash)
@@ -64,7 +64,7 @@ void        __prn_bk(void)  // TODO: hash
 
 void        __prn_tx(void)
 {
-    cerr
+    cout
         << "  Tx: " << LOCAL.tx
         << " (" << COUNT.tx << ")"
         << ", hash: " << hash2hex(CUR_TX.hash)
@@ -77,13 +77,13 @@ void        __prn_tx(void)
 
 void        __prn_vin(void)
 {
-    cerr << "    Vin: " << LOCAL.vin
+    cout << "    Vin: " << LOCAL.vin
         << ", src: ";
     if (CUR_VIN.vout == 0xFFFFFFFF)
-        cerr << "<coinbase>";
+        cout << "<coinbase>";
     else
-        cerr << "(Tx: " << CUR_VIN.txno << ", vout: " << CUR_VIN.vout << ")";
-    cerr
+        cout << "(Tx: " << CUR_VIN.txno << ", vout: " << CUR_VIN.vout << ")";
+    cout
         << ", ssize: " << CUR_VIN.ssize
         << ", seq: " << CUR_VIN.seq
         << endl;
@@ -91,7 +91,7 @@ void        __prn_vin(void)
 
 void        __prn_vout(void)
 {
-    cerr
+    cout
         << "    Vout: " << LOCAL.vout
         << ", no: " << LOCAL.vout
         << ", $: " << CUR_VOUT.satoshi
@@ -108,10 +108,10 @@ void        __prn_addr(void)
         for (size_t i = 1; i < alist.size(); i++)
             v = v + "," + alist[i];
     }
-    cerr << "      Addr: " << CUR_ADDR.get_type_name();
+    cout << "      Addr: " << CUR_ADDR.get_type_name();
     if (!v.empty())
-        cerr << " " << v;
-    cerr << endl;
+        cout << " " << v;
+    cout << endl;
 }
 
 // ====

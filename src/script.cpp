@@ -241,8 +241,10 @@ bool    do_P2MS(void)                   ///< multisig
     }
     if (key_ptr == keys_qty_ptr)    // final chk
         retvalue = true;
-    else
+    else {
+        CUR_ADDR.reset();
         dump_script("Bad P2MS");
+    }
     return retvalue;
 }
 
