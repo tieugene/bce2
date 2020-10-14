@@ -6,6 +6,8 @@
  */
 #include <iostream>
 #include <cstring>  // memset
+#include <algorithm>
+#include <unistr.h> // u8_cmp
 #include "bce.h"
 #include "misc.h"
 #include "script.h"
@@ -21,11 +23,12 @@ enum    KYE_TYPE_T {
 void    dump_script(const string &);
 
 ADDR_FOUND_T CUR_ADDR;
-// ADDRS_T CUR_ADDR;
-// uint256_t WSH;           // hack: for P2WSH only
 
 static uint8_t  *script_ptr;    // ptr to currently decoded opcode
 static uint32_t script_size;    // script size
+
+bool cmp_uint160(const uint160_t &l, const uint160_t &r)    // desc
+    { return memcmp(&l, &r, sizeof (uint160_t)) > 0; }
 
 const char *ADDR_FOUND_T::get_type_name(void)
 {
@@ -130,6 +133,12 @@ void ADDR_FOUND_T::add_data(const SCTYPE t, const uint8_t *src)
     }
 }
 
+inline void ADDR_FOUND_T::sort_multisig(void)
+{
+    if (qty > 1)
+        std::sort(buffer.u160.begin(), buffer.u160.end(), cmp_uint160);
+}
+
 inline bool chk_PKu_pfx(const uint8_t pfx)    // check PKu prefix
 {
     /*
@@ -148,7 +157,7 @@ inline bool chk_PKc_pfx(const uint8_t pfx)    // check PKu prefix
     return (pfx & 0xFE) == 0x02;
 }
 
-bool    do_P2PKu(void)                   ///< pubkey (uncompressed)
+bool    do_P2PKu(void)                  ///< pubkey (uncompressed)
 {
     // https://learnmeabitcoin.com/technical/public-key
     if (script_size == 67
@@ -162,7 +171,7 @@ bool    do_P2PKu(void)                   ///< pubkey (uncompressed)
     return false;
 }
 
-bool    do_P2PKc(void)                   ///< pubkey (compressed)
+bool    do_P2PKc(void)                  ///< pubkey (compressed)
 {
     if (script_size == 35                   // compressed
         and chk_PKc_pfx(script_ptr[1])
@@ -211,7 +220,7 @@ bool    do_P2WPKH(void)                 ///< witness_v0_*
     return true;
 }
 
-bool    do_P2WSH(void)                 ///< witness_v0_*
+bool    do_P2WSH(void)                  ///< witness_v0_*
 {
     CUR_ADDR.add_data(W0SCRIPTHASH, script_ptr+2);
     return true;
@@ -239,9 +248,10 @@ bool    do_P2MS(void)                   ///< multisig
                 break;
         }
     }
-    if (key_ptr == keys_qty_ptr)    // final chk
+    if (key_ptr == keys_qty_ptr) {    // final chk
+        CUR_ADDR.sort_multisig();
         retvalue = true;
-    else {
+    } else {
         CUR_ADDR.reset();
         dump_script("Bad P2MS");
     }

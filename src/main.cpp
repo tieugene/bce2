@@ -125,7 +125,7 @@ bool    set_cash(void)
                 tpath = OPTS.cachedir + "tx.kch";
                 apath = OPTS.cachedir + "addr.kch";
             }
-            if (!(TxKC->init(tpath)) or (!AddrKC->init(apath)))
+            if (!TxKC->init(tpath) or !AddrKC->init(apath))
                 return false;
             tx_full = bool(TxKC->count());
             addr_full = bool(AddrKC->count());

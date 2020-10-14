@@ -4,8 +4,8 @@
 bool        KV_T::init(const string &s)
 {
     auto retvalue = db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE);
-    if (not retvalue)
-        cerr << "Can't oprn db '" << s << "'." << endl;
+    if (!retvalue)
+        cerr << "Can't open db '" << s << "'." << endl;
     return retvalue;
 }
 

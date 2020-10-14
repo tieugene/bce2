@@ -4,6 +4,7 @@
 #define SCRIPT_H
 
 #include <vector>
+#include <array>
 #include "uintxxx.h"
 
 typedef std::vector<std::string> string_list;
@@ -29,8 +30,8 @@ private:
     uint8_t     qty;
     uint16_t    len;
     union   {
-        uint8_t     u8[16 * sizeof (uint160_t)];    // max P2MS size
-        uint160_t   *u160;
+        uint8_t     u8[16*sizeof(uint160_t)];    // max P2MS size
+        std::array<uint160_t, 16>   u160;
         uint256_t   *u256;
     } buffer;
 public:
@@ -44,6 +45,7 @@ public:
     void                add_data(const SCTYPE, const uint8_t *);
     inline uint16_t     get_len(void) { return len; }
     inline uint8_t      *get_data() { return buffer.u8; }
+    void                sort_multisig(void);
 };
 
 bool        script_decode(uint8_t *, const uint32_t);
