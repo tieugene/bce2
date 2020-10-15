@@ -6,7 +6,6 @@ Summary:	BTC blockchain export
 Source:		%{name}-%{version}.tar.gz
 BuildRequires:	gcc-c++
 BuildRequires:	cmake
-BuildRequires:	boost-devel
 # openssl-devel
 BuildRequires:	pkgconfig(libcrypto)
 # kyotocabinet-devel
