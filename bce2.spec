@@ -3,13 +3,15 @@ Version:	0.0.1
 Release:	1%{?dist}
 License:	GPLv3
 Summary:	BTC blockchain export
-Source:		%{name}-%{version}.tar.gz
+Source:		%{name}-%{version}.tar.bz2
 BuildRequires:	gcc-c++
 BuildRequires:	cmake
 # openssl-devel
 BuildRequires:	pkgconfig(libcrypto)
 # kyotocabinet-devel
 BuildRequires:	pkgconfig(kyotocabinet)
+# leveldb-devel
+BuildRequires:	cmake(leveldb)
 
 
 %description
@@ -33,6 +35,7 @@ BitCoin Export 2 is tool to export BTC blockchain into SQL loadable files.
 %license LICENSE
 %doc README.md
 %{_bindir}/%{name}
+%{_bindir}/btcbklocs
 
 
 %changelog
