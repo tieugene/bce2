@@ -6,10 +6,12 @@
 #include <cstdlib>
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/resource.h>
 #include "bce.h"
 #include "misc.h"
 #include "script.h" // cur_addr only
+#if defined(__APPLE__)
+#include <mach/mach.h>
+#endif
 
 static string  help_txt = "\
 Usage: [options] <file-offset_file>\n\
@@ -17,7 +19,8 @@ Options:\n\
 -f n      - block starts from (default=0)\n\
 -n n      - blocks to process (default=1, 0=all)\n\
 -d <path> - *.dat folder (default='' - current folder)\n\
--c <path> - cache data folder\n\
+-k <path> - key-value folder\n\
+-m        - use inmem key-value\n\
 -o        - output results\n\
 -v[n]     - verbose (debug info to stderr):\n\
     0 - errors only (default)\n\
@@ -36,6 +39,7 @@ void        __prn_opts(void)
         << TAB << "Debug:" << TAB << OPTS.verbose << endl
         << TAB << "DatDir:" << TAB << OPTS.datdir << endl
         << TAB << "Cache:" << TAB << OPTS.cachedir << endl
+        << TAB << "InMem:" << TAB << OPTS.inmem << endl
     ;
 }
 
@@ -48,9 +52,10 @@ bool        cli(int argc, char *argv[])
     OPTS.num = 1;
     OPTS.datdir = "";
     // OPTS.cachedir = ".";
+    OPTS.inmem = false;
     OPTS.out = false;
-    OPTS.verbose = 0;
-    while ((opt = getopt(argc, argv, "f:n:d:c:ov::")) != -1)
+    OPTS.verbose = DBG_NONE;
+    while ((opt = getopt(argc, argv, "f:n:d:k:mov::")) != -1)
     {
         switch (opt) {
             case 'f':   // FIXME: optarg < 0 | > 999999
@@ -67,14 +72,18 @@ bool        cli(int argc, char *argv[])
             case 'd':
                 OPTS.datdir = optarg;
                 break;
-            case 'c':
+            case 'k':
                 OPTS.cachedir = optarg;
+                OPTS.cash = !OPTS.cachedir.empty();
+                break;
+            case 'm':
+                OPTS.inmem = true;
                 break;
             case 'o':
                 OPTS.out = true;
                 break;
             case 'v':   // FIXME: optarg = 0..5
-                OPTS.verbose = (optarg) ? atoi(optarg) : 1;
+                OPTS.verbose = (optarg) ? (DBG_LVL_T)atoi(optarg) : DBG_MIN;
                 break;
             case '?':   // can handle optopt
                 cerr << help_txt << endl;
@@ -92,13 +101,28 @@ bool        cli(int argc, char *argv[])
     return retvalue;
 }
 
-long memused(void)
+long        get_statm(void)   ///< returns used memory in kilobytes
 {
-    rusage rused;
-    long retvalue = 0;
-    if (getrusage(RUSAGE_SELF, &rused) == 0)
-      retvalue = rused.ru_maxrss;
-    return retvalue;
+    long    total = 0;  // rss, shared, text, lib, data, dt; man proc
+#if defined (__linux__)
+    ifstream statm("/proc/self/statm");
+    statm >> total; // >> rss...
+    statm.close();
+    total *= (sysconf(_SC_PAGE_SIZE) >> 10);  // pages-ze = 4k in F32_x64
+#elif defined(__APPLE__)
+    struct task_basic_info t_info;
+    mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
+    if (KERN_SUCCESS == task_info(mach_task_self(),
+        TASK_BASIC_INFO, (task_info_t)&t_info,
+        &t_info_count))
+        total = t_info.virtual_size >> 10;
+#endif
+    return total;
+}
+
+long        memused(void)
+{
+    return get_statm();
 }
 
 uint32_t    read_v(void)   ///<read 1..4-byte int and forward;
@@ -158,4 +182,9 @@ string      ptr2hex(void const *vptr, size_t const size)
         s.push_back(hex_chars[(*cptr & 0x0F)]);
     }
     return s;
+}
+
+string      str2hex(const string &s)
+{
+    return ptr2hex(s.c_str(), s.size());
 }

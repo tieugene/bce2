@@ -23,7 +23,7 @@ bool    parse_bk(void)
     if (OPTS.out) // on demand
     {
         hash256(CUR_BK.head_ptr, sizeof(BK_HEAD_T), CUR_BK.hash);
-        if (OPTS.cash)
+        if (kv_mode())
             out_bk();
         else
             __prn_bk();
@@ -87,10 +87,10 @@ bool    parse_tx(void) // TODO: hash
         cerr << "Vins == 0" << endl;
         return false;
     }
-    if (OPTS.out or OPTS.cash) {
+    if (OPTS.out or kv_mode()) {
         if (!hash_tx(tx_beg))
             return false;
-        if (OPTS.cash) {
+        if (kv_mode()) {
             auto tx_added = TxDB->add(CUR_TX.hash);
             if (tx_added == NOT_FOUND_U32) {
                     cerr << "Can't add tx " << hash2hex(CUR_TX.hash) << endl;
@@ -135,7 +135,7 @@ bool    parse_vin(const bool dojob)
     if (!dojob)
         return true;
     BUSY.vin = true;
-    if (OPTS.cash)
+    if (kv_mode())
     {
         if (CUR_VIN.vout != COINBASE_vout) {
             CUR_VIN.txno = TxDB->get(*CUR_VIN.txid);
@@ -168,56 +168,29 @@ bool    parse_vout(const bool dojob)
     if (!dojob)
         return true;
     BUSY.vout = true;
+    if (!parse_script())
+        return false;
     if (OPTS.out) {
-        if (OPTS.cash)
+        if (kv_mode())
             out_vout();
         else
             __prn_vout();
     }
-    if (!parse_script())
-        return false;
     BUSY.vout = false;
     return true;
 }
-/*
-void    __debug_addr(void)
-{
-    printf("%d\t%d\t%d\t%s", COUNT.bk, LOCAL.tx, LOCAL.vout, get_addrs_type());
-    if (CUR_ADDR.qty)
-        printf("\t%s\n", get_addrs_str().c_str());
-    else
-        printf("\n");
-}
-*/
+
 bool    parse_script(void)
 {
     /// FIXME: nulldata is not spendable
     /// FIXME: empty script
     auto script_ok = script_decode(CUR_VOUT.script, CUR_VOUT.ssize);
-    if (script_ok and CUR_ADDR.qty) {
-        if (OPTS.cash) {
+    if (script_ok and CUR_ADDR.get_qty()) {
+        if (kv_mode()) {
             uint32_t addr_added;
-            switch (CUR_ADDR.type) {
-            case W0SCRIPTHASH:
-                addr_added = AddrDB->get(WSH);
-                break;
-            case MULTISIG:
-                addr_added = AddrDB->get(CUR_ADDR.addr, CUR_ADDR.qty);
-                break;
-            default:
-                addr_added = AddrDB->get(CUR_ADDR.addr[0]);
-            }
+            addr_added = AddrDB->get_raw(CUR_ADDR.get_data(), CUR_ADDR.get_len());
             if (addr_added == NOT_FOUND_U32) {
-                switch (CUR_ADDR.type) {
-                case W0SCRIPTHASH:
-                    addr_added = AddrDB->add(WSH);
-                    break;
-                case MULTISIG:
-                    addr_added = AddrDB->add(CUR_ADDR.addr, CUR_ADDR.qty);
-                    break;
-                default:
-                    addr_added = AddrDB->add(CUR_ADDR.addr[0]);
-                }
+                addr_added = AddrDB->add_raw(CUR_ADDR.get_data(), CUR_ADDR.get_len());
                 if (addr_added == NOT_FOUND_U32) {
                     cerr << "Can not find nor add addr " << endl;
                     return false;
@@ -226,10 +199,12 @@ bool    parse_script(void)
                         cerr << "Addr added as " << addr_added << " against waiting " << COUNT.addr << endl;
                         return false;
                 }
+                CUR_ADDR.set_id(addr_added);
                 if (OPTS.out)
                     out_addr(); // FIXME:
                 COUNT.addr += 1;
-            }
+            } else
+              CUR_ADDR.set_id(addr_added);
         } else if (OPTS.out)
             __prn_addr();
         STAT.addrs += 1;    // FIXME: if decoded and 1+

@@ -1,17 +1,21 @@
 #include "kv.h"
+#include "misc.h"
 
-bool        KVDB_T::init(const string &s)
+bool        KV_T::init(const string &s)
 {
-    return db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE); // | kyotocabinet::PolyDB::OTRUNCATE); // TODO:
+    auto retvalue = db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE);
+    if (!retvalue)
+        cerr << "Can't open db '" << s << "'." << endl;
+    return retvalue;
 }
 
-uint32_t    KVDB_T::count(void)
+uint32_t    KV_T::count(void)
 {
     auto retvalue = db.count();
     return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
 }
 
-uint32_t    KVDB_T::real_add(const uint8_t *key, const uint16_t size)
+uint32_t    KV_T::add_raw(const uint8_t *key, const uint16_t size)
 {
     //auto value = map.emplace(key, value);   // FIXME: emplace() w/ checking retvalue
     auto value = count();
@@ -21,7 +25,7 @@ uint32_t    KVDB_T::real_add(const uint8_t *key, const uint16_t size)
     return value;
 }
 
-uint32_t    KVDB_T::real_get(const uint8_t *key, const uint16_t size)
+uint32_t    KV_T::get_raw(const uint8_t *key, const uint16_t size)
 {
     uint32_t value;
     auto result = db.get((const char *)key, size, (char *)&value, sizeof(uint32_t));
@@ -30,31 +34,18 @@ uint32_t    KVDB_T::real_get(const uint8_t *key, const uint16_t size)
     return value;
 }
 
-// ====
-uint32_t    KVMEM_T::real_add(const uint8_t *raw_key, const uint16_t size)
+bool        KV_T::cpto(KV_T *dst)
 {
-    VARRAY_T key;
-    key.size = size;
-    key.data[size] = raw_key[size];
-    auto value = NOT_FOUND_U32;
-    cerr << "want to add" << endl;
-    if (db.find(key) == db.end()) {
-        value = db.size();
-        db.emplace(key, value);
-    }
-    cerr << "added " << value << endl;
-    return value;
-}
-
-uint32_t    KVMEM_T::real_get(const uint8_t *raw_key, const uint16_t size)
-{
-    VARRAY_T key;
-    key.size = size;
-    key.data[size] = raw_key[size];
-    auto value = NOT_FOUND_U32;
-    auto search = db.find(key);
-    if (search != db.end())
-        value = search->second;
-    cerr << "get " << value << endl;
-    return value;
+    /*
+        auto cur = db.cursor();
+        cur->jump();
+        string key, cvalue;
+        while (cur->get(&key, &cvalue, true))    // string:string
+            dst->add(key, *((uint32_t *) cvalue.c_str()));
+        delete cur;
+    */
+    kyotocabinet::BasicDB *tmp[1];
+    tmp[0] = &db;
+    dst->db.merge(tmp, 1, kyotocabinet::PolyDB::MADD);
+    return true;
 }

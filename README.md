@@ -1,6 +1,45 @@
-# bce
+# bce2 - BlockChain Export 2
 Blockchain export.
 CLI utility to export blockchain data into plain text format
+
+## Requires
+- openssl
+- boost
+- kyotocabinet
+
+## Input
+- block location file ({fileno:uint32, offset:uint32) for each block}
+- blockchain directory (with blkXXXXX.dat files)
+
+## Output
+Plaintext with records:
+- `b	id	'datetime'	'hash'`
+- `t	id	b.id	hash`
+- `i	t.id	vout	t.id`
+- `o	t.id	vout	$`
+- `a	id	"addr"|["addr",…]	qty`
+
+
+## FIXME
+Comparing to bcepy out:
+- o: +[a.id] # 540 diffs @ 0..50k
+- b: &check; time is GMT (must be localtime (+03w/+02s)
+- t: &check;
+- i: &check; t.id - <t.id - v => <t.id - v -t.id
+- a: &check; before 'o'; +qty
+
+## FUTURE:
+- b: s/'hash'/hash/
+- b: GMT
+- o: [a.id] => \N
+- a: -qty
+
+## Utility
+```
+#!/bin/sh
+# get bk by height
+bitcoin-cli getblock `bitcoin-cli getblockhash $1` 2 > $1.jso
+```
 
 ## Modes:
 Walk and count depending on -c & -o:
