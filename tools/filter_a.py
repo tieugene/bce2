@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Filter diff by ^a after comparing bcepy and bce2 output.
+Skip if sorted addrlists are equal
 Lines must be:
 -|+a\t...
 """

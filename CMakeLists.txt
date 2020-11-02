@@ -11,6 +11,9 @@ add_executable(${PROJECT_NAME} ${SRC_LIST})
 add_executable(btcbklocs tools/btcbklocs.cpp)
 
 ## openssl
+if (APPLE)
+    set (OPENSSL_ROOT_DIR "/usr/local/opt/openssl")
+endif (APPLE)
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} ${OPENSSL_CRYPTO_LIBRARY})
