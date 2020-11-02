@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Filter diff by ^o after comparing bcepy and bce2 output.
+Skip if delta(satoshi) < 1
 Lines must be:
 -|+o\t...
 """

@@ -137,3 +137,12 @@ addr: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
 - [Bitcoin API](https://www.blockchain.com/api/blockchain_api)
 - Use Blochain Explorer API for test addrs (https://www.blockchain.com/api)
 - [jq](https://stedolan.github.io/jq/)
+
+## Kyotocabinet backends:
+- DB::PolyDB => [kyotocabinet::HashDB](https://dbmx.net//kyotocabinet/api/classkyotocabinet_1_1HashDB.html) ('kch')
+- try: kc.occupy()
+- try: on-memory [kyotocabinet::](https://dbmx.net//kyotocabinet/api/index.html):
+  - [ProtoHashDB](https://dbmx.net//kyotocabinet/api/namespacekyotocabinet.html#a68826fcd903705a08001af0180d713e6) -- ('-') hash database based on std::unordered_map
+  - [StashDB](https://dbmx.net//kyotocabinet/api/classkyotocabinet_1_1StashDB.html) -- (':') economical hash database for cache.
+  - [CacheDB](https://dbmx.net//kyotocabinet/api/classkyotocabinet_1_1CacheDB.html) -- ('*') hash database for cache with LRU deletion
+  - [GrassDB](https://dbmx.net//kyotocabinet/api/namespacekyotocabinet.html#ab08bf5f25c36e8e6b06e7531b047acc7) -- ('%') tree database for cache in order
