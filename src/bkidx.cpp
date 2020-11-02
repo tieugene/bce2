@@ -8,14 +8,21 @@ using namespace std;
 
 FOFF_T   *FOFF;
 const uint32_t  BK_SIGN = 0xD9B4BEF9;   // LE
+const uint8_t WIN_SIZE = 16;
+static queue<size_t> opened;
 
-bool        DATFARM_T::open(const size_t no) {
+bool        DATFARM_T::open(const size_t no)
+{
     if (no > qty) {
         cerr << "File # too big: " << no << endl;
         return false;
     }
     if (file[no].is_open())
         return true;
+    if (opened.size() >= WIN_SIZE) {  // close unused file
+        file[opened.front()].close();
+        opened.pop();
+    }
     ostringstream ss;
     ss << setw(5) << setfill('0') << no;
     string fn = folder + "blk" + ss.str() + ".dat";
@@ -24,6 +31,7 @@ bool        DATFARM_T::open(const size_t no) {
         cerr << "Can't open file " << fn << endl;
         return false;
     }
+    opened.push(no);
     return true;
 }
 

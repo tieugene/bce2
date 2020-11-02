@@ -7,7 +7,7 @@
 #include <iostream>
 #include <cstring>  // memset
 #include <algorithm>
-#include <unistr.h> // u8_cmp
+//include <unistr.h> // u8_cmp
 #include "bce.h"
 #include "misc.h"
 #include "script.h"
