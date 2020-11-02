@@ -10,13 +10,13 @@
 typedef std::vector<std::string> string_list;
 
 enum    SCTYPE {    // script (address) type
-    PUBKEYu,
-    PUBKEYc,
-    PUBKEYHASH,
-    SCRIPTHASH,
-    MULTISIG,       // PUBKEY[HASH][]
-    W0KEYHASH,
-    W0SCRIPTHASH,   // WSH (0x20)
+    PUBKEYu,        // P2PKu (65)
+    PUBKEYc,        // P2PKc (33)
+    PUBKEYHASH,     // P2PKH (20)
+    SCRIPTHASH,     // P2SH (20)
+    MULTISIG,       // P2MS, PUBKEYx[]
+    W0KEYHASH,      // P2WPKH? (20)
+    W0SCRIPTHASH,   // P2WSH (32)
     NULLDATA,
     NONSTANDARD
 };
