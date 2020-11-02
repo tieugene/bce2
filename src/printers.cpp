@@ -4,6 +4,8 @@
 #include "printers.h"
 #include "script.h"
 
+#define DBG
+
 void        out_bk(void)    ///< Output bk data for DB
 {   // FIXME: hash can be w/o 's
     time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);
@@ -51,6 +53,7 @@ void        out_addr(void)
 
 void        __prn_bk(void)  // TODO: hash
 {
+#ifndef DBG
     //time_t t = static_cast<time_t>(CUR_BK.head_ptr->time);
     cout
         << "Bk: " << COUNT.bk
@@ -60,10 +63,12 @@ void        __prn_bk(void)  // TODO: hash
         << ", txs: " << CUR_BK.txs
         << endl;
         // << " (" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << ")"
+#endif
 }
 
 void        __prn_tx(void)
 {
+#ifndef DBG
     cout
         << "  Tx: " << LOCAL.tx
         << " (" << COUNT.tx << ")"
@@ -73,10 +78,12 @@ void        __prn_tx(void)
         << ", ver: " << CUR_TX.ver
         << ", lock: " << CUR_TX.locktime
         << endl;
+#endif
 }
 
 void        __prn_vin(void)
 {
+#ifndef DBG
     cout << "    Vin: " << LOCAL.vin
         << ", src: ";
     if (CUR_VIN.vout == 0xFFFFFFFF)
@@ -87,31 +94,39 @@ void        __prn_vin(void)
         << ", ssize: " << CUR_VIN.ssize
         << ", seq: " << CUR_VIN.seq
         << endl;
+#endif
 }
 
 void        __prn_vout(void)
 {
+#ifndef DBG
     cout
         << "    Vout: " << LOCAL.vout
         << ", no: " << LOCAL.vout
         << ", $: " << CUR_VOUT.satoshi
         << ", ssize: " << CUR_VOUT.ssize
         << endl;
+#endif
 }
 
 void        __prn_addr(void)
 {
-    auto alist = CUR_ADDR.get_strings();
     string v;
+    auto alist = CUR_ADDR.get_strings();
     if (alist.size()) {
+        sort(alist.begin(), alist.end());
         v = alist[0];
         for (size_t i = 1; i < alist.size(); i++)
             v = v + "," + alist[i];
     }
+#ifndef DBG
     cout << "      Addr: " << CUR_ADDR.get_type_name();
     if (!v.empty())
         cout << " " << v;
     cout << endl;
+#else
+    printf("%u\t%u\t%u\t%s\t%s\n", COUNT.bk, LOCAL.tx, LOCAL.vout, CUR_ADDR.get_type_name(), v.c_str());
+#endif
 }
 
 // ====
