@@ -12,6 +12,7 @@ add_executable(btcbklocs tools/btcbklocs.cpp)
 
 ## openssl
 if (APPLE)
+    # brew hack
     set (OPENSSL_ROOT_DIR "/usr/local/opt/openssl")
 endif (APPLE)
 find_package(OpenSSL REQUIRED)
@@ -25,8 +26,9 @@ target_link_libraries(${PROJECT_NAME} PkgConfig::kyotocabinet)
 
 ## leveldb
 if (APPLE)
-    include_directories(/opt/local/include/)
-    target_link_libraries(btcbklocs /opt/local/lib/libleveldb.dylib)
+    # brew hack
+    include_directories(/usr/local/opt/leveldb/include/)
+    target_link_libraries(btcbklocs /usr/local/opt/leveldb/lib/libleveldb.dylib)
 else(APPLE)
     find_package(leveldb CONFIG REQUIRED)
     # include_directories(${LEVELDB_INCLUDE_DIR})
