@@ -67,7 +67,7 @@ const string_list ADDR_FOUND_T::get_strings(void)
         retvalue.push_back(ripe2addr(buffer.u8 + 1, 5));
         break;
     case W0KEYHASH:
-        retvalue.push_back(wpkh2addr(buffer.u8));
+        retvalue.push_back(wpkh2addr(buffer.u8 + 1));
         break;
     case W0SCRIPTHASH:
         retvalue.push_back(wsh2addr(buffer.u8));
@@ -214,13 +214,13 @@ bool    do_P2SH(void)                   ///< scripthash
     return false;
 }
 
-bool    do_P2WPKH(void)                 ///< witness_v0_*
+bool    do_P2WPKH(void)                 ///< witness_v0_keyhash
 {
     CUR_ADDR.add_data(W0KEYHASH, script_ptr+2);
     return true;
 }
 
-bool    do_P2WSH(void)                  ///< witness_v0_*
+bool    do_P2WSH(void)                  ///< witness_v0_scripthash
 {
     CUR_ADDR.add_data(W0SCRIPTHASH, script_ptr+2);
     return true;
