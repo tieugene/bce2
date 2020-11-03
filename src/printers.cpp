@@ -4,7 +4,8 @@
 #include "printers.h"
 #include "script.h"
 
-#define DBG
+// Uncomment to use bce2 as addresses generator only
+// #define DBG
 
 void        out_bk(void)    ///< Output bk data for DB
 {   // FIXME: hash can be w/o 's
