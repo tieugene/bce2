@@ -1,29 +1,44 @@
 # TODO
-## 201029:
-Test [bech32 encoding](https://slowli.github.io/bech32-buffer/)
-Comparing bcepy vs bce2.
-A: 96 (48 utems):
-```
--a 295234989 "bc1q34aq5drpuwy3wgl9lhup9892qp6svr8ldzyy7c" 1
-+a 295234989 "bc1qq2xh5z35v83cj9eruh7lsy5u4gq82psv8h3qw3" 1
--a 295244991 "bc1qpkuy609cpcl7dpvrgkpavgtdqumtcynxp33z0h" 1
-+a 295244991 "bc1qqgxmsnfuhq8rle59sdzc843pd5rnd0qjra45p7" 1
--a 295254920 "bc1q47fes6vk5l2klxgvl80q6neymj4vwvp5tlgdzq" 1
-+a 295254920 "bc1qq2he8xrfj6na2muepnuaur20ynw243esth766y" 1
-```
+## 201103:
+- begin_transaction()..end-transaction() (cpto)
+- count() => count
+- occupy() (cpto, add, get)
+- open(OAUTOTRAN) - each updating operation is performed in implicit transaction
+- open(OTRYLOCK) - locking is performed without blocking
+- cach+mem: OREADER-close-OWRITER
+- tune bnum, msiz (kchashtest)
+- another backend:
+  - HashDB (.kch) => DirDB (.kcd)
+  - leveldb
+- threaded print (std::thread)
+- write-through cache (threaded)
 
-data (src, 481824.):
-```
-t 249036899 481824 dfcec48bb8491856c353306ab5febeb7e99e4d783eedf3de98f3ee0812b92bad
-a 295234989 "bc1q34aq5drpuwy3wgl9lhup9892qp6svr8ldzyy7c" 1
-o 249036899 0 194300 295234989
-```
+### Done
+- status 
+- sync && close?, info? check?
+- slow start &larr; db.sync; db.close()
 
-480-490:
+### Test on:
+CPU: i5-3210M 2.5..3.1 GHz
+RAM: 8GB
+Range: -f 310k -n 10k (bk00138..00155)
+KV: in-mem/HDD
 
-44061219: *
-7: nonstandard$
-421134: nulldata$
-----
-421141: -e nulldata$ -e nonstandard$
-43640078: 
+#### 50..250:
+broken
+
+#### 300k:
+- unpack: 3'20"
+- job (tx.ld+ad.ld+job):
+   - 328+325+1763 = 42'
+   - 430+324+
+
+bk |   Tx   |   Ad   |  Tx@HDD  |  Ad@HDD  | hJob | Tx.ld | Ad.ld | mJob
+---|--------|--------|----------|----------|------|-------|-------|------
+ 50|   50779|   50420|   9449472|   9449472| 1 |  |  |  |
+100|  216571|  174696|  20574208|  19619840| 3 |  |  |  |
+150| 1718395| 2337716| 102527840| 118508088|  |  |  |  |
+200| 7316306| 6576581| 416010856| 321973800|  |  |  |  |
+250|21490939|16176859|1209790304| 782787336|  |  |  |  |
+300|38463550|35538489|2160256520|1712265136|  |  |  |  |
+
