@@ -4,7 +4,6 @@
 bool        KV_T::init(const string &s)
 {
     opened = db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE);
-    // opened = db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE | kyotocabinet::PolyDB::OAUTOTRAN | kyotocabinet::PolyDB::OTRYLOCK);
     if (!opened)
         cerr << "Can't open db '" << s << "'." << endl;
     return opened;
@@ -56,8 +55,5 @@ bool        KV_T::cpto(KV_T *dst)
     */
     kyotocabinet::BasicDB *tmp[1];
     tmp[0] = &db;
-    // dst->db.begin_transaction();
-    dst->db.merge(tmp, 1, kyotocabinet::PolyDB::MADD);
-    // dst->db.end_transaction();
-    return true;
+    return dst->db.merge(tmp, 1, kyotocabinet::PolyDB::MADD);
 }
