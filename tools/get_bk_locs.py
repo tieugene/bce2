@@ -1,15 +1,10 @@
-#!/opt/local/bin/python3
+#!/usr/bin/env python3
 """
-Get block info from LevelDB.
+Get blocks location info from LevelDB.
 Input: block hashes (stdin), LevelDB path
 Output: bk file+offset (2x4=8 bytes per bk)
-
-Test: 80..90"/630k,
-
-Args: -i /Users/eugene/tmp/btc/test.hex -l /Users/eugene/tmp/blockchain/blocks/index -o /Users/eugene/tmp/btc/test.bin
-
-TODO:
-- check infile type (txt/gx/*)
+Speed: 130"/650k
+TODO: -a (append mode)
 """
 
 import argparse
@@ -17,7 +12,6 @@ import os
 import sys
 from collections import namedtuple
 from struct import pack
-
 # import leveldb
 import plyvel
 
@@ -28,7 +22,6 @@ TOOBIGOFFSET = 256 << 20  # 256MB > any blk*.dat
 
 # vars
 LdbRec = namedtuple('LdbRec', ['v', 'h', 's', 't', 'f', 'd', 'u'])
-db = None
 TODUMP = False
 MAXBKNO = 2999
 
@@ -69,8 +62,8 @@ def __get_varint(rec: bytes, pos: int = 0) -> tuple:
     :return (value, bytes read)
     """
     result = 0
-    l = len(rec)
-    while pos <= l:
+    rec_len = len(rec)
+    while pos <= rec_len:
         limb = int(rec[pos])
         pos += 1
         result <<= 7
@@ -82,7 +75,7 @@ def __get_varint(rec: bytes, pos: int = 0) -> tuple:
     return result, pos
 
 
-def decode_rec(rec: bytes, bk_no: int) -> object:
+def decode_rec(rec: bytes, bk_no: int) -> type(LdbRec):
     """
     Decode record.
     (see bitoin-core, chain.h, class CDiskBlockIndex)
@@ -118,14 +111,14 @@ def decode_rec(rec: bytes, bk_no: int) -> object:
     return LdbRec
 
 
-def get_ldbrec(hash_b: bytes) -> bytes:
+def get_ldbrec(db, hash_b: bytes) -> bytes:
     """
     Get LevelDB's record of bk. Excluding bk head (last 80 bytes)
+    :param db: LevelDB
     :param hash_b: block record to find
     :return: raw block record
     """
-    global db
-    k = b'\x62' + hash_b
+    k = b'\x62' + hash_b[::-1]
     retvalue = None
     ''' leveldb
     try:
@@ -177,26 +170,16 @@ def print_rec(ldbrec):
         print("-----")
 
 
-def walk(sfn: str, dfn: str, ldb: str, verbose: bool) -> int:
+def walk(sf, df, ldb: str, verbose: bool) -> int:
     """
-    @param sfn: input file name (hashes hex strings (64 per line))
-    @param dfn: output file name (2x4 bytes per block)
+    @param sf: opened input file (hashes hex strings (64 per line))
+    @param df: opened output file (2x4 bytes per block)
     @param ldb: LevelDB directory
     @param verbose: no comments
     @return: None
     """
-    global db
     # 0. prepare
-    sf = open(sfn, "rt")
-    if not sf:
-        eprint("Can't open %s to read" % sfn)
-        return 1
-    df = open(dfn, "wb")
-    if not df:
-        eprint("Can't open %s to write" % dfn)
-        return 1
-    # db = leveldb.LevelDB(ldb, create_if_missing=False)
-    db = plyvel.DB(ldb, create_if_missing=False)
+    db = plyvel.DB(ldb, create_if_missing=False)    # or leveldb.LevelDB(...)
     if verbose:  # header
         print("Ver\tHeight\tStatus\tnTx\tFile\tDoffset\tUoffset")
         print("===\t======\t======\t===\t====\t=======\t=======")
@@ -206,7 +189,7 @@ def walk(sfn: str, dfn: str, ldb: str, verbose: bool) -> int:
         hash_b = hex2bytes(line.rstrip('\n'))
         if not hash_b:
             break
-        rec = get_ldbrec(hash_b)  # 2. get ldb rec; FIXME: error handle
+        rec = get_ldbrec(db, hash_b)  # 2. get ldb rec; FIXME: error handle
         if not rec:
             break
         r = decode_rec(rec, bk_no)  # 3. decode it
@@ -229,15 +212,15 @@ def init_cli():
     """
     Handle CLI
     """
-    parser = argparse.ArgumentParser(description='Hash to file-offset.')
-    parser.add_argument('ldb', metavar='<dir>', type=str, nargs=1,
+    parser = argparse.ArgumentParser(description='Get blocks locations (file+offset) from blockchain LevelDB.')
+    parser.add_argument('ldb', metavar='<ldb_dir>', type=str, nargs=1,
                         help='LevelDB dir')
-    parser.add_argument('outfile', metavar='<file>', type=str, nargs=1,
+    parser.add_argument('outfile', metavar='<out_file>', type=str, nargs=1,
                         help='Bk locs file')
-    parser.add_argument('-i', '--infile', metavar='<file>', type=str, nargs=1, default=None,
-                        help='Input file')
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='Debug process (default=false)')
+    parser.add_argument('-i', '--infile', metavar='<in_file>', type=str, nargs=1,
+                        help='Input file (default=stdin)')
     return parser
 
 
@@ -245,18 +228,30 @@ def main():
     parser = init_cli()
     args = parser.parse_args()
     # print(args.infile, type(args.infile))
-    if (not args.infile) or (not args.outfile) or (not args.ldb):
+    if (not args.ldb) or (not args.outfile):
         parser.print_help()
     else:
-        ifile = args.infile[0]
-        ofile = args.outfile[0]
+        ifile = args.infile[0] if args.infile else None
         ldir = args.ldb[0]
-        if not os.path.isfile(ifile):
-            eprint("Infile '{}' not exist or is not file.".format(ifile))
-        elif not os.path.isdir(ldir):
+        ofile = args.outfile[0]
+        if not os.path.isdir(ldir):
             eprint("LevelDB '{}' not exist or is not dir.".format(ldir))
+            sys.exit(1)
+        if ifile:
+            if not os.path.isfile(ifile):
+                eprint("Infile '{}' not exist or is not file.".format(ifile))
+                sys.exit(1)
+            sf = open(ifile, "rt")
+            if not sf:
+                eprint("Can't open '{}' to read".format(ifile))
+                sys.exit(1)
         else:
-            return walk(ifile, ofile, ldir, args.verbose)
+            if sys.stdin.isatty():
+                eprint("Stdin is empty")
+                sys.exit(1)
+            sf = sys.stdin
+        with open(ofile, "wb") as df:
+            walk(sf, df, ldir, args.verbose)
 
 
 if __name__ == '__main__':
