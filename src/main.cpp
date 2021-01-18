@@ -24,8 +24,8 @@ KV_T        *TxDB = nullptr, *AddrDB = nullptr;
 long        start_mem;
 time_t      start_time;
 // locals
-KVMEM_T     *TxMEM = nullptr, *AddrMEM = nullptr;
-KVKC_T      *TxKC = nullptr, *AddrKC = nullptr;
+static KV_T *TxMEM = nullptr, *AddrMEM = nullptr;
+static KV_T *TxKC = nullptr, *AddrKC = nullptr;
 // consts
 const uint32_t  BULK_SIZE = 1000;
 // forwards
@@ -41,11 +41,11 @@ int     main(int argc, char *argv[])
     // 1.1. handle CLI
     if (!cli(argc, argv))  // no file defined
         return 1;
-    auto bk_no_upto = OPTS.from + OPTS.num;
     // 1.2.1. prepare bk info
     auto bk_qty = load_fileoffsets(argv[argc-1]);
     if (!bk_qty)
         return 1;
+    auto bk_no_upto = (OPTS.from < 0 ? 0 : OPTS.from) + OPTS.num;
     if (bk_qty < bk_no_upto) {
         cerr << "Loaded blocks (" << bk_qty << ") < max wanted " << bk_no_upto << endl;
         return 1;
@@ -54,16 +54,17 @@ int     main(int argc, char *argv[])
     if (!OPTS.datdir.empty() and OPTS.datdir.back() != '/')
         OPTS.datdir += '/';  // FIXME: native OS path separator
     DATFARM_T datfarm(bk_qty, OPTS.datdir);
-    // 1.4. last prestart
+    // 1.2.3. prepare bk buffer
     BUFFER.beg = new char[MAX_BK_SIZE];
-    // 1.3. prepare k-v storages
+    // 1.3. prepare k-v storages (and normalize OPTS.from)
     start_mem = memused();
     if (!set_cash())
         return 1;
-    // 2. main loop
-    start_time = time(nullptr);
+    // 1.4. last prestart
     if (OPTS.verbose)
       __prn_head();
+    start_time = time(nullptr);
+    // 2. main loop
     for (COUNT.bk = OPTS.from; COUNT.bk < bk_no_upto; COUNT.bk++)
     {
         // BUSY.tx = BUSY.vin = BUSY.vout = false;
@@ -113,20 +114,19 @@ bool    set_cash(void)
     if (kv_mode()) {
         bool tx_full = false, addr_full = false;
         if (OPTS.cash) {
-            TxKC = new KVKC_T();
-            AddrKC = new KVKC_T();
-            if (OPTS.cachedir.back() != '/')
-                OPTS.cachedir += '/';  // FIXME: native path separator
-            auto s = OPTS.cachedir + "tx.kch";
-            if (!TxKC->init(s)) {
-                cerr << "Can't open 'tx' cache: " << s << endl;
-                return false;
+            TxKC = new KV_T();
+            AddrKC = new KV_T();
+            string tpath, apath;
+            if (OPTS.cachedir.size() == 1)  {   // on-memory
+                tpath = apath = OPTS.cachedir;
+            } else {
+                if (OPTS.cachedir.back() != '/')
+                    OPTS.cachedir += '/';  // FIXME: native path separator
+                tpath = OPTS.cachedir + "tx.kch";
+                apath = OPTS.cachedir + "addr.kch";
             }
-            s = OPTS.cachedir + "addr.kch";
-            if (!AddrKC->init(s)) {
-                cerr << "Can't open 'addr' cache " << s << endl;
+            if (!TxKC->init(tpath) or !AddrKC->init(apath))
                 return false;
-            }
             tx_full = bool(TxKC->count());
             addr_full = bool(AddrKC->count());
             if (tx_full != addr_full and OPTS.from > 0) {
@@ -135,7 +135,7 @@ bool    set_cash(void)
             }
             if (tx_full or addr_full) {
                 if (OPTS.from < 0) {
-                    cerr << "Tx (" << TxKC->count() << ") or Addr ("<< AddrKC->count() << ") k-v is not empty. Set -f option." << endl;;
+                    cerr << "Tx (" << TxKC->count() << ") or Addr ("<< AddrKC->count() << ") k-v is not empty. Set -f option." << endl;
                     return false;
                 } else if (OPTS.from == 0) {
                     TxKC->clear();
@@ -152,28 +152,32 @@ bool    set_cash(void)
             }
         }
         if (OPTS.inmem) {
-            TxMEM = new KVMEM_T();
-            AddrMEM = new KVMEM_T();
+            TxMEM = new KV_T();
+            TxMEM->init(":");   // StashDB
+            AddrMEM = new KV_T();
+            AddrMEM->init(":");
             if (OPTS.cash) {
                 if (tx_full) {
                     if (OPTS.verbose)
                         cerr << "Loading txs ...";
+                    auto t = time(nullptr);
                     if (!TxKC->cpto(TxMEM)) {
                         cerr << "Loading tx Error." << endl;
                         return false;
                     }
                     if (OPTS.verbose)
-                        cerr << "OK." << endl;
+                        cerr << time(nullptr)-t << "s OK." << endl;
                 }
                 if (addr_full) {
                     if (OPTS.verbose)
                         cerr << "Loading addrs ...";
+                    auto t = time(nullptr);
                     if (!AddrKC->cpto(AddrMEM)) {
                         cerr << "Error." << endl;
                         return false;
                     }
                     if (OPTS.verbose)
-                        cerr << "OK." << endl;
+                        cerr << time(nullptr)-t << "s OK." << endl;
                 }
             } else {    // mem-only
                 if (OPTS.from > 0) {

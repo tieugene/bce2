@@ -168,56 +168,29 @@ bool    parse_vout(const bool dojob)
     if (!dojob)
         return true;
     BUSY.vout = true;
+    if (!parse_script())
+        return false;
     if (OPTS.out) {
         if (kv_mode())
             out_vout();
         else
             __prn_vout();
     }
-    if (!parse_script())
-        return false;
     BUSY.vout = false;
     return true;
 }
-/*
-void    __debug_addr(void)
-{
-    printf("%d\t%d\t%d\t%s", COUNT.bk, LOCAL.tx, LOCAL.vout, get_addrs_type());
-    if (CUR_ADDR.qty)
-        printf("\t%s\n", get_addrs_str().c_str());
-    else
-        printf("\n");
-}
-*/
+
 bool    parse_script(void)
 {
     /// FIXME: nulldata is not spendable
     /// FIXME: empty script
     auto script_ok = script_decode(CUR_VOUT.script, CUR_VOUT.ssize);
-    if (script_ok and CUR_ADDR.qty) {
+    if (script_ok and CUR_ADDR.get_qty()) {
         if (kv_mode()) {
             uint32_t addr_added;
-            switch (CUR_ADDR.type) {
-            case W0SCRIPTHASH:
-                addr_added = AddrDB->get(WSH);
-                break;
-            case MULTISIG:
-                addr_added = AddrDB->get(CUR_ADDR.addr, CUR_ADDR.qty);
-                break;
-            default:
-                addr_added = AddrDB->get(CUR_ADDR.addr[0]);
-            }
+            addr_added = AddrDB->get_raw(CUR_ADDR.get_data(), CUR_ADDR.get_len());
             if (addr_added == NOT_FOUND_U32) {
-                switch (CUR_ADDR.type) {
-                case W0SCRIPTHASH:
-                    addr_added = AddrDB->add(WSH);
-                    break;
-                case MULTISIG:
-                    addr_added = AddrDB->add(CUR_ADDR.addr, CUR_ADDR.qty);
-                    break;
-                default:
-                    addr_added = AddrDB->add(CUR_ADDR.addr[0]);
-                }
+                addr_added = AddrDB->add_raw(CUR_ADDR.get_data(), CUR_ADDR.get_len());
                 if (addr_added == NOT_FOUND_U32) {
                     cerr << "Can not find nor add addr " << endl;
                     return false;
@@ -226,10 +199,12 @@ bool    parse_script(void)
                         cerr << "Addr added as " << addr_added << " against waiting " << COUNT.addr << endl;
                         return false;
                 }
+                CUR_ADDR.set_id(addr_added);
                 if (OPTS.out)
                     out_addr(); // FIXME:
                 COUNT.addr += 1;
-            }
+            } else
+              CUR_ADDR.set_id(addr_added);
         } else if (OPTS.out)
             __prn_addr();
         STAT.addrs += 1;    // FIXME: if decoded and 1+

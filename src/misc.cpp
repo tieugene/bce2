@@ -6,10 +6,12 @@
 #include <cstdlib>
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/resource.h>
 #include "bce.h"
 #include "misc.h"
 #include "script.h" // cur_addr only
+#if defined(__APPLE__)
+#include <mach/mach.h>
+#endif
 
 static string  help_txt = "\
 Usage: [options] <file-offset_file>\n\
@@ -99,13 +101,28 @@ bool        cli(int argc, char *argv[])
     return retvalue;
 }
 
+long        get_statm(void)   ///< returns used memory in kilobytes
+{
+    long    total = 0;  // rss, shared, text, lib, data, dt; man proc
+#if defined (__linux__)
+    ifstream statm("/proc/self/statm");
+    statm >> total; // >> rss...
+    statm.close();
+    total *= (sysconf(_SC_PAGE_SIZE) >> 10);  // pages-ze = 4k in F32_x64
+#elif defined(__APPLE__)
+    struct task_basic_info t_info;
+    mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
+    if (KERN_SUCCESS == task_info(mach_task_self(),
+        TASK_BASIC_INFO, (task_info_t)&t_info,
+        &t_info_count))
+        total = t_info.virtual_size >> 10;
+#endif
+    return total;
+}
+
 long        memused(void)
 {
-    rusage rused;
-    long retvalue = 0;
-    if (getrusage(RUSAGE_SELF, &rused) == 0)
-      retvalue = rused.ru_maxrss;
-    return retvalue;
+    return get_statm();
 }
 
 uint32_t    read_v(void)   ///<read 1..4-byte int and forward;

@@ -1,6 +1,8 @@
 // Copyright (c) 2017 Pieter Wuille
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+// Source:
+// https://github.com/bitcoin/bitcoin/blob/master/src/bech32.cpp
 
 #include <vector>
 #include "bech32.h"
@@ -8,7 +10,7 @@
 typedef std::vector<uint8_t> data;
 
 /** The Bech32 character set for encoding. */
-const char* CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
+const static char* CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
 const std::string hrp = "bc";  // BTC mainnet
 
 /** Concatenate two vectors, moving elements. */
