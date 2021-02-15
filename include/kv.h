@@ -13,8 +13,10 @@ using namespace std;
 class KV_T {
 private:
     kyotocabinet::PolyDB     db;
+    bool        opened = false;
 public:
     bool        init(const string &);
+    bool        close(void);
     void        clear(void) { db.clear(); }
     uint32_t    count(void);
     bool        cpto(KV_T *);

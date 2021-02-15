@@ -26,6 +26,7 @@ time_t      start_time;
 // locals
 static KV_T *TxMEM = nullptr, *AddrMEM = nullptr;
 static KV_T *TxKC = nullptr, *AddrKC = nullptr;
+static time_t T0;
 // consts
 const uint32_t  BULK_SIZE = 1000;
 // forwards
@@ -37,6 +38,7 @@ int     main(int argc, char *argv[])
  * [- local FOFF]
  */
 {
+T0 = time(nullptr);
     // 1. prepare
     // 1.1. handle CLI
     if (!cli(argc, argv))  // no file defined
@@ -87,22 +89,26 @@ int     main(int argc, char *argv[])
       if (OPTS.verbose > DBG_MIN)
         __prn_summary();
     }
-    if (OPTS.inmem and OPTS.cash) { // flush
-        if (OPTS.verbose) {
-            // tx
-            cerr << "Flush tx   (" << TxKC->count() << " => ";
-            auto t = time(nullptr);
-            TxMEM->cpto(TxKC);
-            cerr << TxKC->count() << " @ " << time(nullptr)-t << "s OK." << endl;
-            // addr
-            cerr << "Flush addr (" << AddrKC->count() << " => ";
-            t = time(nullptr);
-            AddrMEM->cpto(AddrKC);
-            cerr << AddrKC->count() << " @ " << time(nullptr)-t << "s OK." << endl;
-        } else {
-            TxMEM->cpto(TxKC);
-            AddrMEM->cpto(AddrKC);
+    if (OPTS.cash) {
+        if (OPTS.inmem) { // flush
+            if (OPTS.verbose) {
+                // tx
+                cerr << "Flush tx   (" << TxKC->count() << " => ";
+                auto t = time(nullptr);
+                TxMEM->cpto(TxKC);
+                cerr << TxKC->count() << " @ " << time(nullptr)-t << "s OK." << endl;
+                // addr
+                cerr << "Flush addr (" << AddrKC->count() << " => ";
+                t = time(nullptr);
+                AddrMEM->cpto(AddrKC);
+                cerr << AddrKC->count() << " @ " << time(nullptr)-t << "s OK." << endl;
+            } else {
+                TxMEM->cpto(TxKC);
+                AddrMEM->cpto(AddrKC);
+            }
         }
+        TxKC->close();
+        AddrKC->close();
     }
     if (BUFFER.beg)
         delete BUFFER.beg;
@@ -113,11 +119,11 @@ bool    set_cash(void)
 {
     if (kv_mode()) {
         bool tx_full = false, addr_full = false;
-        if (OPTS.cash) {
+        if (OPTS.cash) {    // any cache
             TxKC = new KV_T();
             AddrKC = new KV_T();
             string tpath, apath;
-            if (OPTS.cachedir.size() == 1)  {   // on-memory
+            if (OPTS.cachedir.size() == 1)  {   // on-memory; for kc tests
                 tpath = apath = OPTS.cachedir;
             } else {
                 if (OPTS.cachedir.back() != '/')
@@ -150,6 +156,7 @@ bool    set_cash(void)
                     AddrDB = AddrKC;
                 }
             }
+// cerr << "-. end init any cache: " << time(nullptr)-T0 << endl;
         }
         if (OPTS.inmem) {
             TxMEM = new KV_T();
