@@ -24,7 +24,7 @@ public:
     bool        read(const size_t, const size_t, const int, void *);
 };
 
-size_t  load_fileoffsets(const char *);  ///< load file-offset file
+size_t  load_fileoffsets(const string);  ///< load file-offset file
 bool    load_bk(DATFARM_T &, const uint32_t, const uint32_t);       ///< load bk to buffer
 
 extern FOFF_T   *FOFF;

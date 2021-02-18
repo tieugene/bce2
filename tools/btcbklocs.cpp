@@ -28,12 +28,12 @@ const int MAXOFFSET = 256 << 20; // 256MB > any blk*.dat
 const int BLOCK_HAVE_DATA = 8;
 const int BLOCK_HAVE_UNDO = 16;
 static string  help_txt = "\
-Usage: [options]\n\
+Usage: [-h] [-i <in_file>] <ldb_dir> <out_file>\n\
 Options:\n\
--i <path>   - indices folder\n\
--o <path>   - output file\n\
--x <path>   - hashes file (option)\n\
--b <path>   - blk*.dat folder (option)\n\
+-h         - this help\n\
+-i <path>  - hashes file (stdin if ommit)\n\
+<ldb_dir>  - folder with blockchain LevelDB\n\
+<out_file> - target locs-file\
 ";
 
 struct LDBREC_T {
@@ -49,9 +49,7 @@ struct LDBREC_T {
 struct {     ///< program CLI options
     string      idir;
     string      ofile;
-    string      xfile;
-    string      bdir;
-    bool        use_dat = false;
+    string      xfile = "";
 } OPTS;
 
 string      __ptr2hex(const void *vptr, const size_t size)
@@ -71,38 +69,34 @@ bool        cli(int argc, char *argv[])
     int opt;
     bool retvalue = false;
 
-    while ((opt = getopt(argc, argv, "i:o:x:n:b:")) != -1) {
+    while ((opt = getopt(argc, argv, "hi:")) != -1) {
         switch (opt) {
+        case 'h':
+            cerr << help_txt << endl;
+            return false;
+            break;
         case 'i':
-            OPTS.idir = optarg;
-            break;
-        case 'o':
-            OPTS.ofile = optarg;
-            break;
-        case 'x':
             OPTS.xfile = optarg;
-            break;
-        case 'b':
-            OPTS.bdir = optarg;
-            OPTS.use_dat = !OPTS.bdir.empty();
             break;
         default:   // can handle optopt
             cerr << help_txt << endl;
             return false;
         }
     }
-    if (OPTS.idir.empty())
-        cerr << "Set -i option" << endl;
-    else if (OPTS.ofile.empty())
-        cerr << "Set -o option" << endl;
-    else if (!filesystem::exists(OPTS.idir))
-        cerr << OPTS.idir << " not exists" << endl;
+    // argc: all args (including app itself (must be 3 or 5)
+    // optind: idx of 1st unprocessed arg (must be 1 or 3)
+    // => must be argc - optind == 2
+    if ((argc - optind) < 2)
+      cerr << "Too fiew mandatory arguments. Use -h for help" << endl;
+    else if (!filesystem::exists(argv[optind]))
+        cerr << argv[optind] << " not exists" << endl;
     else if (!OPTS.xfile.empty() and !filesystem::exists(OPTS.xfile))
-        cerr << OPTS.xfile << " not exists" << endl;
-    else if (!OPTS.bdir.empty() and !filesystem::exists(OPTS.bdir))
-        cerr << OPTS.bdir << " not exists" << endl;
-    else
+      cerr << OPTS.xfile << " not exists" << endl;
+    else {
+        OPTS.idir = argv[optind];
+        OPTS.ofile = argv[optind + 1];
         retvalue = true;
+    }
     return retvalue;
 }
 
@@ -164,31 +158,6 @@ bool        decode_rec(const string &value, LDBREC_T &rec)
     return true;
 }
 
-bool        chk_dat(uint64_t fileoffset)   ///< chk bk header
-{
-    const uint32_t  BK_SIGN = 0xD9B4BEF9;   // LE
-    static uint32_t i = MAX32;
-    static ifstream f;
-    uint32_t sig, fno = fileoffset & MAX32, offset = fileoffset >> 32;
-
-    if (fno != i) {
-        if (f.is_open())
-            f.close();
-        std::stringstream ss;
-        ss << std::setw(5) << std::setfill('0') << fno;
-        string fname = OPTS.bdir + "/blk" + ss.str() + ".dat";
-        f.open(fname, ios::in|ios::binary);
-        if (!f.is_open()) {
-            cerr << "Can't open to read: " << fname << endl;
-            return false;
-        }
-        i = fno;
-    }
-    f.seekg(offset-8, f.beg);
-    f.read(reinterpret_cast<char *>(&sig), sizeof(sig));
-    return sig == BK_SIGN;
-}
-
 int main(int argc, char *argv[])
 {
     leveldb::DB*        db;
@@ -233,6 +202,7 @@ int main(int argc, char *argv[])
     size_t bk_no = 0;
     // 2. main loop
     while (!getline(xfile, s).eof()) {
+//cerr << s << endl;
         // if read ok
         if (s.length() != 64) {
             cerr << "Line " << bk_no << " is " << s.length() << " bytes != 64." << endl;
@@ -265,6 +235,6 @@ int main(int argc, char *argv[])
     delete db;
     ofile.close();
     // x. that's all
-    cerr << bk_no << " records wrote." << endl;
+    cerr << bk_no << " records ok." << endl;
     exit(EXIT_SUCCESS);
 }

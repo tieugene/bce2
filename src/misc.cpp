@@ -14,19 +14,21 @@
 #endif
 
 static string  help_txt = "\
-Usage: [options] <file-offset_file>\n\
+Usage: [options] <dat_dir> <locs_file>\n\
 Options:\n\
+-h        - this help\n\
 -f n      - block starts from (default=0)\n\
 -n n      - blocks to process (default=1, 0=all)\n\
--d <path> - *.dat folder (default='' - current folder)\n\
--k <path> - key-value folder\n\
--m        - use inmem key-value\n\
+-k <path> - file-based key-value folder\n\
+-m        - use in-mem key-value\n\
 -o        - output results\n\
--v[n]     - verbose (debug info to stderr):\n\
+-v[n]     - verbose (to stderr):\n\
     0 - errors only (default)\n\
     1 - short info (default n)\n\
     2 - mid\n\
     3 - full debug\n\
+<dat_dir> - blk*.dat folder\n\
+<locs_file> - file with block locations\
 ";
 
 void        __prn_opts(void)
@@ -38,6 +40,7 @@ void        __prn_opts(void)
         << TAB << "Quiet:" << TAB << OPTS.out << endl
         << TAB << "Debug:" << TAB << OPTS.verbose << endl
         << TAB << "DatDir:" << TAB << OPTS.datdir << endl
+        << TAB << "LocsFile:" << TAB << OPTS.locsfile << endl
         << TAB << "Cache:" << TAB << OPTS.cachedir << endl
         << TAB << "InMem:" << TAB << OPTS.inmem << endl
     ;
@@ -55,22 +58,23 @@ bool        cli(int argc, char *argv[])
     OPTS.inmem = false;
     OPTS.out = false;
     OPTS.verbose = DBG_NONE;
-    while ((opt = getopt(argc, argv, "f:n:d:k:mov::")) != -1)
+    while ((opt = getopt(argc, argv, "hf:n:k:mov::")) != -1)  // FIXME: v?
     {
         switch (opt) {
+            case 'h':
+                cerr << help_txt << endl;
+                return false;
+                break;
             case 'f':   // FIXME: optarg < 0 | > 999999
-                OPTS.from = atoi(optarg);
+                OPTS.from = atoi(optarg); // FIXME: try digit_optarg
                 if (OPTS.from < 0)
                     OPTS.from = 0;
                 break;
             case 'n':   // FIXME: optarg < 1 | > 999999
                 //OPTS.num = *optarg == '*' ? 999999 : atoi(optarg);
-                OPTS.num = atoi(optarg);
+                OPTS.num = atoi(optarg);  // FIXME: try digit_optarg
                 if (OPTS.num == 0)
                     OPTS.num = 999999;
-                break;
-            case 'd':
-                OPTS.datdir = optarg;
                 break;
             case 'k':
                 OPTS.cachedir = optarg;
@@ -87,17 +91,26 @@ bool        cli(int argc, char *argv[])
                 break;
             case '?':   // can handle optopt
                 cerr << help_txt << endl;
-                break;
+                return false;
         }
     }
     // opterr - allways 1
-    // optind - 1st file argv's no (if argc > optind)
-    if (optind == (argc-1))  {
+    // optind - 1-st unhandled is argv[optarg] (if argc > optind)
+    if ((argc - optind) < 2)
+      cerr << "Too fiew mandatory arguments. Use -h for help" << endl;
+    else if (!filesystem::exists(argv[optind]))
+        cerr << argv[optind] << " not exists" << endl;
+    else if (!filesystem::exists(argv[optind + 1]))
+        cerr << argv[optind + 1] << " not exists" << endl;
+    else if (!OPTS.cachedir.empty() and !filesystem::exists(OPTS.cachedir))
+      cerr << OPTS.cachedir << " not exists" << endl;
+    else {
+        OPTS.datdir = argv[optind];
+        OPTS.locsfile = argv[optind + 1];
         retvalue = true;
         if (OPTS.verbose > 1)   // TODO: up v-level
             __prn_opts();
-    } else
-        cerr << "Error: file-offset filename required." << endl << help_txt;
+    }
     return retvalue;
 }
 
