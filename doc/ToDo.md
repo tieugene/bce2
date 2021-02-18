@@ -2,8 +2,7 @@
 
 ## FixMe:
 
-- unify btcbklocs CLI: <hexfile>|- <ldbdir> <outfile>
-- unify w/ bcepy CLI: -f, -**n**, -o, [, -l], -m/c vs -m/k/v
++ unify btcbklocs CLI: <hexfile>|- <ldbdir> <outfile>
 - dat-dir is mandatory => not option (`-d`)
 
 ## Feature requests:
@@ -28,3 +27,4 @@
 - another backend:
   - HashDB (.kch) => DirDB (.kcd)
   - leveldb
+

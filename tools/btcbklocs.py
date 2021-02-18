@@ -217,8 +217,8 @@ def init_cli():
                         help='LevelDB dir')
     parser.add_argument('outfile', metavar='<out_file>', type=str, nargs=1,
                         help='Bk locs file')
-    parser.add_argument('-v', '--verbose', action='store_true',
-                        help='Debug process (default=false)')
+    # parser.add_argument('-v', '--verbose', action='store_true',
+    #                    help='Debug process (default=false)')
     parser.add_argument('-i', '--infile', metavar='<in_file>', type=str, nargs=1,
                         help='Input file (default=stdin)')
     return parser
@@ -251,7 +251,7 @@ def main():
                 sys.exit(1)
             sf = sys.stdin
         with open(ofile, "wb") as df:
-            walk(sf, df, ldir, args.verbose)
+            walk(sf, df, ldir, False)  # , args.verbose)
 
 
 if __name__ == '__main__':
