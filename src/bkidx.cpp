@@ -48,7 +48,7 @@ bool        DATFARM_T::read(const size_t no, const size_t offset, const int size
     return true;
 }
 
-size_t  load_fileoffsets(const char *fn)  ///< load file-offset file
+size_t  load_fileoffsets(const string fn)  ///< load file-offset file
 {
     ifstream file (fn, ios::in|ios::binary|ios::ate);
     if (!file) {            // 1. open

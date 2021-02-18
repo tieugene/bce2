@@ -12,6 +12,8 @@ BuildRequires:	pkgconfig(libcrypto)
 BuildRequires:	pkgconfig(kyotocabinet)
 # leveldb-devel
 BuildRequires:	cmake(leveldb)
+# for tools/btcbklocs.py
+Recommends:     python3-plyvel
 
 
 %description

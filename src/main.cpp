@@ -44,7 +44,7 @@ T0 = time(nullptr);
     if (!cli(argc, argv))  // no file defined
         return 1;
     // 1.2.1. prepare bk info
-    auto bk_qty = load_fileoffsets(argv[argc-1]);
+    auto bk_qty = load_fileoffsets(OPTS.locsfile);
     if (!bk_qty)
         return 1;
     auto bk_no_upto = (OPTS.from < 0 ? 0 : OPTS.from) + OPTS.num;
@@ -53,7 +53,7 @@ T0 = time(nullptr);
         return 1;
     }
     // 1.2.2. prepare dat
-    if (!OPTS.datdir.empty() and OPTS.datdir.back() != '/')
+    if (OPTS.datdir.back() != '/')
         OPTS.datdir += '/';  // FIXME: native OS path separator
     DATFARM_T datfarm(bk_qty, OPTS.datdir);
     // 1.2.3. prepare bk buffer

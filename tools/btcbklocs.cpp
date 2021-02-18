@@ -91,7 +91,7 @@ bool        cli(int argc, char *argv[])
     else if (!filesystem::exists(argv[optind]))
         cerr << argv[optind] << " not exists" << endl;
     else if (!OPTS.xfile.empty() and !filesystem::exists(OPTS.xfile))
-      cerr << argv[optind-1] << " not exists" << endl;
+      cerr << OPTS.xfile << " not exists" << endl;
     else {
         OPTS.idir = argv[optind];
         OPTS.ofile = argv[optind + 1];
