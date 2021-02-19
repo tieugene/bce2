@@ -1,9 +1,10 @@
 Name:		bce2
-Version:	0.0.1
+Version:	0.0.2
 Release:	1%{?dist}
 License:	GPLv3
 Summary:	BTC blockchain export
-Source:		%{name}-%{version}.tar.bz2
+URL:		https://github.com/tieugene/bce2
+Source:		https://github.com/tieugene/bce2/archive/%{version}.tar.gz/%{name}-%{version}.tar.gz
 BuildRequires:	gcc-c++
 BuildRequires:	cmake
 # openssl-devel
@@ -35,11 +36,15 @@ BitCoin Export 2 is tool to export BTC blockchain into SQL loadable files.
 
 %files
 %license LICENSE
-%doc README.md
+%doc README.md doc/*
 %{_bindir}/%{name}
 %{_bindir}/btcbklocs
+%{_bindir}/btclocview
 
 
 %changelog
+* Sat Feb 20 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.2-1
+- Version bump
+
 * Mon Sep 28 2020 TI_Eugene <ti.eugene@gmail.com> 0.0.1-1
 - Initial packaging
