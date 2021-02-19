@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
     string s, value;
     size_t bk_no = 0;
     // 2. main loop
-    while (!getline(xfile, s).eof()) {
+    while (!getline(*in, s).eof()) {
 //cerr << s << endl;
         // if read ok
         if (s.length() != 64) {
