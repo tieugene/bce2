@@ -28,7 +28,7 @@ Let's make locs-file for **670k** blocks. Blockchain is stored in `$BTCDIR`.
    ```
 1. get 1-st 670k block hashes into `tmp.hex` (filename is not matter):
    ```bash
-   (for i in ${seq 0 699999}; do blockchain-cli getblockhash $i; done) > tmp.hex
+   (for i in `seq 0 699999`; do bitcoin-cli getblockhash $i; done) > tmp.hex
    ```
 1. stop bitcoind:
    ```bash
@@ -44,7 +44,7 @@ Let's make locs-file for **670k** blocks. Blockchain is stored in `$BTCDIR`.
    ```
 1. make locs-file `bk.locs.670k.bin` (filename is not matter):
    ```bash
-   btcbklocs -x tmp.hex -i index -o bk.locs.670k.bin
+   btcbklocs -i tmp.hex index bk.locs.670k.bin
    ```
    or (requires python3-plyvel):
    ```bash
