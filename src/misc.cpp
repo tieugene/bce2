@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <stdio.h>
 #include <unistd.h>
+#include <filesystem>
 #include "bce.h"
 #include "misc.h"
 #include "script.h" // cur_addr only

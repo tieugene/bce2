@@ -1,3 +1,5 @@
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
 #include <time.h>
 #include "bce.h"
 #include "misc.h"
@@ -23,15 +25,15 @@ void        out_tx(void)
 void        out_vin(void)   // FIXME: compare w/ COINBASE_txid too
 {
     if (CUR_VIN.vout != COINBASE_vout)  // skip coinbase
-        printf("i\t%lu\t%u\t%u\n", CUR_VIN.txno, CUR_VIN.vout, COUNT.tx);
+        printf("i\t%" PRIu64 "\t%u\t%u\n", CUR_VIN.txno, CUR_VIN.vout, COUNT.tx);
 }
 
 void        out_vout(void)
 {
   if (CUR_ADDR.get_qty())
-    printf("o\t%u\t%u\t%lu\t%u\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi, CUR_ADDR.get_id());
+    printf("o\t%u\t%u\t%" PRIu64 "\t%u\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi, CUR_ADDR.get_id());
   else
-    printf("o\t%u\t%u\t%lu\t\\N\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi);
+    printf("o\t%u\t%u\t%" PRIu64 "\t\\N\n", COUNT.tx, LOCAL.vout, CUR_VOUT.satoshi);
 }
 
 void        out_addr(void)

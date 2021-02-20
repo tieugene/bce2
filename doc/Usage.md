@@ -26,7 +26,7 @@ Let's make locs-file for **670k** blocks. Blockchain is stored in `$BTCDIR`.
    ```bash
    bitcoin-cli getblockcount
    ```
-1. get 1-st 670k block hashes into `tmp.hex`:
+1. get 1-st 670k block hashes into `tmp.hex` (filename is not matter):
    ```bash
    (for i in ${seq 0 699999}; do blockchain-cli getblockhash $i; done) > tmp.hex
    ```
@@ -42,7 +42,7 @@ Let's make locs-file for **670k** blocks. Blockchain is stored in `$BTCDIR`.
    ```
    cp $BTSDIR/blocks/index .
    ```
-1. make locs-file `bk.locs.670k.bin`:
+1. make locs-file `bk.locs.670k.bin` (filename is not matter):
    ```bash
    btcbklocs -x tmp.hex -i index -o bk.locs.670k.bin
    ```
@@ -79,10 +79,10 @@ Options:
 - `-o` : produces output results (to stdout); printing format depens on k-v: 'debug' if no one from or 'main' (see "[Output](Output.md)") if any/both of `-m`/`-k` set
 - `-v <n>` : verbosity (to stderr) - show processed blocks, transactions, vins, vouts, addresses and some other info (depends on k-v set and vebosity level), each 1000 blocks and summary
 
-Mandatory:
+Mandatory arguments:
 
-- `locs-file` : mandatory argument
-- `-d <path>` : *.dat folder
+- `<dat_dir>` : *.dat folder
+- `<locs-file>` : locs-file
 
 As all options excepting `-m` and `-k` are more or less trivial as combining `-m`/`-k` requires additional explanation:
 
