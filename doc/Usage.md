@@ -26,9 +26,9 @@ Let's make locs-file for **670k** blocks. Blockchain is stored in `$BTCDIR`.
    ```bash
    bitcoin-cli getblockcount
    ```
-1. get 1-st 670k block hashes into `tmp.hex` (filename is not matter):
+1. get 1-st 650k block hashes into `tmp.hex` (filename is not matter):
    ```bash
-   (for i in `seq 0 699999`; do bitcoin-cli getblockhash $i; done) > tmp.hex
+   (for i in `seq 0 649999`; do bitcoin-cli getblockhash $i; done) > tmp.hex
    ```
 1. stop bitcoind:
    ```bash
