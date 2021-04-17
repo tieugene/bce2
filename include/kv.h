@@ -26,7 +26,7 @@ using namespace std;
 class KV_T {
 private:
 #ifdef TKRZW
-  tkrzw::PolyDBM  db;
+    tkrzw::PolyDBM  db;
 #else
     kyotocabinet::PolyDB     db;
     bool        opened = false;
