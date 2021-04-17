@@ -151,10 +151,8 @@ bool    set_cash(void)
                 }
             }
             if (!OPTS.inmem) {
-                if (OPTS.verbose) {
-                    TxDB = TxKC;
-                    AddrDB = AddrKC;
-                }
+                TxDB = TxKC;
+                AddrDB = AddrKC;
             }
 // cerr << "-. end init any cache: " << time(nullptr)-T0 << endl;
         }
