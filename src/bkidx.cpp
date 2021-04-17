@@ -3,6 +3,7 @@
 
 #include "bce.h"
 #include "bkidx.h"
+#include <queue>
 
 using namespace std;
 

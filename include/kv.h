@@ -29,8 +29,8 @@ private:
   tkrzw::PolyDBM  db;
 #else
     kyotocabinet::PolyDB     db;
-#endif
     bool        opened = false;
+#endif
 public:
     bool        init(const string &);
     bool        close(void);

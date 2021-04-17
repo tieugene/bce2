@@ -22,7 +22,8 @@ target_link_libraries(${PROJECT_NAME} ${OPENSSL_CRYPTO_LIBRARY})
 
 # Define k-v backend
 find_package(PkgConfig REQUIRED)
-option(USE_TKRZW "Use tkrzw k-v" OFF)
+option(USE_TKRZW "Use tkrzw k-v")
+message(STATUS "Tkrzw: ${USE_TKRZW}")
 if (USE_TKRZW)
   add_definitions(-DTKRZW)
   ## tkrzw
