@@ -1,28 +1,5 @@
 # ToDo
 
-## 210415
-
-- tkrzw
-  - brew (mremap() absent)
-- BcGetHex() (from `bitcoin-cli |`)
-+ BcGetJson()
-+ print_sql()
-+ -m: +write2disk()
-+ multithreading:
-  + print()
-  + kv.add()/getoradd()
-  + &hellip;
-  + tx.calc_hash()
-+ k-v:
-  + cmake
-  + GetOrSet()
-  + bk qty
-  + bulk save (tkrzw::DBM::SetMulti())
-+ [unit]tests
-+ split: tx.kv=tx.history+utxo.kv
-
-Note: memmem() and `no member named 'ru_maxrss' in 'rusage'` - must be __DARWIN_C_LEVEL >= __DARWIN_C_FULL
-
 ## Enhancements:
 
 - Threading: (std::thread)
@@ -45,3 +22,4 @@ Note: memmem() and `no member named 'ru_maxrss' in 'rusage'` - must be __DARWIN_
 - another backend:
   - HashDB (.kch) => DirDB (.kcd)
   - leveldb
+&hellip;
