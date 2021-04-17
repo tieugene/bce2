@@ -128,8 +128,8 @@ bool    set_cash(void)
             } else {
                 if (OPTS.cachedir.back() != '/')
                     OPTS.cachedir += '/';  // FIXME: native path separator
-                tpath = OPTS.cachedir + "tx.kch";
-                apath = OPTS.cachedir + "addr.kch";
+                tpath = OPTS.cachedir + TxFileName;
+                apath = OPTS.cachedir + AddrFileName;
             }
             if (!TxKC->init(tpath) or !AddrKC->init(apath))
                 return false;
@@ -158,9 +158,9 @@ bool    set_cash(void)
         }
         if (OPTS.inmem) {
             TxMEM = new KV_T();
-            TxMEM->init(":");   // StashDB
+            TxMEM->init(TxMemName);   // StashDB
             AddrMEM = new KV_T();
-            AddrMEM->init(":");
+            AddrMEM->init(AddrMemName);
             if (OPTS.cash) {
                 if (tx_full) {
                     if (OPTS.verbose)

@@ -1,3 +1,4 @@
+#ifdef TKRZW
 #include "kv.h"
 #include "misc.h"
 
@@ -57,3 +58,4 @@ bool        KV_T::cpto(KV_T *dst)
     tmp[0] = &db;
     return dst->db.merge(tmp, 1, kyotocabinet::PolyDB::MADD);
 }
+#endif

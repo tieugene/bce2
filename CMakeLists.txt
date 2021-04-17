@@ -20,10 +20,19 @@ find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} ${OPENSSL_CRYPTO_LIBRARY})
 
-## kyotocabinet
+# Define k-v backend
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(kyotocabinet REQUIRED IMPORTED_TARGET kyotocabinet)
-target_link_libraries(${PROJECT_NAME} PkgConfig::kyotocabinet)
+option(USE_TKRZW "Use tkrzw k-v" OFF)
+if (USE_TKRZW)
+  add_definitions(-DTKRZW)
+  ## tkrzw
+  pkg_check_modules(tkrzw REQUIRED IMPORTED_TARGET tkrzw)
+  target_link_libraries(${PROJECT_NAME} PkgConfig::tkrzw)
+else (USE_TKRZW)
+    ## kyotocabinet
+    pkg_check_modules(kyotocabinet REQUIRED IMPORTED_TARGET kyotocabinet)
+    target_link_libraries(${PROJECT_NAME} PkgConfig::kyotocabinet)
+endif (USE_TKRZW)
 
 ## leveldb
 if (APPLE)
