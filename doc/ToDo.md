@@ -7,7 +7,8 @@
 1. += hex
 
 Separate:
-- init(locs path, blocks path)
+- init(locs path, blocks path):
+   load_fileoffsets(), datfarm(), load_bk()
 - seek(int)
 - get/load(dst)
 

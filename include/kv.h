@@ -22,7 +22,9 @@ const uint32_t NOT_FOUND_U32 = 0xFFFFFFFF;
 
 using namespace std;
 
-// == common ==
+bool    set_cache(void); ///< setup k-v storages
+void    stop_cache(void); ///< reset k-v storages
+
 class KV_T {
 private:
 #ifdef TKRZW
