@@ -1,3 +1,6 @@
+/*
+ * Block body processors
+ */
 #include <stdio.h>  // printf
 
 #include "bce.h"

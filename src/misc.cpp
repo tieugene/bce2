@@ -1,4 +1,5 @@
 /*
+ * Misc utilities
  * TODO: options:
  * - input bk no=>hash table
  */

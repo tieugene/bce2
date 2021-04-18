@@ -31,6 +31,7 @@ static time_t T0;
 const uint32_t  BULK_SIZE = 1000;
 // forwards
 bool    set_cash(void); ///< setup k-v storages
+void    stop_cash(void); ///< reset k-v storages
 
 int     main(int argc, char *argv[])
 /* TODO:
@@ -89,27 +90,7 @@ T0 = time(nullptr);
       if (OPTS.verbose > DBG_MIN)
         __prn_summary();
     }
-    if (OPTS.cash) {
-        if (OPTS.inmem) { // flush
-            if (OPTS.verbose) {
-                // tx
-                cerr << "Flush tx   (" << TxKC->count() << " => ";
-                auto t = time(nullptr);
-                TxMEM->cpto(TxKC);
-                cerr << TxKC->count() << " @ " << time(nullptr)-t << "s OK." << endl;
-                // addr
-                cerr << "Flush addr (" << AddrKC->count() << " => ";
-                t = time(nullptr);
-                AddrMEM->cpto(AddrKC);
-                cerr << AddrKC->count() << " @ " << time(nullptr)-t << "s OK." << endl;
-            } else {
-                TxMEM->cpto(TxKC);
-                AddrMEM->cpto(AddrKC);
-            }
-        }
-        TxKC->close();
-        AddrKC->close();
-    }
+    stop_cash();
     if (BUFFER.beg)
         delete BUFFER.beg;
     return 0;
@@ -154,7 +135,6 @@ bool    set_cash(void)
                 TxDB = TxKC;
                 AddrDB = AddrKC;
             }
-// cerr << "-. end init any cache: " << time(nullptr)-T0 << endl;
         }
         if (OPTS.inmem) {
             TxMEM = new KV_T();
@@ -201,4 +181,29 @@ bool    set_cash(void)
             OPTS.from = 0;
     }
     return true;
+}
+
+void stop_cache(void)
+{
+  if (OPTS.cash) {
+      if (OPTS.inmem) { // flush
+          if (OPTS.verbose) {
+              // tx
+              cerr << "Flush tx   (" << TxKC->count() << " => ";
+              auto t = time(nullptr);
+              TxMEM->cpto(TxKC);
+              cerr << TxKC->count() << " @ " << time(nullptr)-t << "s OK." << endl;
+              // addr
+              cerr << "Flush addr (" << AddrKC->count() << " => ";
+              t = time(nullptr);
+              AddrMEM->cpto(AddrKC);
+              cerr << AddrKC->count() << " @ " << time(nullptr)-t << "s OK." << endl;
+          } else {
+              TxMEM->cpto(TxKC);
+              AddrMEM->cpto(AddrKC);
+          }
+      }
+      TxKC->close();
+      AddrKC->close();
+  }
 }

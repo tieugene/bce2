@@ -1,3 +1,7 @@
+/*
+ * Key-value backend.
+ * Tkrzw version.
+ */
 #ifdef TKRZW
 #include "kv.h"
 #include "misc.h"

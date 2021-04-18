@@ -1,3 +1,6 @@
+/*
+ * locs- and *.dat files handler
+ */
 #include <iostream>
 #include <filesystem>
 

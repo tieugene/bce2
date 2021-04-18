@@ -1,3 +1,7 @@
+/*
+ * Key-value backend.
+ * Kyotocabinet version.
+ */
 #ifndef TKRZW
 #include "kv.h"
 #include "misc.h"

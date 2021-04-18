@@ -1,3 +1,6 @@
+/*
+ * Just Base58 encoder
+ */
 #include <vector>
 #include <cassert>
 #include "base58.h"
