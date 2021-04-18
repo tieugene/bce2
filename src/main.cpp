@@ -30,8 +30,8 @@ static time_t T0;
 // consts
 const uint32_t  BULK_SIZE = 1000;
 // forwards
-bool    set_cash(void); ///< setup k-v storages
-void    stop_cash(void); ///< reset k-v storages
+bool    set_cache(void); ///< setup k-v storages
+void    stop_cache(void); ///< reset k-v storages
 
 int     main(int argc, char *argv[])
 /* TODO:
@@ -61,7 +61,7 @@ T0 = time(nullptr);
     BUFFER.beg = new char[MAX_BK_SIZE];
     // 1.3. prepare k-v storages (and normalize OPTS.from)
     start_mem = memused();
-    if (!set_cash())
+    if (!set_cache())
         return 1;
     // 1.4. last prestart
     if (OPTS.verbose)
@@ -90,13 +90,13 @@ T0 = time(nullptr);
       if (OPTS.verbose > DBG_MIN)
         __prn_summary();
     }
-    stop_cash();
+    stop_cache();
     if (BUFFER.beg)
         delete BUFFER.beg;
     return 0;
 }
 
-bool    set_cash(void)
+bool    set_cache(void)
 {
     if (kv_mode()) {
         bool tx_full = false, addr_full = false;
