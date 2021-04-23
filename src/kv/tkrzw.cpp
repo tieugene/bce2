@@ -1,26 +1,34 @@
+/*
+ * Key-value backend.
+ * Tkrzw version.
+ */
+#ifdef TKRZW
 #include "kv.h"
 #include "misc.h"
 
 bool        KV_T::init(const string &s)
 {
-    opened = db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE);
-    if (!opened)
+    if (db.Open(s, true, tkrzw::File::OPEN_TRUNCATE) != tkrzw::Status::SUCCESS)
         cerr << "Can't open db '" << s << "'." << endl;
-    return opened;
+    return db.IsOpen();
 }
 
 bool    KV_T::close(void)
 {
-    if (opened) {
-        db.synchronize();
-        opened = !db.close();
+    if (db.IsOpen()) {
+        db.Synchronize(true);
+        db.Close();
     }
-    return (!opened);
+    return (!db.IsOpen());
+}
+
+void  KV_T::clear(void) {
+  db.Clear();
 }
 
 uint32_t    KV_T::count(void)
 {
-    auto retvalue = db.count();
+    auto retvalue = db.CountSimple();
     return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
 }
 
@@ -29,7 +37,7 @@ uint32_t    KV_T::add_raw(const uint8_t *key, const uint16_t size)
     //auto value = map.emplace(key, value);   // FIXME: emplace() w/ checking retvalue
     auto value = count();
     if (value != NOT_FOUND_U32)
-        if (!db.add((const char *)key, size, (const char *)&value, sizeof(uint32_t)))
+        if (db.Set(string_view((const char *) key, size), string_view((const char *)&value, sizeof(uint32_t))) != tkrzw::Status::SUCCESS)
             value = NOT_FOUND_U32;
     return value;
 }
@@ -37,8 +45,7 @@ uint32_t    KV_T::add_raw(const uint8_t *key, const uint16_t size)
 uint32_t    KV_T::get_raw(const uint8_t *key, const uint16_t size)
 {
     uint32_t value;
-    auto result = db.get((const char *)key, size, (char *)&value, sizeof(uint32_t));
-    if (result != sizeof(uint32_t))
+    if (db.Get(string_view((const char *)key, size), (string *)&value) != tkrzw::Status::SUCCESS)
         value = NOT_FOUND_U32;
     return value;
 }
@@ -53,7 +60,6 @@ bool        KV_T::cpto(KV_T *dst)
             dst->add(key, *((uint32_t *) cvalue.c_str()));
         delete cur;
     */
-    kyotocabinet::BasicDB *tmp[1];
-    tmp[0] = &db;
-    return dst->db.merge(tmp, 1, kyotocabinet::PolyDB::MADD);
+    return db.Export(&dst->db) == tkrzw::Status::SUCCESS;
 }
+#endif

@@ -1,6 +1,7 @@
 #ifndef BCE_H
 #define BCE_H
 
+// TODO: replace OPTS.cashe+inmem with file || inmem
 // TODO: stacktrace - file, byte, bk[, tx[, vin+n|vout+n]
 
 #include <iostream>

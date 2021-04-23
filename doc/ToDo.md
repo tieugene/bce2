@@ -1,24 +1,36 @@
 # ToDo
 
-## Enhancements:
+## Hot
 
-- Threading: (std::thread)
-  - print
-  - write-through tx/addr cache
-- tx.id &= 128-bit => uint_128
-- multisig => separate k-v | skip
-- drop wrong ($0, !addr)
-- cache k-v (2-nd order for old)
-- semi-in-mem (tx | addr)
+1. separate bk source
+1. common bk source
+1. += hex
 
-## Unordered:
+Separate:
+- init(locs path, blocks path):
+   load_fileoffsets(), datfarm(), load_bk()
+- seek(int)
+- get/load(dst)
 
-### 201103:
-- test count() => count
-- occupy() (cpto, add, get)
-- open(OAUTOTRAN) - each updating operation is performed in implicit transaction
-- open(OTRYLOCK) - locking is performed without blocking
-- cach+mem: OREADER-close-OWRITER
-- another backend:
-  - HashDB (.kch) => DirDB (.kcd)
-  - leveldb
+## 210415
+
+- \#54 tkrzw (brew: mremap() absent)
+- \#56 BcGetHex() (from `bitcoin-cli |`)
+- \#57 string_view
++ \#58 BcGetJson()
++ \#59 [unit]tests
++ \#61 moduled (pipe process)
++ \#51 multithreading:
+  + print()
+  + kv.add()/getoradd()
+  + tx.calc_hash()
++ \#60 k-v: bulk save (tkrzw::DBM::SetMulti()); +bk qty
++ \#15 -m: +write2disk()
+
+## Future
+
++ print_sql()
++ \#38 split: tx.kv=tx.history+utxo.kv
++ tx.id &= 128-bit => uint_128
++ multisig => separate k-v | skip
++ cache k-v (2-nd order for old)

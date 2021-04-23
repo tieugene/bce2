@@ -1,3 +1,6 @@
+/*
+ * Block body processors
+ */
 #include <stdio.h>  // printf
 
 #include "bce.h"
@@ -5,6 +8,7 @@
 #include "misc.h"
 #include "printers.h"
 #include "script.h"
+#include <cstring>
 
 static uint32_t BK_GLITCH[] = {91722, 91842};    // dup 91880, 91812
 
