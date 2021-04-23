@@ -8,6 +8,7 @@
 
 #include "bkidx.h"
 #include "datfarm.h"
+#include "misc.h"
 
 using namespace std;
 
@@ -49,7 +50,7 @@ size_t  init_bkloader(const std::string datdir, const std::string locsfile)
   return bk_qty;
 }
 
-bool    load_bk(const uint32_t bk_no, char *dst)       ///< load bk to buffer
+bool    load_bk(char *dst, const uint32_t bk_no)       ///< load bk to buffer
 {
   // load_bk(datfarm, FOFF[COUNT.bk].fileno, FOFF[COUNT.bk].offset)
   // load_bk(DATFARM_T &datfarm, const uint32_t fileno, const uint32_t offset)
@@ -74,7 +75,23 @@ bool    load_bk(const uint32_t bk_no, char *dst)       ///< load bk to buffer
     return datfarm->read(fileno, offset, size, dst);
 }
 
-//fs::path sDatName = OPTS.bkdir + "/" + argv[file1idx];
-//cerr << dir << TAB << file << endl;
-//auto sDatPAth = dir.append(file);
-//auto sDatPAth = std::filesystem::path(OPTS.bkdir, argv[file1idx]);
+bool    stdin_bk(char *dst, const uint32_t bk_no)
+{
+  bool retvalue = false;
+  string line;
+
+  getline(cin, line);
+  if (!line.empty()) {
+    auto line_len = line.length();
+    if (line_len > (MAX_BK_SIZE << 1))
+      cerr << "Bk too big: " << bk_no << endl;
+    else {
+      auto done = hex2bytes(line, dst);
+      if (done != (line_len >> 1))
+        cerr << done << "/" << (line_len >> 1) << " bytes converted" << endl;
+      else
+        retvalue = true;
+    }
+  }
+  return retvalue;
+}

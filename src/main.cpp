@@ -30,20 +30,24 @@ const uint32_t  BULK_SIZE = 1000;
 
 int     main(int argc, char *argv[])
 {
+  bool (*bkloader)(char *, const uint32_t) = &stdin_bk;
+
   // TODO: local BUFFER
     T0 = time(nullptr);
     // 1. prepare
     // 1.1. handle CLI
-    if (!cli(argc, argv))  // no file defined
+    if (!cli(argc, argv))
         return 1;
     // 1.2. prepare bk info
-    auto bk_no_upto = (OPTS.from < 0 ? 0 : OPTS.from) + OPTS.num;
-    auto bk_qty = init_bkloader(OPTS.datdir, OPTS.locsfile);
-    if (!bk_qty)
-      return 1;
-    if (bk_qty < bk_no_upto) {
-        cerr << "Loaded blocks (" << bk_qty << ") < max wanted " << bk_no_upto << endl;
-        return 1;
+    if (OPTS.datdir != FROM_STDIN) {
+      auto bk_qty = init_bkloader(OPTS.datdir, OPTS.locsfile);
+      if (!bk_qty)
+        return 2;
+      if (bk_qty <= OPTS.from) {
+          cerr << "Loaded blocks (" << bk_qty << ") <= 'from' " << OPTS.from << endl;
+          return 3;
+      }
+      bkloader = load_bk;
     }
     // 1.3. prepare bk buffer
     BUFFER.beg = new char[MAX_BK_SIZE];
@@ -56,22 +60,17 @@ int     main(int argc, char *argv[])
       __prn_head();
     start_time = time(nullptr);
     // 2. main loop
-    for (COUNT.bk = OPTS.from; COUNT.bk < bk_no_upto; COUNT.bk++)
-    {
-        // BUSY.tx = BUSY.vin = BUSY.vout = false;
-        if (!load_bk(COUNT.bk, BUFFER.beg))
-            break;
-        // BUFFER.end = BUFFER.beg + size;
-        CUR_PTR.v_ptr = BUFFER.beg;
-        if (!parse_bk()) {
-            __prn_trace();
-            break;
-        }
-        if ((OPTS.verbose) and (((COUNT.bk+1) % BULK_SIZE) == 0))
-            __prn_interim();
-        // if ((OPTS.verbose > 3) and ((COUNT.bk % BULK_SIZE) == 0))
-        //    cerr << COUNT.bk << endl;
-        // CUR_TX.busy = CUR_VIN.busy = CUR_VOUT.busy = false;
+    for (COUNT.bk = OPTS.from; bkloader(BUFFER.beg, COUNT.bk); COUNT.bk++) {
+      CUR_PTR.v_ptr = BUFFER.beg;
+      if (!parse_bk()) {
+          __prn_trace();
+          break;
+      }
+      if ((OPTS.verbose) and (((COUNT.bk+1) % BULK_SIZE) == 0))
+          __prn_interim();
+      if (OPTS.num)   // not 'untill the end'
+        if (--OPTS.num == 0)
+          break;
     }
     // 3. The end
     if (OPTS.verbose) {

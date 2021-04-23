@@ -14,6 +14,7 @@ aux_source_directory(src/out SRC_LIST)
 add_executable(${PROJECT_NAME} ${SRC_LIST})
 add_executable(btcbklocs tools/btcbklocs.cpp)
 add_executable(btclocview tools/btclocview.cpp)
+add_executable(test_cin tools/test_cin.cpp)
 
 ## openssl
 if (APPLE)
@@ -54,3 +55,4 @@ endif(APPLE)
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 install(TARGETS btcbklocs RUNTIME DESTINATION bin)
 install(TARGETS btclocview RUNTIME DESTINATION bin)
+install(TARGETS test_cin RUNTIME DESTINATION bin)
