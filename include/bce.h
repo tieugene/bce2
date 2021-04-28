@@ -10,7 +10,6 @@
 #include <fstream>
 #include <array>
 
-#include "uintxxx.h"
 #include "kv.h"
 
 enum    DBG_LVL_T
@@ -80,7 +79,7 @@ struct  BK_HEAD_T   ///< bk header, 80 bytes
 
 struct  BK_T        ///< whole of bk data w/o txs
 {
-    BK_HEAD_T   *head_ptr;
+    const BK_HEAD_T   *head_ptr;
     uint32_t    txs;
     uint256_t   hash;
 };
@@ -98,11 +97,11 @@ struct  TX_T        ///< tx variables w/o vins/vouts
 
 struct  VIN_T       ///< vin data
 {
-    uint256_t   *txid;
+    const uint256_t   *txid;
     uint64_t    txno;       // ?
     uint32_t    vout;
     uint32_t    ssize;      // vint
-    uint8_t     *script;
+    const uint8_t     *script;
     uint32_t    seq;
 };
 
@@ -110,22 +109,7 @@ struct  VOUT_T      ///< vout data
 {
     uint64_t    satoshi;
     uint32_t    ssize;      // vint
-    uint8_t     *script;
-};
-
-struct  BUFFER_T    ///< loaded block (raw)
-{
-    char        *beg = nullptr;
-};
-
-union   UNIPTR_T    ///< Universal ptr
-{
-    void        *v_ptr;
-    uint8_t     *u8_ptr;
-    uint16_t    *u16_ptr;
-    uint32_t    *u32_ptr;
-    uint64_t    *u64_ptr;
-    uint256_t   *u256_ptr;
+    const uint8_t     *script;
 };
 
 extern OPT_T    OPTS;
@@ -139,7 +123,6 @@ extern TX_T     CUR_TX;
 extern VIN_T    CUR_VIN;
 extern VOUT_T   CUR_VOUT;
 extern UNIPTR_T CUR_PTR;
-extern BUFFER_T BUFFER;
 extern KV_T     *TxDB, *AddrDB;
 
 extern time_t   start_time;
