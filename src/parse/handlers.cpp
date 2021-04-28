@@ -56,14 +56,14 @@ bool    hash_tx(const uint8_t *tx_beg)   // calc tx hash on demand
     for (uint32_t i = 0; i < CUR_TX.vouts; i++)
         parse_vout(false);
     if (!CUR_TX.segwit) {
-        CUR_TX.locktime = read_32();
+        CUR_TX.locktime = CUR_PTR.take_32();
         hash256(tx_beg, CUR_PTR.u8_ptr - tx_beg, CUR_TX.hash);
     } else {
         auto wit_ptr = CUR_PTR.u8_ptr;
         for (uint32_t i = 0; i < CUR_TX.vins; i++)
             parse_wit();
         auto lt_ptr = CUR_PTR.u8_ptr;
-        CUR_TX.locktime = read_32();
+        CUR_TX.locktime = CUR_PTR.take_32();
         // prepare buffer for hashing
         auto tmp_size = wit_ptr - tx_beg - sizeof(uint16_t) + sizeof(uint32_t);     // -segwit_sign +locktime
         uint8_t tmp_buf[tmp_size]; // , *tmp_ptr = tmp_buf;
@@ -82,7 +82,7 @@ bool    parse_tx(void) // TODO: hash
 {
     BUSY.tx = true;
     auto tx_beg = CUR_PTR.u8_ptr;
-    CUR_TX.ver = read_32();
+    CUR_TX.ver = CUR_PTR.take_32();
     CUR_TX.segwit = (*CUR_PTR.u16_ptr == 0x0100);
     if (CUR_TX.segwit)
         CUR_PTR.u16_ptr++;  // skip witness signature
@@ -119,7 +119,7 @@ bool    parse_tx(void) // TODO: hash
     if (CUR_TX.segwit)
         for (LOCAL.wit = 0; LOCAL.wit < CUR_TX.vins; LOCAL.wit++)
             parse_wit();
-    CUR_TX.locktime = read_32();  // locktime
+    CUR_TX.locktime = CUR_PTR.take_32();  // locktime
     STAT.vins += CUR_TX.vins;
     STAT.vouts += CUR_TX.vouts;
     STAT.max_vins = max(STAT.max_vins, CUR_TX.vins);
@@ -131,11 +131,11 @@ bool    parse_tx(void) // TODO: hash
 bool    parse_vin(const bool dojob)
 {
     // FIXME: coinbase = 32x00 + 4xFF (txid+vout)
-    CUR_VIN.txid = read_256_ptr();
-    CUR_VIN.vout = read_32();
+    CUR_VIN.txid = CUR_PTR.take_256_ptr();
+    CUR_VIN.vout = CUR_PTR.take_32();
     CUR_VIN.ssize = read_v();
     CUR_VIN.script = read_u8_ptr(CUR_VIN.ssize);
-    CUR_VIN.seq = read_32();
+    CUR_VIN.seq = CUR_PTR.take_32();
     if (!dojob)
         return true;
     BUSY.vin = true;
@@ -166,7 +166,7 @@ bool    parse_wit()
 
 bool    parse_vout(const bool dojob)
 {
-    CUR_VOUT.satoshi = read_64();
+    CUR_VOUT.satoshi = CUR_PTR.take_64();
     CUR_VOUT.ssize = read_v();
     CUR_VOUT.script = read_u8_ptr(CUR_VOUT.ssize);
     if (!dojob)

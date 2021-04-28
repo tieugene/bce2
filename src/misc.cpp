@@ -174,31 +174,11 @@ uint32_t    read_v(void)   ///<read 1..4-byte int and forward;
     return retvalue;
 }
 
-uint32_t    read_32(void)  ///< Read 4-byte int and go forward
-{
-    return *CUR_PTR.u32_ptr++;
-}
-
-uint64_t    read_64(void)  ///< Read 8-byte int and go forward
-{
-    return *CUR_PTR.u64_ptr++;
-}
-
 const uint8_t     *read_u8_ptr(uint32_t const size)
 {
     auto retvalue = CUR_PTR.u8_ptr;
     CUR_PTR.u8_ptr += size;
     return retvalue;
-}
-
-const uint32_t    *read_32_ptr(void)
-{
-    return CUR_PTR.u32_ptr++;
-}
-
-const uint256_t   *read_256_ptr(void)
-{
-    return CUR_PTR.u256_ptr++;
 }
 
 string      ptr2hex(void const *vptr, size_t const size)
