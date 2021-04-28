@@ -22,6 +22,8 @@ union   UNIPTR_T    ///< Universal ptr
     UNIPTR_T(const uint256_t * ptr) { u256_ptr = ptr; }
     uint32_t    take_32(void) { return *u32_ptr++; }
     uint64_t    take_64(void) { return *u64_ptr++; }
+    uint32_t    take_varuint(void);
+    const uint8_t     *take_u8_ptr(const uint32_t);
     const uint32_t    *take_32_ptr(void) { return u32_ptr++; }
     const uint256_t    *take_256_ptr(void) { return u256_ptr++; }
 };

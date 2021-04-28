@@ -23,7 +23,7 @@ bool    parse_bk(void)
     BUSY.bk = true;
     CUR_BK.head_ptr = static_cast<const BK_HEAD_T*> (CUR_PTR.v_ptr);
     CUR_PTR.u8_ptr += sizeof (BK_HEAD_T);
-    CUR_BK.txs = read_v();
+    CUR_BK.txs = CUR_PTR.take_varuint();
     if (OPTS.out) // on demand
     {
         hash256(CUR_BK.head_ptr, sizeof(BK_HEAD_T), CUR_BK.hash);
@@ -48,7 +48,7 @@ bool    hash_tx(const uint8_t *tx_beg)   // calc tx hash on demand
     // 1. fast rewind
     for (uint32_t i = 0; i < CUR_TX.vins; i++)
         parse_vin(false);
-    CUR_TX.vouts = read_v();
+    CUR_TX.vouts = CUR_PTR.take_varuint();
     if (!CUR_TX.vouts) {
         cerr << "Vouts == 0" << endl;
         return false;
@@ -86,7 +86,7 @@ bool    parse_tx(void) // TODO: hash
     CUR_TX.segwit = (*CUR_PTR.u16_ptr == 0x0100);
     if (CUR_TX.segwit)
         CUR_PTR.u16_ptr++;  // skip witness signature
-    CUR_TX.vins = read_v();
+    CUR_TX.vins = CUR_PTR.take_varuint();
     if (CUR_TX.vins == 0) {
         cerr << "Vins == 0" << endl;
         return false;
@@ -112,7 +112,7 @@ bool    parse_tx(void) // TODO: hash
     for (LOCAL.vin = 0; LOCAL.vin < CUR_TX.vins; LOCAL.vin++)
         if (!parse_vin(true))
             return false;
-    CUR_TX.vouts = read_v();   // vouts
+    CUR_TX.vouts = CUR_PTR.take_varuint();   // vouts
     for (LOCAL.vout = 0; LOCAL.vout < CUR_TX.vouts; LOCAL.vout++)
         if (!parse_vout(true))
             return false;
@@ -133,8 +133,8 @@ bool    parse_vin(const bool dojob)
     // FIXME: coinbase = 32x00 + 4xFF (txid+vout)
     CUR_VIN.txid = CUR_PTR.take_256_ptr();
     CUR_VIN.vout = CUR_PTR.take_32();
-    CUR_VIN.ssize = read_v();
-    CUR_VIN.script = read_u8_ptr(CUR_VIN.ssize);
+    CUR_VIN.ssize = CUR_PTR.take_varuint();
+    CUR_VIN.script = CUR_PTR.take_u8_ptr(CUR_VIN.ssize);
     CUR_VIN.seq = CUR_PTR.take_32();
     if (!dojob)
         return true;
@@ -158,17 +158,17 @@ bool    parse_vin(const bool dojob)
 
 bool    parse_wit()
 {
-    auto count = read_v();
+    auto count = CUR_PTR.take_varuint();
     for (uint32_t i = 0; i < count; i++)
-        CUR_PTR.u8_ptr += read_v();
+        CUR_PTR.u8_ptr += CUR_PTR.take_varuint();
     return true;
 }
 
 bool    parse_vout(const bool dojob)
 {
     CUR_VOUT.satoshi = CUR_PTR.take_64();
-    CUR_VOUT.ssize = read_v();
-    CUR_VOUT.script = read_u8_ptr(CUR_VOUT.ssize);
+    CUR_VOUT.ssize = CUR_PTR.take_varuint();
+    CUR_VOUT.script = CUR_PTR.take_u8_ptr(CUR_VOUT.ssize);
     if (!dojob)
         return true;
     BUSY.vout = true;
