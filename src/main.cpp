@@ -20,7 +20,6 @@ TX_T        CUR_TX;
 VIN_T       CUR_VIN;
 VOUT_T      CUR_VOUT;
 UNIPTR_T    CUR_PTR;
-BUFFER_T    BUFFER;
 long        start_mem;
 time_t      start_time;
 // locals
@@ -28,11 +27,10 @@ static time_t T0;
 // consts
 const uint32_t  BULK_SIZE = 1000;
 
-int     main(int argc, char *argv[])
-{
+int     main(int argc, char *argv[]) {
+  // TODO: local BUFFER = char *const ptr;
   bool (*bkloader)(char *, const uint32_t) = &stdin_bk;
 
-  // TODO: local BUFFER
     T0 = time(nullptr);
     // 1. prepare
     // 1.1. handle CLI
@@ -49,19 +47,18 @@ int     main(int argc, char *argv[])
       }
       bkloader = load_bk;
     }
-    // 1.3. prepare bk buffer
-    BUFFER.beg = new char[MAX_BK_SIZE];
-    // 1.4. prepare k-v storages (and normalize OPTS.from)
+    // 1.3. prepare k-v storages (and normalize OPTS.from)
     start_mem = memused();
     if (!set_cache())
         return 1;
-    // 1.5. last prestart
+    // 1.4. last prestart
+    char *const BUFFER = new char[MAX_BK_SIZE];
     if (OPTS.verbose)
       __prn_head();
     start_time = time(nullptr);
     // 2. main loop
-    for (COUNT.bk = OPTS.from; bkloader(BUFFER.beg, COUNT.bk); COUNT.bk++) {
-      CUR_PTR.v_ptr = BUFFER.beg;
+    for (COUNT.bk = OPTS.from; bkloader(BUFFER, COUNT.bk); COUNT.bk++) {
+      CUR_PTR.v_ptr = BUFFER;
       if (!parse_bk()) {
           __prn_trace();
           break;
@@ -80,7 +77,7 @@ int     main(int argc, char *argv[])
         __prn_summary();
     }
     stop_cache();
-    if (BUFFER.beg)
-        delete BUFFER.beg;
+    //if (BUFFER)
+    //    delete BUFFER;
     return 0;
 }

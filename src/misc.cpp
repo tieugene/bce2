@@ -184,19 +184,19 @@ uint64_t    read_64(void)  ///< Read 8-byte int and go forward
     return *CUR_PTR.u64_ptr++;
 }
 
-uint8_t     *read_u8_ptr(uint32_t const size)
+const uint8_t     *read_u8_ptr(uint32_t const size)
 {
     auto retvalue = CUR_PTR.u8_ptr;
     CUR_PTR.u8_ptr += size;
     return retvalue;
 }
 
-uint32_t    *read_32_ptr(void)
+const uint32_t    *read_32_ptr(void)
 {
     return CUR_PTR.u32_ptr++;
 }
 
-uint256_t   *read_256_ptr(void)
+const uint256_t   *read_256_ptr(void)
 {
     return CUR_PTR.u256_ptr++;
 }

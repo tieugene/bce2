@@ -3,7 +3,7 @@
 #define KV_H
 
 #include <string_view>
-#include "uintxxx.h"
+#include "common.h"
 #ifdef TKRZW
 #include <tkrzw_dbm_poly.h>
 const std::string TxFileName = "tx.tkh";

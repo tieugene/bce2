@@ -21,7 +21,7 @@ bool    parse_script(void);
 bool    parse_bk(void)
 {
     BUSY.bk = true;
-    CUR_BK.head_ptr = static_cast<BK_HEAD_T*> (CUR_PTR.v_ptr);
+    CUR_BK.head_ptr = static_cast<const BK_HEAD_T*> (CUR_PTR.v_ptr);
     CUR_PTR.u8_ptr += sizeof (BK_HEAD_T);
     CUR_BK.txs = read_v();
     if (OPTS.out) // on demand

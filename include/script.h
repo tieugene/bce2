@@ -48,7 +48,7 @@ public:
     void                sort_multisig(void);
 };
 
-bool        script_decode(uint8_t *, const uint32_t);
+bool        script_decode(const uint8_t *, const uint32_t);
 
 extern ADDR_FOUND_T CUR_ADDR;
 

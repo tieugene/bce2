@@ -12,19 +12,18 @@
 using namespace std;
 
 const string  hash2hex(const uint256_t &h) {
-  MULTIPTR_T u(&h);
+  UNIPTR_T u(&h);
   char tmp[65];
   tmp[64] = '\0';
-  sprintf(tmp, "%016llx%016llx%016llx%016llx", u.u64[3], u.u64[2], u.u64[1], u.u64[0]);
+  sprintf(tmp, "%016llx%016llx%016llx%016llx", u.u64_ptr[3], u.u64_ptr[2], u.u64_ptr[1], u.u64_ptr[0]);
   return string(tmp);
 }
 
 const string  ripe2hex(const uint160_t &r) {
-  //MULTIUINT_T *v = &r;
-  MULTIPTR_T u(&r);
+  UNIPTR_T u(&r);
   char tmp[41];
   tmp[40] = '\0';
-  sprintf(tmp, "%08x%08x%08x%08x%08x", u.u32[4], u.u32[3], u.u32[2], u.u32[1], u.u32[0]);
+  sprintf(tmp, "%08x%08x%08x%08x%08x", u.u32_ptr[4], u.u32_ptr[3], u.u32_ptr[2], u.u32_ptr[1], u.u32_ptr[0]);
   return string(tmp);
 }
 

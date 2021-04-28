@@ -24,7 +24,7 @@ void    dump_script(const string &);
 
 ADDR_FOUND_T CUR_ADDR;
 
-static uint8_t  *script_ptr;    // ptr to currently decoded opcode
+static const uint8_t  *script_ptr;    // ptr to currently decoded opcode
 static uint32_t script_size;    // script size
 
 bool cmp_uint160(const uint160_t &l, const uint160_t &r)    // desc
@@ -258,7 +258,7 @@ bool    do_P2MS(void)                   ///< multisig
     return retvalue;
 }
 
-bool    script_decode(uint8_t *script, const uint32_t size)
+bool    script_decode(const uint8_t *script, const uint32_t size)
 {
     /// FIXME: empty script
     CUR_ADDR.reset();
