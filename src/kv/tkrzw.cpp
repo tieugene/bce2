@@ -32,22 +32,34 @@ uint32_t    KV_T::count(void)
     return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
 }
 
-uint32_t    KV_T::add_raw(const uint8_t *key, const uint16_t size)
-{
-    //auto value = map.emplace(key, value);   // FIXME: emplace() w/ checking retvalue
-    auto value = count();
+uint32_t    KV_T::add(string_view key) {
+    uint32_t value = count();
     if (value != NOT_FOUND_U32)
-        if (db.Set(string_view((const char *) key, size), string_view((const char *)&value, sizeof(uint32_t))) != tkrzw::Status::SUCCESS)
+        if (!db.Set(key, string_view((const char *)&value, sizeof(uint32_t))).IsOK())
             value = NOT_FOUND_U32;
     return value;
 }
 
-uint32_t    KV_T::get_raw(const uint8_t *key, const uint16_t size)
-{
+uint32_t    KV_T::get(string_view key) {
     uint32_t value;
-    if (db.Get(string_view((const char *)key, size), (string *)&value) != tkrzw::Status::SUCCESS)
+    if (!db.Get(key, (string *)&value).IsOK())    // FXIME: handle errors
         value = NOT_FOUND_U32;
     return value;
+}
+
+uint32_t    KV_T::get_or_add(std::string_view key) {
+  string old_value;
+  uint32_t value = count();
+  if (value != NOT_FOUND_U32) {
+    auto status = db.Set(key, string_view((const char *)&value, sizeof(uint32_t)), false, &old_value);
+    if (status == tkrzw::Status::DUPLICATION_ERROR)
+      value = *((uint32_t *) old_value.data());
+    else if (!status.IsOK()) {
+      cerr << "Something wrong with get_or_add" << endl;
+      value = NOT_FOUND_U32;
+    }
+  }
+  return value;
 }
 
 bool        KV_T::cpto(KV_T *dst)
