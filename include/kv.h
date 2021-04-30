@@ -56,7 +56,14 @@ public:
     uint32_t    get(std::string_view key);
     uint32_t    get(const uint256_t &key)
                 { return get(std::string_view(reinterpret_cast<const char *>(std::data(key)), sizeof(uint256_t))); }
-    //uint32_t    try_emplace(std::string_view);
+    /**
+     * @brief Try to get existing k-v or add new
+     * @param key Key to find
+     * @param val Value to store if key is new
+     * @return Found or added value or NOT_FOUND_U32 on error (not found nor added)
+     * @throw Not found nor added, added as not expected
+     */
+    uint32_t    try_emplace(std::string_view key, uint32_t val);
 };
 
 #endif // KV_H

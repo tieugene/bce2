@@ -2,12 +2,12 @@
  * Block body processors
  */
 #include <stdio.h>  // printf
+#include "script.h"
 
 #include "bce.h"
 #include "handlers.h"
 #include "misc.h"
 #include "printers.h"
-#include "script.h"
 #include <cstring>
 
 static uint32_t BK_GLITCH[] = {91722, 91842};    // dup 91880, 91812
@@ -21,8 +21,7 @@ bool    parse_script(void);
 bool    parse_bk(void)
 {
     BUSY.bk = true;
-    CUR_BK.head_ptr = static_cast<const BK_HEAD_T*> (CUR_PTR.v_ptr);
-    CUR_PTR.u8_ptr += sizeof (BK_HEAD_T);
+    CUR_BK.head_ptr = static_cast<const BK_HEAD_T*> ((const void *) CUR_PTR.take_u8_ptr(sizeof (BK_HEAD_T)));
     CUR_BK.txs = CUR_PTR.take_varuint();
     if (OPTS.out) // on demand
     {
@@ -191,26 +190,17 @@ bool    parse_script(void)
     auto script_ok = script_decode(CUR_VOUT.script, CUR_VOUT.ssize);
     if (script_ok and CUR_ADDR.get_qty()) {
         if (kv_mode()) {
-            uint32_t addr_added;
-            addr_added = AddrDB->get(CUR_ADDR.get_view());
-            if (addr_added == NOT_FOUND_U32) {
-                addr_added = AddrDB->add(CUR_ADDR.get_view());
-                if (addr_added == NOT_FOUND_U32) {
-                    cerr << "Can not find nor add addr " << endl;
-                    return false;
-                }
-                if (addr_added != COUNT.addr) {
-                        cerr << "Addr added as " << addr_added << " against waiting " << COUNT.addr << endl;
-                        return false;
-                }
-                CUR_ADDR.set_id(addr_added);
-                if (OPTS.out)
-                    out_addr(); // FIXME:
-                COUNT.addr += 1;
-            } else
-              CUR_ADDR.set_id(addr_added);
+            auto addr_tried = AddrDB->try_emplace(CUR_ADDR.get_view(), COUNT.addr);
+            if (addr_tried == NOT_FOUND_U32)
+              return false;
+            CUR_ADDR.set_id(addr_tried);
+            if (addr_tried == COUNT.addr) {
+              if (OPTS.out)
+                out_addr();
+              COUNT.addr++;
+            }
         } else if (OPTS.out)
-            __prn_addr();
+          __prn_addr();
         STAT.addrs += 1;    // FIXME: if decoded and 1+
     }
     return true;

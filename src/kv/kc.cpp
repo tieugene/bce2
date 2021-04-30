@@ -46,10 +46,20 @@ uint32_t    KV_T::get(string_view key) {
         value = NOT_FOUND_U32;
     return value;
 }
-/*
-uint32_t    KV_T::try_emplace(std::string_view data) {
-  if ();
-}*/
+
+uint32_t    KV_T::try_emplace(std::string_view key, uint32_t val) {
+  auto v = get(key);
+  if (v == NOT_FOUND_U32) {
+    v = add(key);
+    if (v == NOT_FOUND_U32)
+      cerr << "Cannot add key '" << ptr2hex(key) << "' : " << val << endl;
+    else if (v != val) {
+      cerr << "Key '" << ptr2hex(key) << "' added as " << v << " against expected " << val << endl;
+      v = NOT_FOUND_U32;
+    }
+  }
+  return v;
+}
 
 bool        KV_T::cpto(KV_T *dst)
 {

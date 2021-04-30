@@ -15,7 +15,7 @@
 #include <mach/mach.h>
 #endif
 
-static string  help_txt = "\
+const string  help_txt = "\
 Usage: [options] (- | <dat_dir> <locs_file>)\n\
 Options:\n\
 -h        - this help\n\
@@ -154,21 +154,16 @@ long        memused(void)
     return get_statm();
 }
 
-string      ptr2hex(void const *vptr, size_t const size)
-{
+string  ptr2hex(string_view data) {
     static string hex_chars = "0123456789abcdef";
     string s;
-    auto cptr = reinterpret_cast<char const *>(vptr);
-    for (size_t i = 0; i < size; i++, cptr++) {
+    //auto cptr = reinterpret_cast<char const *>(vptr);
+    auto cptr = data.cbegin();
+    for (size_t i = 0; i < data.length(); i++, cptr++) {
         s.push_back(hex_chars[(*cptr & 0xF0) >> 4]);
         s.push_back(hex_chars[(*cptr & 0x0F)]);
     }
     return s;
-}
-
-string      str2hex(const string &s)
-{
-    return ptr2hex(s.c_str(), s.size());
 }
 
 int hex2bytes(const string& s, char *dst)

@@ -2,20 +2,19 @@
 
 ## Hot
 
-1. separate bk source
-1. common bk source
-1. += hex
+Clean up:
 
-Separate:
-- init(locs path, blocks path):
-   load_fileoffsets(), datfarm(), load_bk()
-- seek(int)
-- get/load(dst)
+- kv.try()
+- const *ptr
+- ? uint8_t => char
+- string_view
+- exceptions
+- stages: load | parse | resolve (and save) | print
 
 ## 210415
 
 - \#54 tkrzw (brew: mremap() absent)
-- \#56 BcGetHex() (from `bitcoin-cli |`)
+- [x] \#56 BcGetHex() (from `bitcoin-cli |`)
 - \#57 string_view
 + \#58 BcGetJson()
 + \#59 [unit]tests
