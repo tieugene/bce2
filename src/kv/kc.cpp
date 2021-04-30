@@ -47,16 +47,12 @@ uint32_t    KV_T::get(string_view key) {
     return value;
 }
 
-uint32_t    KV_T::try_emplace(std::string_view key, uint32_t val) {
+uint32_t    KV_T::get_or_add(std::string_view key) {
   auto v = get(key);
   if (v == NOT_FOUND_U32) {
     v = add(key);
     if (v == NOT_FOUND_U32)
-      cerr << "Cannot add key '" << ptr2hex(key) << "' : " << val << endl;
-    else if (v != val) {
-      cerr << "Key '" << ptr2hex(key) << "' added as " << v << " against expected " << val << endl;
-      v = NOT_FOUND_U32;
-    }
+      cerr << "Cannot add key '" << ptr2hex(key) << endl;
   }
   return v;
 }

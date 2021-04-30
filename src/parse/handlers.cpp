@@ -190,11 +190,12 @@ bool    parse_script(void)
     auto script_ok = script_decode(CUR_VOUT.script, CUR_VOUT.ssize);
     if (script_ok and CUR_ADDR.get_qty()) {
         if (kv_mode()) {
-            auto addr_tried = AddrDB->try_emplace(CUR_ADDR.get_view(), COUNT.addr);
+            auto addr_tried = AddrDB->get_or_add(CUR_ADDR.get_view());
+            // TODO: check created > expected
             if (addr_tried == NOT_FOUND_U32)
               return false;
             CUR_ADDR.set_id(addr_tried);
-            if (addr_tried == COUNT.addr) {
+            if (addr_tried == COUNT.addr) {   // new addr created
               if (OPTS.out)
                 out_addr();
               COUNT.addr++;
