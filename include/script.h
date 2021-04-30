@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <array>
+#include <string_view>
 #include "uintxxx.h"
 
 typedef std::vector<std::string> string_list;
@@ -30,6 +31,7 @@ private:
     uint8_t     qty;
     uint16_t    len;
     union   {
+        char  *const cptr;  // string_view helper
         uint8_t     u8[16*sizeof(uint160_t)];    // max P2MS size
         std::array<uint160_t, 16>   u160;
         uint256_t   *u256;
@@ -45,6 +47,7 @@ public:
     void                add_data(const SCTYPE, const uint8_t *);
     inline uint16_t     get_len(void) { return len; }
     inline uint8_t      *get_data() { return buffer.u8; }
+    std::string_view    get_view(void) { return std::string_view(reinterpret_cast<const char *>(buffer.u8), len); }
     void                sort_multisig(void);
 };
 

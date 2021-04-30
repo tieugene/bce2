@@ -39,13 +39,24 @@ public:
     void        clear(void);
     uint32_t    count(void);
     bool        cpto(KV_T *);
-    bool        add(const string &key, const uint32_t value);
-    uint32_t    add_raw(const uint8_t *, const uint16_t);
+    //bool        add(const string &key, const uint32_t value);
+    /**
+     * @brief Add new k-v pair
+     * @param key Key to add
+     * @return Value of new key added or NOT_FOUND_U32
+     */
+    uint32_t    add(std::string_view key);
     uint32_t    add(const uint256_t &key)                     // tx, WSH
-                { return add_raw(key.begin(), sizeof(uint256_t)); }
-    uint32_t    get_raw(const uint8_t *, const uint16_t);
+                { return add(std::string_view(reinterpret_cast<const char *>(std::data(key)), sizeof(uint256_t))); }
+    /**
+     * @brief Get value of key
+     * @param key Key to find
+     * @return Key value or NOT_FOUND_U32
+     */
+    uint32_t    get(std::string_view key);
     uint32_t    get(const uint256_t &key)
-                { return get_raw(key.begin(), sizeof(uint256_t)); }
+                { return get(std::string_view(reinterpret_cast<const char *>(std::data(key)), sizeof(uint256_t))); }
+    //uint32_t    try_emplace(std::string_view);
 };
 
 #endif // KV_H

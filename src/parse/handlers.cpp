@@ -192,9 +192,9 @@ bool    parse_script(void)
     if (script_ok and CUR_ADDR.get_qty()) {
         if (kv_mode()) {
             uint32_t addr_added;
-            addr_added = AddrDB->get_raw(CUR_ADDR.get_data(), CUR_ADDR.get_len());
+            addr_added = AddrDB->get(CUR_ADDR.get_view());
             if (addr_added == NOT_FOUND_U32) {
-                addr_added = AddrDB->add_raw(CUR_ADDR.get_data(), CUR_ADDR.get_len());
+                addr_added = AddrDB->add(CUR_ADDR.get_view());
                 if (addr_added == NOT_FOUND_U32) {
                     cerr << "Can not find nor add addr " << endl;
                     return false;
