@@ -5,6 +5,7 @@
  */
 
 #include <cstdlib>
+#include <cstring>
 #include <stdio.h>
 #include <unistd.h>
 #include <filesystem>

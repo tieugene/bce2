@@ -15,7 +15,13 @@ const string  hash2hex(const uint256_t &h) {
   UNIPTR_T u(&h);
   char tmp[65];
   tmp[64] = '\0';
-  sprintf(tmp, "%016llx%016llx%016llx%016llx", u.u64_ptr[3], u.u64_ptr[2], u.u64_ptr[1], u.u64_ptr[0]);
+  sprintf(tmp,
+#if defined(__APPLE__)
+    "%016llx%016llx%016llx%016llx",
+#else
+    "%016lx%016lx%016lx%016lx",
+#endif
+    u.u64_ptr[3], u.u64_ptr[2], u.u64_ptr[1], u.u64_ptr[0]);
   return string(tmp);
 }
 
