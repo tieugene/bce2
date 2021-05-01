@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <array>
 #include <string_view>
+#include <exception>
 
 template <size_t Size>
 using byte_array = std::array<uint8_t, Size>;
@@ -32,5 +33,9 @@ union   UNIPTR_T    ///< Universal ptr
     const uint32_t    *take_32_ptr(void) { return u32_ptr++; }
     const uint256_t    *take_256_ptr(void) { return u256_ptr++; }
 };
-
+class BCException : public std::exception {
+  const char* what() const throw() {
+    return "BCE exception";
+  }
+};
 #endif // COMMON_H

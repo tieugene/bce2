@@ -13,7 +13,7 @@ bool    set_cache(void)
             TxKC = new KV_T();
             AddrKC = new KV_T();
             string tpath, apath;
-            if (OPTS.cachedir.size() == 1)  {   // on-memory; for kc tests
+            if (OPTS.cachedir.size() == 1)  {   // FIXME: 'on-memory; for tests'
                 tpath = apath = OPTS.cachedir;
             } else {
                 if (OPTS.cachedir.back() != '/')

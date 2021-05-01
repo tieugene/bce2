@@ -6,10 +6,11 @@
 #include "kv.h"
 #include "misc.h"
 
-bool        KV_T::init(const string &s) {
+bool  KV_T::init(const string &s) {
     opened = db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE);
     if (!opened)
-        cerr << "Can't open db '" << s << "'." << endl;
+      return false;
+      // throw BCException "Can't open db '"; // + s + "'";
     return opened;
 }
 

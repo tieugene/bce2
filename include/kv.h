@@ -7,12 +7,12 @@
 #ifdef TKRZW
 #include <tkrzw_dbm_poly.h>
 // HashDBM
-const std::string TxFileName = "tx.tkh";
+const std::string TxFileName = "tx.tkz";
 const std::string AddrFileName = "addr.tkh";
 // TinyDBM
 const std::string TxMemName = "tx.tkmt";
 const std::string AddrMemName = "addr.tkmt";
-// TODO: BabyDBM (.tkmb)
+// TODO: try BabyDBM (.tkmb)
 #else
 #include <kcpolydb.h>
 // HashDB
