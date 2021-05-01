@@ -31,7 +31,6 @@ private:
     uint8_t     qty;
     uint16_t    len;
     union   {
-        char  *const cptr;  // string_view helper
         uint8_t     u8[16*sizeof(uint160_t)];    // max P2MS size
         std::array<uint160_t, 16>   u160;
         uint256_t   *u256;
