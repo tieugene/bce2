@@ -1,16 +1,20 @@
+/*
+ * Key-value backend.
+ * Kyotocabinet version.
+ */
+#ifndef TKRZW
 #include "kv.h"
 #include "misc.h"
 
-bool        KV_T::init(const string &s)
-{
+bool  KV_T::init(const string &s) {
     opened = db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE);
     if (!opened)
-        cerr << "Can't open db '" << s << "'." << endl;
+      return false;
+      // throw BCException "Can't open db '"; // + s + "'";
     return opened;
 }
 
-bool    KV_T::close(void)
-{
+bool    KV_T::close(void) {
     if (opened) {
         db.synchronize();
         opened = !db.close();
@@ -18,29 +22,40 @@ bool    KV_T::close(void)
     return (!opened);
 }
 
-uint32_t    KV_T::count(void)
-{
+void  KV_T::clear(void) {
+  db.clear();
+}
+
+uint32_t    KV_T::count(void) {
     auto retvalue = db.count();
     return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
 }
 
-uint32_t    KV_T::add_raw(const uint8_t *key, const uint16_t size)
-{
+uint32_t    KV_T::add(string_view key) {
     //auto value = map.emplace(key, value);   // FIXME: emplace() w/ checking retvalue
     auto value = count();
     if (value != NOT_FOUND_U32)
-        if (!db.add((const char *)key, size, (const char *)&value, sizeof(uint32_t)))
+        if (!db.add(key.data(), key.length(), (const char *)&value, sizeof(uint32_t)))
             value = NOT_FOUND_U32;
     return value;
 }
 
-uint32_t    KV_T::get_raw(const uint8_t *key, const uint16_t size)
-{
+uint32_t    KV_T::get(string_view key) {
     uint32_t value;
-    auto result = db.get((const char *)key, size, (char *)&value, sizeof(uint32_t));
+    auto result = db.get(key.data(), key.length(), (char *)&value, sizeof(uint32_t));
     if (result != sizeof(uint32_t))
         value = NOT_FOUND_U32;
     return value;
+}
+
+uint32_t    KV_T::get_or_add(std::string_view key) {
+  auto v = get(key);
+  if (v == NOT_FOUND_U32) {
+    v = add(key);
+    if (v == NOT_FOUND_U32)
+      cerr << "Cannot add key '" << ptr2hex(key) << endl;
+  }
+  return v;
 }
 
 bool        KV_T::cpto(KV_T *dst)
@@ -57,3 +72,4 @@ bool        KV_T::cpto(KV_T *dst)
     tmp[0] = &db;
     return dst->db.merge(tmp, 1, kyotocabinet::PolyDB::MADD);
 }
+#endif

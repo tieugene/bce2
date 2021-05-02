@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <array>
+#include <string_view>
 #include "uintxxx.h"
 
 typedef std::vector<std::string> string_list;
@@ -45,10 +46,11 @@ public:
     void                add_data(const SCTYPE, const uint8_t *);
     inline uint16_t     get_len(void) { return len; }
     inline uint8_t      *get_data() { return buffer.u8; }
+    std::string_view    get_view(void) { return std::string_view(reinterpret_cast<const char *>(buffer.u8), len); }
     void                sort_multisig(void);
 };
 
-bool        script_decode(uint8_t *, const uint32_t);
+bool        script_decode(const uint8_t *, const uint32_t);
 
 extern ADDR_FOUND_T CUR_ADDR;
 

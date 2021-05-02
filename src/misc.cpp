@@ -1,9 +1,11 @@
 /*
+ * Misc utilities
  * TODO: options:
  * - input bk no=>hash table
  */
 
 #include <cstdlib>
+#include <cstring>
 #include <stdio.h>
 #include <unistd.h>
 #include <filesystem>
@@ -14,8 +16,8 @@
 #include <mach/mach.h>
 #endif
 
-static string  help_txt = "\
-Usage: [options] <dat_dir> <locs_file>\n\
+const string  help_txt = "\
+Usage: [options] (- | <dat_dir> <locs_file>)\n\
 Options:\n\
 -h        - this help\n\
 -f n      - block starts from (default=0)\n\
@@ -28,6 +30,9 @@ Options:\n\
     1 - short info (default n)\n\
     2 - mid\n\
     3 - full debug\n\
+Mandatory args:\n\
+-         - get blocks hex-string from stdin\n\
+    or\n\
 <dat_dir> - blk*.dat folder\n\
 <locs_file> - file with block locations\
 ";
@@ -97,21 +102,32 @@ bool        cli(int argc, char *argv[])
     }
     // opterr - allways 1
     // optind - 1-st unhandled is argv[optarg] (if argc > optind)
-    if ((argc - optind) < 2)
-      cerr << "Too fiew mandatory arguments. Use -h for help" << endl;
-    else if (!filesystem::exists(argv[optind]))
-        cerr << argv[optind] << " not exists" << endl;
-    else if (!filesystem::exists(argv[optind + 1]))
-        cerr << argv[optind + 1] << " not exists" << endl;
-    else if (!OPTS.cachedir.empty() and !filesystem::exists(OPTS.cachedir))
-      cerr << OPTS.cachedir << " not exists" << endl;
-    else {
-        OPTS.datdir = argv[optind];
-        OPTS.locsfile = argv[optind + 1];
-        retvalue = true;
-        if (OPTS.verbose > 1)   // TODO: up v-level
-            __prn_opts();
-    }
+    auto argc_last = argc - optind;
+    if ((argc_last == 1) and (strcmp(argv[optind], FROM_STDIN.c_str()) == 0)) {
+        fseek(stdin, 0, SEEK_END);
+        if (ftell(stdin) >= 0)
+          cerr << "Stdin is empty" << endl;
+        else {
+          rewind(stdin);
+          OPTS.datdir = argv[optind];
+          retvalue = true;
+       }
+    } else if (argc_last == 2) {
+      if (!filesystem::exists(argv[optind]))
+          cerr << argv[optind] << " not exists" << endl;
+      else if (!filesystem::exists(argv[optind + 1]))
+          cerr << argv[optind + 1] << " not exists" << endl;
+      else if (!OPTS.cachedir.empty() and !filesystem::exists(OPTS.cachedir))
+        cerr << OPTS.cachedir << " not exists" << endl;
+      else {
+          OPTS.datdir = argv[optind];
+          OPTS.locsfile = argv[optind + 1];
+          retvalue = true;
+          if (OPTS.verbose > 1)   // TODO: up v-level
+              __prn_opts();
+      }
+    } else
+      cerr << "Bad mandatory arguments. Use -h for help" << endl;
     return retvalue;
 }
 
@@ -139,66 +155,27 @@ long        memused(void)
     return get_statm();
 }
 
-uint32_t    read_v(void)   ///<read 1..4-byte int and forward;
-{
-    auto retvalue = static_cast<uint32_t>(*CUR_PTR.u8_ptr++);
-    if ((retvalue & 0xFC) == 0xFC) {
-        switch (retvalue & 0x03) {
-            case 0: // 0xFC
-                break;
-            case 1: // 0xFD
-                retvalue = static_cast<uint32_t>(*CUR_PTR.u16_ptr++);
-                break;
-            case 2: // 0xFE
-                retvalue = *CUR_PTR.u32_ptr++;
-                break;
-            case 3: // 0xFF
-                throw "Value too big";
-        }
-    }
-    return retvalue;
-}
-
-uint32_t    read_32(void)  ///< Read 4-byte int and go forward
-{
-    return *CUR_PTR.u32_ptr++;
-}
-
-uint64_t    read_64(void)  ///< Read 8-byte int and go forward
-{
-    return *CUR_PTR.u64_ptr++;
-}
-
-uint8_t     *read_u8_ptr(uint32_t const size)
-{
-    auto retvalue = CUR_PTR.u8_ptr;
-    CUR_PTR.u8_ptr += size;
-    return retvalue;
-}
-
-uint32_t    *read_32_ptr(void)
-{
-    return CUR_PTR.u32_ptr++;
-}
-
-uint256_t   *read_256_ptr(void)
-{
-    return CUR_PTR.u256_ptr++;
-}
-
-string      ptr2hex(void const *vptr, size_t const size)
-{
+string  ptr2hex(string_view data) {
     static string hex_chars = "0123456789abcdef";
     string s;
-    auto cptr = reinterpret_cast<char const *>(vptr);
-    for (size_t i = 0; i < size; i++, cptr++) {
+    //auto cptr = reinterpret_cast<char const *>(vptr);
+    auto cptr = data.cbegin();
+    for (size_t i = 0; i < data.length(); i++, cptr++) {
         s.push_back(hex_chars[(*cptr & 0xF0) >> 4]);
         s.push_back(hex_chars[(*cptr & 0x0F)]);
     }
     return s;
 }
 
-string      str2hex(const string &s)
+int hex2bytes(const string& s, char *dst)
 {
-    return ptr2hex(s.c_str(), s.size());
+    auto src_ptr = s.c_str();
+    auto src_end = src_ptr + s.length();
+    char *dst_ptr;
+
+    for (dst_ptr = dst; src_ptr < src_end; src_ptr += 2, dst_ptr++) {
+        if (sscanf(src_ptr, "%2hhx", dst_ptr) != 1)
+          break;
+    }
+    return dst_ptr - dst;
 }

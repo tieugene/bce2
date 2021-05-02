@@ -14,7 +14,7 @@
 
 #include <stdint.h>
 #include <string>
-#include "uintxxx.h"
+#include "common.h"
 
 /** Encode a Bech32 string. If hrp contains uppercase characters, this will cause an assertion error. */
 std::string Bech32Encode(const std::vector<uint8_t> &);

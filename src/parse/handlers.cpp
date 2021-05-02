@@ -1,10 +1,14 @@
+/*
+ * Block body processors
+ */
 #include <stdio.h>  // printf
+#include "script.h"
 
 #include "bce.h"
 #include "handlers.h"
 #include "misc.h"
 #include "printers.h"
-#include "script.h"
+#include <cstring>
 
 static uint32_t BK_GLITCH[] = {91722, 91842};    // dup 91880, 91812
 
@@ -17,9 +21,8 @@ bool    parse_script(void);
 bool    parse_bk(void)
 {
     BUSY.bk = true;
-    CUR_BK.head_ptr = static_cast<BK_HEAD_T*> (CUR_PTR.v_ptr);
-    CUR_PTR.u8_ptr += sizeof (BK_HEAD_T);
-    CUR_BK.txs = read_v();
+    CUR_BK.head_ptr = static_cast<const BK_HEAD_T*> ((const void *) CUR_PTR.take_u8_ptr(sizeof (BK_HEAD_T)));
+    CUR_BK.txs = CUR_PTR.take_varuint();
     if (OPTS.out) // on demand
     {
         hash256(CUR_BK.head_ptr, sizeof(BK_HEAD_T), CUR_BK.hash);
@@ -44,7 +47,7 @@ bool    hash_tx(const uint8_t *tx_beg)   // calc tx hash on demand
     // 1. fast rewind
     for (uint32_t i = 0; i < CUR_TX.vins; i++)
         parse_vin(false);
-    CUR_TX.vouts = read_v();
+    CUR_TX.vouts = CUR_PTR.take_varuint();
     if (!CUR_TX.vouts) {
         cerr << "Vouts == 0" << endl;
         return false;
@@ -52,14 +55,14 @@ bool    hash_tx(const uint8_t *tx_beg)   // calc tx hash on demand
     for (uint32_t i = 0; i < CUR_TX.vouts; i++)
         parse_vout(false);
     if (!CUR_TX.segwit) {
-        CUR_TX.locktime = read_32();
+        CUR_TX.locktime = CUR_PTR.take_32();
         hash256(tx_beg, CUR_PTR.u8_ptr - tx_beg, CUR_TX.hash);
     } else {
         auto wit_ptr = CUR_PTR.u8_ptr;
         for (uint32_t i = 0; i < CUR_TX.vins; i++)
             parse_wit();
         auto lt_ptr = CUR_PTR.u8_ptr;
-        CUR_TX.locktime = read_32();
+        CUR_TX.locktime = CUR_PTR.take_32();
         // prepare buffer for hashing
         auto tmp_size = wit_ptr - tx_beg - sizeof(uint16_t) + sizeof(uint32_t);     // -segwit_sign +locktime
         uint8_t tmp_buf[tmp_size]; // , *tmp_ptr = tmp_buf;
@@ -78,11 +81,11 @@ bool    parse_tx(void) // TODO: hash
 {
     BUSY.tx = true;
     auto tx_beg = CUR_PTR.u8_ptr;
-    CUR_TX.ver = read_32();
+    CUR_TX.ver = CUR_PTR.take_32();
     CUR_TX.segwit = (*CUR_PTR.u16_ptr == 0x0100);
     if (CUR_TX.segwit)
         CUR_PTR.u16_ptr++;  // skip witness signature
-    CUR_TX.vins = read_v();
+    CUR_TX.vins = CUR_PTR.take_varuint();
     if (CUR_TX.vins == 0) {
         cerr << "Vins == 0" << endl;
         return false;
@@ -108,14 +111,14 @@ bool    parse_tx(void) // TODO: hash
     for (LOCAL.vin = 0; LOCAL.vin < CUR_TX.vins; LOCAL.vin++)
         if (!parse_vin(true))
             return false;
-    CUR_TX.vouts = read_v();   // vouts
+    CUR_TX.vouts = CUR_PTR.take_varuint();   // vouts
     for (LOCAL.vout = 0; LOCAL.vout < CUR_TX.vouts; LOCAL.vout++)
         if (!parse_vout(true))
             return false;
     if (CUR_TX.segwit)
         for (LOCAL.wit = 0; LOCAL.wit < CUR_TX.vins; LOCAL.wit++)
             parse_wit();
-    CUR_TX.locktime = read_32();  // locktime
+    CUR_TX.locktime = CUR_PTR.take_32();  // locktime
     STAT.vins += CUR_TX.vins;
     STAT.vouts += CUR_TX.vouts;
     STAT.max_vins = max(STAT.max_vins, CUR_TX.vins);
@@ -127,11 +130,11 @@ bool    parse_tx(void) // TODO: hash
 bool    parse_vin(const bool dojob)
 {
     // FIXME: coinbase = 32x00 + 4xFF (txid+vout)
-    CUR_VIN.txid = read_256_ptr();
-    CUR_VIN.vout = read_32();
-    CUR_VIN.ssize = read_v();
-    CUR_VIN.script = read_u8_ptr(CUR_VIN.ssize);
-    CUR_VIN.seq = read_32();
+    CUR_VIN.txid = CUR_PTR.take_256_ptr();
+    CUR_VIN.vout = CUR_PTR.take_32();
+    CUR_VIN.ssize = CUR_PTR.take_varuint();
+    CUR_VIN.script = CUR_PTR.take_u8_ptr(CUR_VIN.ssize);
+    CUR_VIN.seq = CUR_PTR.take_32();
     if (!dojob)
         return true;
     BUSY.vin = true;
@@ -154,17 +157,17 @@ bool    parse_vin(const bool dojob)
 
 bool    parse_wit()
 {
-    auto count = read_v();
+    auto count = CUR_PTR.take_varuint();
     for (uint32_t i = 0; i < count; i++)
-        CUR_PTR.u8_ptr += read_v();
+        CUR_PTR.u8_ptr += CUR_PTR.take_varuint();
     return true;
 }
 
 bool    parse_vout(const bool dojob)
 {
-    CUR_VOUT.satoshi = read_64();
-    CUR_VOUT.ssize = read_v();
-    CUR_VOUT.script = read_u8_ptr(CUR_VOUT.ssize);
+    CUR_VOUT.satoshi = CUR_PTR.take_64();
+    CUR_VOUT.ssize = CUR_PTR.take_varuint();
+    CUR_VOUT.script = CUR_PTR.take_u8_ptr(CUR_VOUT.ssize);
     if (!dojob)
         return true;
     BUSY.vout = true;
@@ -187,26 +190,18 @@ bool    parse_script(void)
     auto script_ok = script_decode(CUR_VOUT.script, CUR_VOUT.ssize);
     if (script_ok and CUR_ADDR.get_qty()) {
         if (kv_mode()) {
-            uint32_t addr_added;
-            addr_added = AddrDB->get_raw(CUR_ADDR.get_data(), CUR_ADDR.get_len());
-            if (addr_added == NOT_FOUND_U32) {
-                addr_added = AddrDB->add_raw(CUR_ADDR.get_data(), CUR_ADDR.get_len());
-                if (addr_added == NOT_FOUND_U32) {
-                    cerr << "Can not find nor add addr " << endl;
-                    return false;
-                }
-                if (addr_added != COUNT.addr) {
-                        cerr << "Addr added as " << addr_added << " against waiting " << COUNT.addr << endl;
-                        return false;
-                }
-                CUR_ADDR.set_id(addr_added);
-                if (OPTS.out)
-                    out_addr(); // FIXME:
-                COUNT.addr += 1;
-            } else
-              CUR_ADDR.set_id(addr_added);
+            auto addr_tried = AddrDB->get_or_add(CUR_ADDR.get_view());
+            // TODO: check created > expected
+            if (addr_tried == NOT_FOUND_U32)
+              return false;
+            CUR_ADDR.set_id(addr_tried);
+            if (addr_tried == COUNT.addr) {   // new addr created
+              if (OPTS.out)
+                out_addr();
+              COUNT.addr++;
+            }
         } else if (OPTS.out)
-            __prn_addr();
+          __prn_addr();
         STAT.addrs += 1;    // FIXME: if decoded and 1+
     }
     return true;
