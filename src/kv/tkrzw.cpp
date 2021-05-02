@@ -41,10 +41,10 @@ uint32_t    KV_T::add(string_view key) {
 }
 
 uint32_t    KV_T::get(string_view key) {
-    uint32_t value;
-    if (!db.Get(key, (string *)&value).IsOK())    // FXIME: handle errors
-        value = NOT_FOUND_U32;
-    return value;
+    string value;
+    if (!db.Get(key, &value).IsOK())    // FXIME: handle errors
+        return NOT_FOUND_U32;
+    return *((uint32_t *) value.data());
 }
 
 uint32_t    KV_T::get_or_add(std::string_view key) {
