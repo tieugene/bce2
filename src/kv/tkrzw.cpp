@@ -44,6 +44,10 @@ uint32_t    KV_T::get(string_view key) {
     string value;
     if (!db.Get(key, &value).IsOK())    // FXIME: handle errors
         return NOT_FOUND_U32;
+    if (value.length() != 4) {
+      cerr << "Bad key len: " << value.length() << endl;
+      return NOT_FOUND_U32;
+    }
     return *((uint32_t *) value.data());
 }
 
