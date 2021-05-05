@@ -1,5 +1,5 @@
 Name:		bce2
-Version:	0.0.2
+Version:	0.0.3
 Release:	1%{?dist}
 License:	GPLv3
 Summary:	BTC blockchain export
@@ -43,6 +43,9 @@ BitCoin Export 2 is tool to export BTC blockchain into SQL loadable files.
 
 
 %changelog
+* Thu May 06 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.3-1
+- Version bump
+
 * Sat Feb 20 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.2-1
 - Version bump
 
