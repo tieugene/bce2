@@ -8,7 +8,7 @@
 
 bool  KV_T::init(const string &s) {
 
-  opened = db.open(s, kyotocabinet::PolyDB::OWRITER | kyotocabinet::PolyDB::OCREATE);
+  opened = db.open(s, kyotocabinet::HashDB::OWRITER | kyotocabinet::HashDB::OCREATE);
   if (!opened)
     return false;
   //if (!db.tune_buckets(1<<30))  // must be _before_ creating DB
@@ -58,20 +58,5 @@ uint32_t    KV_T::get_or_add(std::string_view key) {
       cerr << "Cannot add key '" << ptr2hex(key) << endl;
   }
   return v;
-}
-
-bool        KV_T::cpto(KV_T *dst)
-{
-    /*
-        auto cur = db.cursor();
-        cur->jump();
-        string key, cvalue;
-        while (cur->get(&key, &cvalue, true))    // string:string
-            dst->add(key, *((uint32_t *) cvalue.c_str()));
-        delete cur;
-    */
-    kyotocabinet::BasicDB *tmp[1];
-    tmp[0] = &db;
-    return dst->db.merge(tmp, 1, kyotocabinet::PolyDB::MADD);
 }
 #endif

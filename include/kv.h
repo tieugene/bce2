@@ -5,7 +5,7 @@
 #include <string_view>
 #include "common.h"
 #ifdef TKRZW
-#include <tkrzw_dbm_poly.h>
+#include <tkrzw_dbm_hash.h>
 // HashDBM
 const std::string TxFileName = "tx.tkh";
 const std::string AddrFileName = "addr.tkh";
@@ -14,7 +14,7 @@ const std::string TxMemName = "tx.tkmt";
 const std::string AddrMemName = "addr.tkmt";
 // TODO: try BabyDBM (.tkmb)
 #else
-#include <kcpolydb.h>
+#include <kchashdb.h>
 // HashDB
 const std::string TxFileName = "tx.kch";
 const std::string AddrFileName = "addr.kch";
@@ -33,9 +33,9 @@ void    stop_cache(void); ///< reset k-v storages
 class KV_T {
 private:
 #ifdef TKRZW
-    tkrzw::PolyDBM  db;
+    tkrzw::HashDBM  db;
 #else
-    kyotocabinet::PolyDB     db;
+    kyotocabinet::HashDB     db;
     bool        opened = false;
 #endif
 public:
@@ -43,7 +43,6 @@ public:
     bool        close(void);
     void        clear(void);
     uint32_t    count(void);
-    bool        cpto(KV_T *);
     //bool        add(const string &key, const uint32_t value);
     /**
      * @brief Add new k-v pair
