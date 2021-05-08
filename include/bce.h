@@ -19,15 +19,16 @@ enum    DBG_LVL_T {
 };
 
 struct  OPT_T {      ///< program CLI options
-    std::filesystem::path  datdir;       // blk*.dat folder path
-    std::filesystem::path  locsfile;     // locs-file path
-    std::filesystem::path  cachedir;     // file-based k-v dir path
-    uint32_t    from = MAX_UINT32;  // bk start from
-    uint32_t    num = 1;            // bks to process
-    bool        fromcin = false;    // input from stdin
-    bool        out = false;        // produce output
-    DBG_LVL_T   verbose = DBG_NONE;
-    std::string kvngin = "kch";
+    std::filesystem::path  datdir;    // blk*.dat folder path
+    std::filesystem::path  locsfile;  // locs-file path
+    std::filesystem::path  cachedir;  // file-based k-v dir path
+    uint32_t    from = MAX_UINT32;    // bk start from
+    uint32_t    num = 1;              // bks to process
+    bool        fromcin = false;      // input from stdin
+    bool        out = false;          // produce output
+    DBG_LVL_T   verbose = DBG_NONE;   // verbosity
+    std::string kvngin = "kch";       // k-v engine
+    uint64_t    kvtune = 0;           // k-v tuning
     // dependents
     bool        cash = false;       // use k-v (in-mem and/or file-based)
 };

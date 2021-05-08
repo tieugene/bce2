@@ -7,13 +7,17 @@
 
 using namespace std;
 
-bool  KV_KC_HASH_T::init(const string &s) {
-
+bool  KV_KC_HASH_T::init(const string &s, uint64_t tune) {
+  if (tune > 30) {
+      cerr << "Too large tuning parameter: " << tune << endl;
+      return false;
+  } else if (tune) {
+    if (!db.tune_buckets(1<<tune)) {  // must be _before_ creating DB
+      cerr << "Cannot tune KC::HashDB" << endl;
+      return false;
+    }
+  }
   opened = db.open(s + ".kch", kyotocabinet::HashDB::OWRITER | kyotocabinet::HashDB::OCREATE);
-  if (!opened)
-    return false;
-  //if (!db.tune_buckets(1<<30))  // must be _before_ creating DB
-    // throw BCException "Can't open db '"; // + s + "'";
   return opened;
 }
 
@@ -62,13 +66,17 @@ uint32_t    KV_KC_HASH_T::get_or_add(std::string_view key) {
 }
 
 /// Stash
-bool  KV_KC_STASH_T::init(const string &s) {
-
+bool  KV_KC_STASH_T::init(const string &s, uint64_t tune) {
+  if (tune > 30) {
+      cerr << "Too large tuning parameter: " << tune << endl;
+      return false;
+  } else if (tune) {
+    if (!db.tune_buckets(1<<tune)) {  // must be _before_ creating DB
+      cerr << "Cannot tune KC::HashDB" << endl;
+      return false;
+    }
+  }
   opened = db.open(":", kyotocabinet::StashDB::OWRITER | kyotocabinet::StashDB::OCREATE);
-  if (!opened)
-    return false;
-  //if (!db.tune_buckets(1<<30))  // must be _before_ creating DB
-    // throw BCException "Can't open db '"; // + s + "'";
   return opened;
 }
 

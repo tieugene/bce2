@@ -24,6 +24,7 @@ Options:\n\
 -c        - hex input from stdin (conflicts w/ -d and -l)\n\
 -k <path> - file-based key-value folder\n\
 -e <name> - key-value engine (kch/kcs/tkh)\n\
+-t n      - k-v tuning (depends on engine)\n\
 -o        - output results\n\
 -v[n]     - verbosity (0..3, to stderr)\
 ";
@@ -46,7 +47,7 @@ void load_cfg(void) {
   string datdir, locsfile, kvdir;
   ifstream f_in(filesystem::path(getenv("HOME")) / cfg_file_name);
   if(f_in) {
-      CFG::ReadFile(f_in, vector<string>{"datdir", "locsfile", "kvdir", "kvtype", "verbose", "out"}, datdir, locsfile, kvdir, OPTS.kvngin, OPTS.verbose, OPTS.out);
+      CFG::ReadFile(f_in, vector<string>{"datdir", "locsfile", "kvdir", "kvtype", "tune", "verbose", "out"}, datdir, locsfile, kvdir, OPTS.kvngin, OPTS.kvtune, OPTS.verbose, OPTS.out);
       f_in.close();
       if (!datdir.empty())
         OPTS.datdir = datdir;
@@ -59,9 +60,10 @@ void load_cfg(void) {
 
 bool        cli(int argc, char *argv[]) {
     int opt, tmp;
+    long tmp_l;
     bool retvalue = false, direct = false;
 
-    while ((opt = getopt(argc, argv, "hf:n:d:l:k:e:cov::")) != -1) {  // FIXME: v?
+    while ((opt = getopt(argc, argv, "hf:n:d:l:k:e:t:cov::")) != -1) {  // FIXME: v?
       switch (opt) {
         case 'f':   // FIXME: optarg < 0 | > 999999
           tmp = atoi(optarg);
@@ -126,6 +128,14 @@ bool        cli(int argc, char *argv[]) {
               return false;
           }
           OPTS.kvngin = optarg;
+          break;
+        case 't':
+          tmp_l = atol(optarg);
+          if (tmp_l < 0) {
+            cerr << "Bad -t: " << optarg << endl;
+            return false;
+          }
+          OPTS.kvtune = tmp_l;
           break;
         case 'c':
           if (direct) {

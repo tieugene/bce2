@@ -10,7 +10,7 @@ protected:
     kyotocabinet::HashDB           db;
     bool        opened = false;
 public:
-    bool        init(const std::string &);
+    bool        init(const std::string &, uint64_t);
     bool        close(void);
     void        clear(void);
     uint32_t    count(void);
@@ -28,7 +28,7 @@ protected:
     kyotocabinet::StashDB           db;
     bool        opened = false;
 public:
-    bool        init(const std::string &);
+    bool        init(const std::string &, uint64_t);
     bool        close(void);
     void        clear(void);
     uint32_t    count(void);

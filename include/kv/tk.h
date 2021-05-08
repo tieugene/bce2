@@ -10,7 +10,7 @@ class KV_TK_HASH_T : public KV_BASE_T {
 private:
     tkrzw::HashDBM  db;
 public:
-    bool        init(const std::string &);
+    bool        init(const std::string &, uint64_t);
     bool        close(void);
     void        clear(void);
     uint32_t    count(void);

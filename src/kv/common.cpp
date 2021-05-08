@@ -9,7 +9,7 @@ using namespace std;
 
 bool open_kv(KV_BASE_T *kv, const string &name) {
   filesystem::path kvpath = OPTS.cachedir / name;
-  if (!kv->init(kvpath))
+  if (!kv->init(kvpath, OPTS.kvtune))
     throw "Cannot init k-v " + name;
   auto isfull = bool(kv->count());
   if (!isfull and OPTS.from > 0)

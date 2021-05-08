@@ -8,7 +8,7 @@
 
 using namespace std;
 
-bool        KV_TK_HASH_T::init(const string &s) {
+bool        KV_TK_HASH_T::init(const string &s, uint64_t tune) {
     if (db.Open(s + ".tkh", true, tkrzw::File::OPEN_TRUNCATE) != tkrzw::Status::SUCCESS)
         cerr << "Can't open db '" << s << "'." << endl;
     return db.IsOpen();
