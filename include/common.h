@@ -6,6 +6,7 @@
 #include <string_view>
 #include <exception>
 
+const uint32_t MAX_UINT32 = 0xFFFFFFFF;
 template <size_t Size>
 using byte_array = std::array<uint8_t, Size>;
 typedef byte_array<32> uint256_t;   ///< hash representation

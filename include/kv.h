@@ -23,7 +23,7 @@ const std::string TxMemName = ":";
 const std::string AddrMemName = ":";
 #endif
 
-const uint32_t NOT_FOUND_U32 = 0xFFFFFFFF;
+const uint32_t NOT_FOUND_U32 = MAX_UINT32;
 
 using namespace std;
 
