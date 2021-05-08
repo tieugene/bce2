@@ -12,10 +12,10 @@ Application package consists of CLI utilities:
 In short bce2 operates with 3 data "streams":
 
 1. blocks *(input, required)*:
-  - directly from blockchain using:
+   - directly from blockchain using:
      - folder with blk*.dat where blocks live
      - locs-file: single file with block "coordinates" in *.dat
-  - from `bitcoind` hex output using `bitcoin-cli getblock <hash> 0`
+   - from `bitcoind` hex output using `bitcoin-cli getblock <hash> 0`
 1. k-v *(input/output, optional)*: interim storage of transactions (tx) and addresses (addr) hash&rarr;&numero; conversion
 1. output *(output (stdout), optional)*: text results (see "[Output](Output.md)")
 
@@ -45,15 +45,15 @@ Mandatory arguments:
 Combining `-k`, `-o` and `-v` options requires additional explanation:
 
 -k | -o| -v| Usage
----|---|---|------
- - | - | - | Fast walk quietly (test blockchain parsing)
- - | - | + | Fast walk logging (count bk, tx, vins, vouts, addrs)
- - | + | - | Explore blockchain (debugging)
- - | + | + | Explore blockchain logging
- + | - | - | Full walk quietly (test +k-v)
- + | - | + | Full walk logging (count +uniq addresses)
- + | + | - | Main job quietly
- + | + | + | Main job logging
+---|---|---|-------
+\- | - | - | Fast walk quietly (test blockchain parsing)
+\- | - | + | Fast walk logging (count bk, tx, vins, vouts, addrs)
+\- | + | - | Explore blockchain (debugging)
+\- | + | + | Explore blockchain logging
+\+ | - | - | Full walk quietly (test +k-v)
+\+ | - | + | Full walk logging (count +uniq addresses)
+\+ | + | - | Main job quietly
+\+ | + | + | Main job logging
 
 ## 2. Pre-run stage
 
