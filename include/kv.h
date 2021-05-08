@@ -3,7 +3,7 @@
 #define KV_H
 
 #include "kv/kc.h"
-#ifdef TKRZW
+#ifdef USE_TK
 #include "kv/tk.h"
 #endif
 

@@ -5,13 +5,6 @@
 #include <kchashdb.h>
 #include <kcstashdb.h>
 
-// HashDB
-const std::string TxFileName = "tx.kch";
-const std::string AddrFileName = "addr.kch";
-// StashDB
-const std::string TxMemName = ":";
-const std::string AddrMemName = ":";
-
 class KV_KC_HASH_T : public KV_BASE_T {
 protected:
     kyotocabinet::HashDB           db;

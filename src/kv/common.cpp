@@ -12,8 +12,8 @@ bool    set_cache(void) {
         TxDB = new KV_KC_HASH_T();
         AddrDB = new KV_KC_HASH_T();
         filesystem::path tpath, apath;
-        tpath = OPTS.cachedir / TxFileName;
-        apath = OPTS.cachedir / AddrFileName;
+        tpath = OPTS.cachedir / "tx";
+        apath = OPTS.cachedir / "addr";
         if (!TxDB->init(tpath) or !AddrDB->init(apath))
             return false;
         auto tx_full = bool(TxDB->count());

@@ -1,24 +1,16 @@
 #ifndef KV_TK_H
 #define KV_TK_H
 
-#ifdef TKRZW
+#ifdef USE_TK
 
 #include <tkrzw_dbm_hash.h>
 #include "kv/base.h"
 
-// HashDBM
-//const std::string TxFileName = "tx.tkh";
-//const std::string AddrFileName = "addr.tkh";
-// TinyDBM
-//const std::string TxMemName = "tx.tkmt";
-//const std::string AddrMemName = "addr.tkmt";
-// TODO: try BabyDBM (.tkmb)
-
-class KV_TK_T : public KV_BASE_T {
+class KV_TK_HASH_T : public KV_BASE_T {
 private:
     tkrzw::HashDBM  db;
 public:
-    bool        init(const string &);
+    bool        init(const std::string &);
     bool        close(void);
     void        clear(void);
     uint32_t    count(void);
@@ -31,6 +23,6 @@ public:
     uint32_t    get_or_add(std::string_view key);
 };
 
-#endif //TKRZW
+#endif // USE_TK
 
 #endif // KV_TK_H
