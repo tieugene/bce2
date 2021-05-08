@@ -30,7 +30,37 @@ using namespace std;
 bool    set_cache(void); ///< setup k-v storages
 void    stop_cache(void); ///< reset k-v storages
 
-class KV_T {
+class KV_BASE_T {
+public:
+    virtual bool        init(const string &) = 0;
+    virtual bool        close(void) = 0;
+    virtual void        clear(void) = 0;
+    virtual uint32_t    count(void) = 0;
+    //bool        add(const string &key, const uint32_t value);
+    /**
+     * @brief Add new k-v pair
+     * @param key Key to add
+     * @return Value of new key added or NOT_FOUND_U32
+     */
+    virtual uint32_t    add(std::string_view key) = 0;
+    virtual uint32_t    add(const uint256_t &key) = 0;  // tx, WSH
+    /**
+     * @brief Get value of key
+     * @param key Key to find
+     * @return Key value or NOT_FOUND_U32
+     */
+    virtual uint32_t    get(std::string_view key) = 0;
+    virtual uint32_t    get(const uint256_t &key) = 0;
+    /**
+     * @brief Try to get existing k-v or add new
+     * @param key Key to find
+     * @return Found or added value or NOT_FOUND_U32 on error (not found nor added)
+     * @throw Not found nor added, added as not expected
+     */
+    virtual uint32_t    get_or_add(std::string_view key) = 0;
+};
+
+class KV_T : public KV_BASE_T {
 private:
 #ifdef TKRZW
     tkrzw::HashDBM  db;
@@ -43,29 +73,12 @@ public:
     bool        close(void);
     void        clear(void);
     uint32_t    count(void);
-    //bool        add(const string &key, const uint32_t value);
-    /**
-     * @brief Add new k-v pair
-     * @param key Key to add
-     * @return Value of new key added or NOT_FOUND_U32
-     */
     uint32_t    add(std::string_view key);
     uint32_t    add(const uint256_t &key)                     // tx, WSH
                 { return add(std::string_view(reinterpret_cast<const char *>(std::data(key)), sizeof(uint256_t))); }
-    /**
-     * @brief Get value of key
-     * @param key Key to find
-     * @return Key value or NOT_FOUND_U32
-     */
     uint32_t    get(std::string_view key);
     uint32_t    get(const uint256_t &key)
                 { return get(std::string_view(reinterpret_cast<const char *>(std::data(key)), sizeof(uint256_t))); }
-    /**
-     * @brief Try to get existing k-v or add new
-     * @param key Key to find
-     * @return Found or added value or NOT_FOUND_U32 on error (not found nor added)
-     * @throw Not found nor added, added as not expected
-     */
     uint32_t    get_or_add(std::string_view key);
 };
 

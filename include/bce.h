@@ -112,7 +112,7 @@ extern TX_T     CUR_TX;
 extern VIN_T    CUR_VIN;
 extern VOUT_T   CUR_VOUT;
 extern UNIPTR_T CUR_PTR;
-extern KV_T     *TxDB, *AddrDB;
+extern KV_BASE_T     *TxDB, *AddrDB;
 
 extern time_t   start_time;
 extern long     start_mem;

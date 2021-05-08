@@ -1,7 +1,7 @@
 #include "bce.h"
 #include "kv.h"
 
-KV_T        *TxDB = nullptr, *AddrDB = nullptr;
+KV_BASE_T        *TxDB = nullptr, *AddrDB = nullptr;
 
 bool    set_cache(void) {
     if (OPTS.cash) {
