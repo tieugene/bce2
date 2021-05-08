@@ -2,19 +2,19 @@
  * Key-value backend.
  * Tkrzw version.
  */
-#ifdef TKRZW
-#include "kv.h"
+#ifdef USE_TK
+#include "kv/tk.h"
 #include "misc.h"
 
-bool        KV_T::init(const string &s)
-{
-    if (db.Open(s, true, tkrzw::File::OPEN_TRUNCATE) != tkrzw::Status::SUCCESS)
+using namespace std;
+
+bool        KV_TK_HASH_T::init(const string &s) {
+    if (db.Open(s + ".tkh", true, tkrzw::File::OPEN_TRUNCATE) != tkrzw::Status::SUCCESS)
         cerr << "Can't open db '" << s << "'." << endl;
     return db.IsOpen();
 }
 
-bool    KV_T::close(void)
-{
+bool    KV_TK_HASH_T::close(void) {
     if (db.IsOpen()) {
         db.Synchronize(true);
         db.Close();
@@ -22,17 +22,16 @@ bool    KV_T::close(void)
     return (!db.IsOpen());
 }
 
-void  KV_T::clear(void) {
+void  KV_TK_HASH_T::clear(void) {
   db.Clear();
 }
 
-uint32_t    KV_T::count(void)
-{
+uint32_t    KV_TK_HASH_T::count(void) {
     auto retvalue = db.CountSimple();
     return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
 }
 
-uint32_t    KV_T::add(string_view key) {
+uint32_t    KV_TK_HASH_T::add(string_view key) {
     uint32_t value = count();
     if (value != NOT_FOUND_U32)
         if (!db.Set(key, string_view((const char *)&value, sizeof(uint32_t))).IsOK())
@@ -40,7 +39,7 @@ uint32_t    KV_T::add(string_view key) {
     return value;
 }
 
-uint32_t    KV_T::get(string_view key) {
+uint32_t    KV_TK_HASH_T::get(string_view key) {
     string value;
     if (!db.Get(key, &value).IsOK())    // FXIME: handle errors
         return NOT_FOUND_U32;
@@ -51,7 +50,7 @@ uint32_t    KV_T::get(string_view key) {
     return *((uint32_t *) value.data());
 }
 
-uint32_t    KV_T::get_or_add(std::string_view key) {
+uint32_t    KV_TK_HASH_T::get_or_add(std::string_view key) {
   string old_value;
   uint32_t value = count();
   if (value != NOT_FOUND_U32) {
@@ -66,16 +65,4 @@ uint32_t    KV_T::get_or_add(std::string_view key) {
   return value;
 }
 
-bool        KV_T::cpto(KV_T *dst)
-{
-    /*
-        auto cur = db.cursor();
-        cur->jump();
-        string key, cvalue;
-        while (cur->get(&key, &cvalue, true))    // string:string
-            dst->add(key, *((uint32_t *) cvalue.c_str()));
-        delete cur;
-    */
-    return db.Export(&dst->db) == tkrzw::Status::SUCCESS;
-}
 #endif

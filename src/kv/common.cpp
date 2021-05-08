@@ -1,43 +1,58 @@
+#include <filesystem>
+
 #include "bce.h"
 #include "kv.h"
 
-KV_T        *TxDB = nullptr, *AddrDB = nullptr;
+KV_BASE_T  *TxDB = nullptr, *AddrDB = nullptr;
+
+using namespace std;
+
+bool open_kv(KV_BASE_T *kv, const string &name) {
+  filesystem::path kvpath = OPTS.cachedir / name;
+  if (!kv->init(kvpath))
+    throw "Cannot init k-v " + name;
+  auto isfull = bool(kv->count());
+  if (!isfull and OPTS.from > 0)
+    throw "-f > 0 but " + name + " k-v is empty. Use '-f 0' to clean.";
+  if (isfull and OPTS.from == MAX_UINT32)
+    throw name + " is not empty. Set -f option properly.";
+  return isfull;
+}
 
 bool    set_cache(void) {
     if (OPTS.cash) {
-        TxDB = new KV_T();
-        AddrDB = new KV_T();
-        filesystem::path tpath, apath;
-        tpath = OPTS.cachedir / TxFileName;
-        apath = OPTS.cachedir / AddrFileName;
-        if (!TxDB->init(tpath) or !AddrDB->init(apath))
-            return false;
-        auto tx_full = bool(TxDB->count());
-        if (!tx_full and OPTS.from > 0) {
-            cerr << "-f > 0 but Tx k-v is empty. Use '-f 0' to clean." << endl;
-            return false;
+        string kvtitle;
+        if (OPTS.kvngin == "kch") {
+          kvtitle = "Kyotocabinet HashDB";
+          TxDB = new KV_KC_HASH_T();
+          AddrDB = new KV_KC_HASH_T();
+        } else if (OPTS.kvngin == "kcs") {
+          kvtitle = "Kyotocabinet StashDB";
+          TxDB = new KV_KC_STASH_T();
+          AddrDB = new KV_KC_STASH_T();
+        } else if (OPTS.kvngin == "tkh") {
+          kvtitle = "Tkrzw HashDBM";
+          TxDB = new KV_TK_HASH_T();
+          AddrDB = new KV_TK_HASH_T();
+        } else {
+          cerr << OPTS.kvngin << " not implemented" << endl;
+          return false;
         }
-        auto addr_full = bool(AddrDB->count());
-        if (!addr_full and OPTS.from > 0) {
-            cerr << "-f > 0 but Addr k-v is empty. Use '-f 0' to clean." << endl;
-            return false;
+        if (OPTS.verbose)
+          cerr << "K-V engine: " << kvtitle << endl;
+        auto tx_full = open_kv(TxDB, "tx");
+        auto addr_full = open_kv(AddrDB, "addr");
+        if (OPTS.from == 0) {
+          if (tx_full)
+              TxDB->clear();
+          if (addr_full)
+              AddrDB->clear();
         }
-        if (tx_full or addr_full) {
-            if (OPTS.from == MAX_UINT32) {
-                cerr << "Tx (" << TxDB->count() << ") or Addr ("<< AddrDB->count() << ") k-v is not empty. Set -f option." << endl;
-                return false;
-            } else if (OPTS.from == 0) {
-                TxDB->clear();
-                AddrDB->clear();
-            }
-        }
-        //
         COUNT.tx = TxDB->count();
         COUNT.addr = AddrDB->count();
-    } else {    // not k-v mode
+    } else    // not k-v mode
         if (OPTS.from == MAX_UINT32)
             OPTS.from = 0;
-    }
     return true;
 }
 

@@ -16,6 +16,8 @@
 #include <mach/mach.h>
 #endif
 
+using namespace std;
+
 long        get_statm(void) {   ///< returns used memory in kilobytes
     long    total = 0;  // rss, shared, text, lib, data, dt; man proc
 #if defined (__linux__)

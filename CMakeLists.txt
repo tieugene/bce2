@@ -6,7 +6,7 @@ project(bce2 VERSION 0.0.4)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(include)
+include_directories(include include/kv)
 aux_source_directory(src SRC_LIST)
 aux_source_directory(src/load SRC_LIST)
 aux_source_directory(src/parse SRC_LIST)
@@ -28,18 +28,21 @@ target_link_libraries(${PROJECT_NAME} ${OPENSSL_CRYPTO_LIBRARY})
 
 # Define k-v backend
 find_package(PkgConfig REQUIRED)
-option(USE_TKRZW "Use tkrzw k-v")
-message(STATUS "Tkrzw: ${USE_TKRZW}")
-if (USE_TKRZW)
-  add_definitions(-DTKRZW)
-  ## tkrzw
-  pkg_check_modules(tkrzw REQUIRED IMPORTED_TARGET tkrzw)
-  target_link_libraries(${PROJECT_NAME} PkgConfig::tkrzw)
-else (USE_TKRZW)
-    ## kyotocabinet
-    pkg_check_modules(kyotocabinet REQUIRED IMPORTED_TARGET kyotocabinet)
-    target_link_libraries(${PROJECT_NAME} PkgConfig::kyotocabinet)
-endif (USE_TKRZW)
+## kyotocabinet
+pkg_check_modules(kyotocabinet REQUIRED IMPORTED_TARGET kyotocabinet)
+target_link_libraries(${PROJECT_NAME} PkgConfig::kyotocabinet)
+## tkrzw
+option(USE_TK "Tkrzw" OFF)
+if (USE_TK)
+  pkg_search_module(TK IMPORTED_TARGET tkrzw)
+  if (TK_FOUND)
+    add_definitions(-DUSE_TK)
+    target_link_libraries(${PROJECT_NAME} PkgConfig::TK)
+  else ()
+    set(USE_TK OFF)
+  endif ()
+endif ()
+message(STATUS "Tkrzw: ${USE_TK}")
 
 ## leveldb
 if (APPLE)

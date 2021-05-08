@@ -10,6 +10,8 @@
 #include "misc.h"
 #include "config_file.h"  // https://github.com/fbarberm/SimpleConfigFile
 
+using namespace std;
+
 const string cfg_file_name = ".bce2.cfg";
 const string  help_txt = "\
 Usage: [options] (- | <dat_dir> <locs_file>)\n\
@@ -21,6 +23,7 @@ Options:\n\
 -l <path> - locs-file\n\
 -c        - hex input from stdin (conflicts w/ -d and -l)\n\
 -k <path> - file-based key-value folder\n\
+-e <name> - key-value engine (kch/kcs/tkh)\n\
 -o        - output results\n\
 -v[n]     - verbosity (0..3, to stderr)\
 ";
@@ -43,7 +46,7 @@ void load_cfg(void) {
   string datdir, locsfile, kvdir;
   ifstream f_in(filesystem::path(getenv("HOME")) / cfg_file_name);
   if(f_in) {
-      CFG::ReadFile(f_in, vector<string>{"datdir", "locsfile", "kvdir", "verbose", "out"}, datdir, locsfile, kvdir, OPTS.verbose, OPTS.out);
+      CFG::ReadFile(f_in, vector<string>{"datdir", "locsfile", "kvdir", "kvtype", "verbose", "out"}, datdir, locsfile, kvdir, OPTS.kvngin, OPTS.verbose, OPTS.out);
       f_in.close();
       if (!datdir.empty())
         OPTS.datdir = datdir;
@@ -58,7 +61,7 @@ bool        cli(int argc, char *argv[]) {
     int opt, tmp;
     bool retvalue = false, direct = false;
 
-    while ((opt = getopt(argc, argv, "hf:n:d:l:k:cov::")) != -1) {  // FIXME: v?
+    while ((opt = getopt(argc, argv, "hf:n:d:l:k:e:cov::")) != -1) {  // FIXME: v?
       switch (opt) {
         case 'f':   // FIXME: optarg < 0 | > 999999
           tmp = atoi(optarg);
@@ -116,6 +119,13 @@ bool        cli(int argc, char *argv[]) {
             return false;
           }
           OPTS.cachedir = optarg;
+          break;
+        case 'e':
+          if (!kvnames.count(optarg)) {
+              cerr << "-e: unknown engine '" << optarg << "'" << endl;
+              return false;
+          }
+          OPTS.kvngin = optarg;
           break;
         case 'c':
           if (direct) {

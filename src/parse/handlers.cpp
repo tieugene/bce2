@@ -10,6 +10,8 @@
 #include "printers.h"
 #include <cstring>
 
+using namespace std;
+
 static uint32_t BK_GLITCH[] = {91722, 91842};    // dup 91880, 91812
 
 bool    parse_tx(void); // TODO: hash

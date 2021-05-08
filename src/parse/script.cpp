@@ -14,6 +14,8 @@
 #include "opcode.h"
 #include "bech32.h"
 
+using namespace std;
+
 enum    KYE_TYPE_T {
     KEY_0,
     KEY_S,
