@@ -9,8 +9,8 @@ using namespace std;
 
 bool    set_cache(void) {
     if (OPTS.cash) {
-        TxDB = new KV_KC_T();
-        AddrDB = new KV_KC_T();
+        TxDB = new KV_KC_HASH_T();
+        AddrDB = new KV_KC_HASH_T();
         filesystem::path tpath, apath;
         tpath = OPTS.cachedir / TxFileName;
         apath = OPTS.cachedir / AddrFileName;
