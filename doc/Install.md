@@ -1,8 +1,8 @@
 # Install
 
 ## Build
-- c++ compiler
 - cmake
+- c++ compiler
 - c++ devel libs:
   - openssl
   - kyotocabinet

@@ -22,15 +22,17 @@ enum    DBG_LVL_T
 
 struct  OPT_T       ///< program CLI options
 {
-    string      datdir;         // blk*.dat folder path
-    string      locsfile;       // locs-file path
-    string      cachedir;       // file-based k-v dir path
-    int         from;           // bk start from
-    uint32_t    num = 1;        // bks to process
-    bool        out = false;    // produce output
-    bool        cash = false;   // use k-v (in-mem and/or file-based)
-    bool        inmem = false;  // use in-mem k-v
+    string      datdir;             // blk*.dat folder path
+    string      locsfile;           // locs-file path
+    string      cachedir;           // file-based k-v dir path
+    uint32_t    from = MAX_UINT32;  // bk start from
+    uint32_t    num = 1;            // bks to process
+    bool        fromcin = false;    // input from stdin
+    bool        out = false;        // produce output
     DBG_LVL_T   verbose = DBG_NONE;
+    // dependents
+    bool        cash = false;       // use k-v (in-mem and/or file-based)
+    bool        inmem = false;      // use in-mem k-v
 };
 
 struct  COUNT_T     ///< through counters

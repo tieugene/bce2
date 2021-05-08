@@ -86,7 +86,7 @@ bool    set_cache(void)
         COUNT.tx = TxDB->count();
         COUNT.addr = AddrDB->count();
     } else {    // not k-v mode
-        if (OPTS.from < 0)
+        if (OPTS.from == MAX_UINT32)
             OPTS.from = 0;
     }
     return true;

@@ -31,13 +31,15 @@ int     main(int argc, char *argv[]) {
   // TODO: local BUFFER = char *const ptr;
   bool (*bkloader)(char *, const uint32_t) = &stdin_bk;
 
-    T0 = time(nullptr);
     // 1. prepare
-    // 1.1. handle CLI
+    // 1.1. handle options
+    load_cfg();
     if (!cli(argc, argv))
         return 1;
+    // TODO: check options after all
+    T0 = time(nullptr);
     // 1.2. prepare bk info
-    if (OPTS.datdir != FROM_STDIN) {
+    if (!OPTS.fromcin) {
       auto bk_qty = init_bkloader(OPTS.datdir, OPTS.locsfile);
       if (!bk_qty)
         return 2;
