@@ -21,26 +21,19 @@ In short bce2 operates with 3 data "streams":
 
 Additional output (stderr) is logging if `-v` option used.
 
-### CLI explanation:
-
-_(use `bce2 -h` to get this)_
+### 1.1. CLI options:
 
 Options:
 
+- `-h` : this help
 - `-f <n>` : block to start from
 - `-n <n>` : blocks to process
-- `-k <path>` : folder for file-based key-value
-- `-o` : produces output results to stdout; printing format depens on `-k` is set
+- `-d <path>` : *.dat folder
+- `-l <path>` : locs-file
+- `-c` : use `bitcoin-cli getblock <hash> 0` output in stdin
+- `-k <path>` : key-value folder
+- `-o` : output results to stdout; format depens on `-k` is set
 - `-v <n>` : verbosity (to stderr) - show processed blocks, transactions, vins, vouts, addresses and some other info (depends on k-v set and vebosity level), each 1000 blocks and summary
-- ~~`-m` : use in-mem key-value~~
-
-Mandatory arguments:
-
-- for direct blockchain processing:
-  - `<dat_dir>` : *.dat folder
-  - `<locs-file>` : locs-file
-- using `bitcoin-cli getblock <hash> 0` output:
-  - `-`
 
 Combining `-k`, `-o` and `-v` options requires additional explanation:
 
@@ -55,16 +48,25 @@ Combining `-k`, `-o` and `-v` options requires additional explanation:
 \+ | + | - | Main job quietly
 \+ | + | + | Main job logging
 
+### 1.2. bce.cfg:
+
+Default options can be set in `~/.bce2.cfg` like this:
+
+```
+# comments available, any order
+datdir = /var/lib/bitcoin/blocks
+locsfile = /tmp/bce2/bk.locs.670k.bin
+kvdir = /tmp/bce2/kv
+#verbose = True
+#out = True
+```
+
+*Note: CLI overwrites config values.*
+
 ## 2. Pre-run stage
 
-Direct processing blockchain requires making special locs-file.  
-As chain blocks are storing "in heap" bce2 requires to know block "locations" - what block in what blk*.dat at what position is stored.  
-This information is not stored in blockchain itself but can be found in bitcoind helping LevelDB (now) database.  
-To avoid extra job in run time a special utility prepares helping locs-file (block **loc**ation**s** file) as sequence of 8-byte records `{datno:uin32,offset:uint32}`, where:
-
-- record order no: == block height about; 0-based
-- datno: dat-file number (e.g. `5` for `blk00005.dat`); 0-based
-- offset: an offset of the block inside dat-file in bytes; 0-based
+Direct processing blockchain requires to know block "locations" - what block in what blk*.dat at what position is stored.  
+To achieve this a special utility prepares helping locs-file (block **loc**ation**s** file) from blockchain LevelDB database.
 
 Let's make locs-file for **670k** blocks. Blockchain is stored in `$BTCDIR`.
 
@@ -85,11 +87,11 @@ Let's make locs-file for **670k** blocks. Blockchain is stored in `$BTCDIR`.
    sudo systemctl stop bitcoin
    ```
 1. fix blockchain permissions:
-   ```
+   ```bash
    sudo chmod -R o-w+rX $BTCDIR
    ```
 1. copy LevelDB folder into somewhere (e.g. here):
-   ```
+   ```bash
    cp $BTSDIR/blocks/index .
    ```
 1. make locs-file `bk.locs.670k.bin` (filename is not matter):
@@ -101,7 +103,7 @@ Let's make locs-file for **670k** blocks. Blockchain is stored in `$BTCDIR`.
    tools/btcbklocs.py -i tmp.hex index bk.locs.670k.bin
    ```
 
-*Note: steps 1&hellip;4 can be done on any host; steps 5&hellip;7 must be done _exactly_ from those \$BTCDIR that bce2 will use.*
+*Note: steps 1&hellip;4 can be done on any host having bitcoin-cli; steps 5&hellip;7 must be done _exactly_ from those \$BTCDIR that bce2 will use.*
 
 ## 3. K-V perfomance tuning
 
@@ -139,12 +141,4 @@ kchashmgr create -bnum 1073741824 tx.kch~
 kchashmgr dump tx.kch | kchashmgr load tx.kch~
 # 3. rename new into old
 mv tx.kch~ tx.kch
-```
-
-## x. Utility
-
-```bash
-#!/bin/sh
-# get_bk.sh - get bk as json by height
-bitcoin-cli getblock `bitcoin-cli getblockhash $1` 2 > $1.json
 ```

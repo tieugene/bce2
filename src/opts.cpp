@@ -21,7 +21,6 @@ Options:\n\
 -l <path> - locs-file\n\
 -c        - hex input from stdin (conflicts w/ -d and -l)\n\
 -k <path> - file-based key-value folder\n\
--m        - use in-mem key-value\n\
 -o        - output results\n\
 -v[n]     - verbosity (0..3, to stderr)\
 ";
@@ -37,15 +36,21 @@ void        __prn_opts(void) {
         << TAB << "Cin:" << TAB << OPTS.fromcin << endl
         << TAB << "Debug:" << TAB << OPTS.verbose << endl
         << TAB << "Out:" << TAB << OPTS.out << endl
-        << TAB << "InMem:" << TAB << OPTS.inmem << endl
     ;
 }
 
 void load_cfg(void) {
+  string datdir, locsfile, kvdir;
   ifstream f_in(filesystem::path(getenv("HOME")) / cfg_file_name);
   if(f_in) {
-      CFG::ReadFile(f_in, vector<string>{"datdir", "locsfile", "kvdir", "verbose", "out"}, OPTS.datdir, OPTS.locsfile, OPTS.cachedir, OPTS.verbose, OPTS.out);
+      CFG::ReadFile(f_in, vector<string>{"datdir", "locsfile", "kvdir", "verbose", "out"}, datdir, locsfile, kvdir, OPTS.verbose, OPTS.out);
       f_in.close();
+      if (!datdir.empty())
+        OPTS.datdir = datdir;
+      if (!locsfile.empty())
+        OPTS.locsfile = locsfile;
+      if (!kvdir.empty())
+        OPTS.cachedir = kvdir;
   }
 }
 
@@ -53,12 +58,8 @@ bool        cli(int argc, char *argv[]) {
     int opt, tmp;
     bool retvalue = false, direct = false;
 
-    while ((opt = getopt(argc, argv, "hf:n:d:l:k:cmov::")) != -1) {  // FIXME: v?
+    while ((opt = getopt(argc, argv, "hf:n:d:l:k:cov::")) != -1) {  // FIXME: v?
       switch (opt) {
-        case 'h':
-          cerr << help_txt << endl;
-          return false;
-          break;
         case 'f':   // FIXME: optarg < 0 | > 999999
           tmp = atoi(optarg);
           if (tmp < 0 or tmp > 700000) {
@@ -92,7 +93,6 @@ bool        cli(int argc, char *argv[]) {
           }
           OPTS.datdir = optarg;
           direct = true;
-          OPTS.cash = !OPTS.cachedir.empty();
           break;
         case 'l':
           if (OPTS.fromcin) {
@@ -105,7 +105,6 @@ bool        cli(int argc, char *argv[]) {
           }
           OPTS.locsfile = optarg;
           direct = true;
-          OPTS.cash = !OPTS.cachedir.empty();
           break;
         case 'k':
           if (!filesystem::exists(optarg)) {
@@ -117,7 +116,6 @@ bool        cli(int argc, char *argv[]) {
             return false;
           }
           OPTS.cachedir = optarg;
-          OPTS.cash = !OPTS.cachedir.empty();
           break;
         case 'c':
           if (direct) {
@@ -133,21 +131,20 @@ bool        cli(int argc, char *argv[]) {
           rewind(stdin);
           OPTS.fromcin = true;
           break;
-        case 'm':
-          OPTS.inmem = true;
-          break;
         case 'o':
           OPTS.out = true;
           break;
         case 'v':   // FIXME: optarg = 0..5
           OPTS.verbose = (optarg) ? (DBG_LVL_T)atoi(optarg) : DBG_MIN;
           break;
+        case 'h':
         case '?':   // can handle optopt
           cerr << help_txt << endl;
           return false;
       }
     }
     // opterr - always 1; optind - 1-st unhandled is argv[optarg] (if argc > optind), so argc_last = argc - optind;
+    OPTS.cash = !OPTS.cachedir.empty();
     retvalue = true;
     if (OPTS.verbose > 1)   // TODO: up v-level
         __prn_opts();
