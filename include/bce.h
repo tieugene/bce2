@@ -27,6 +27,7 @@ struct  OPT_T {      ///< program CLI options
     bool        fromcin = false;    // input from stdin
     bool        out = false;        // produce output
     DBG_LVL_T   verbose = DBG_NONE;
+    std::string kvngin = "kch";
     // dependents
     bool        cash = false;       // use k-v (in-mem and/or file-based)
 };

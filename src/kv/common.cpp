@@ -21,13 +21,32 @@ bool open_kv(KV_BASE_T *kv, const string &name) {
 
 bool    set_cache(void) {
     if (OPTS.cash) {
-        TxDB = new KV_KC_HASH_T();
+        string kvtitle;
+        if (OPTS.kvngin == "kch") {
+          kvtitle = "Kyotocabinet HashDB";
+          TxDB = new KV_KC_HASH_T();
+          AddrDB = new KV_KC_HASH_T();
+        } else if (OPTS.kvngin == "kcs") {
+          kvtitle = "Kyotocabinet StashDB";
+          TxDB = new KV_KC_STASH_T();
+          AddrDB = new KV_KC_STASH_T();
+        } else if (OPTS.kvngin == "tkh") {
+          kvtitle = "Tkrzw HashDBM";
+          TxDB = new KV_TK_HASH_T();
+          AddrDB = new KV_TK_HASH_T();
+        } else {
+          cerr << OPTS.kvngin << " not implemented" << endl;
+          return false;
+        }
+        if (OPTS.verbose)
+          cerr << "K-V engine: " << kvtitle << endl;
         auto tx_full = open_kv(TxDB, "tx");
-        AddrDB = new KV_KC_HASH_T();
         auto addr_full = open_kv(AddrDB, "addr");
-        if ((tx_full or addr_full) and (OPTS.from == 0)) {
-            TxDB->clear();
-            AddrDB->clear();
+        if (OPTS.from == 0) {
+          if (tx_full)
+              TxDB->clear();
+          if (addr_full)
+              AddrDB->clear();
         }
         COUNT.tx = TxDB->count();
         COUNT.addr = AddrDB->count();
