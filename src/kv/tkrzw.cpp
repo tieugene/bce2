@@ -3,17 +3,17 @@
  * Tkrzw version.
  */
 #ifdef TKRZW
-#include "kv.h"
+#include "kv/tk.h"
 #include "misc.h"
 
-bool        KV_T::init(const string &s)
+bool        KV_TK_T::init(const string &s)
 {
     if (db.Open(s, true, tkrzw::File::OPEN_TRUNCATE) != tkrzw::Status::SUCCESS)
         cerr << "Can't open db '" << s << "'." << endl;
     return db.IsOpen();
 }
 
-bool    KV_T::close(void)
+bool    KV_TK_T::close(void)
 {
     if (db.IsOpen()) {
         db.Synchronize(true);
@@ -22,17 +22,17 @@ bool    KV_T::close(void)
     return (!db.IsOpen());
 }
 
-void  KV_T::clear(void) {
+void  KV_TK_T::clear(void) {
   db.Clear();
 }
 
-uint32_t    KV_T::count(void)
+uint32_t    KV_TK_T::count(void)
 {
     auto retvalue = db.CountSimple();
     return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
 }
 
-uint32_t    KV_T::add(string_view key) {
+uint32_t    KV_TK_T::add(string_view key) {
     uint32_t value = count();
     if (value != NOT_FOUND_U32)
         if (!db.Set(key, string_view((const char *)&value, sizeof(uint32_t))).IsOK())
@@ -40,7 +40,7 @@ uint32_t    KV_T::add(string_view key) {
     return value;
 }
 
-uint32_t    KV_T::get(string_view key) {
+uint32_t    KV_TK_T::get(string_view key) {
     string value;
     if (!db.Get(key, &value).IsOK())    // FXIME: handle errors
         return NOT_FOUND_U32;
@@ -51,7 +51,7 @@ uint32_t    KV_T::get(string_view key) {
     return *((uint32_t *) value.data());
 }
 
-uint32_t    KV_T::get_or_add(std::string_view key) {
+uint32_t    KV_TK_T::get_or_add(std::string_view key) {
   string old_value;
   uint32_t value = count();
   if (value != NOT_FOUND_U32) {
@@ -66,7 +66,7 @@ uint32_t    KV_T::get_or_add(std::string_view key) {
   return value;
 }
 
-bool        KV_T::cpto(KV_T *dst)
+bool        KV_TK_T::cpto(KV_T *dst)
 {
     /*
         auto cur = db.cursor();

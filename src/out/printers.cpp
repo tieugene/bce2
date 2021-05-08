@@ -9,6 +9,8 @@
 #include "printers.h"
 #include "script.h"
 
+using namespace std;
+
 // Uncomment to use bce2 as addresses generator only
 // #define DBG
 

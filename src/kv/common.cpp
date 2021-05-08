@@ -1,12 +1,16 @@
+#include <filesystem>
+
 #include "bce.h"
 #include "kv.h"
 
 KV_BASE_T        *TxDB = nullptr, *AddrDB = nullptr;
 
+using namespace std;
+
 bool    set_cache(void) {
     if (OPTS.cash) {
-        TxDB = new KV_T();
-        AddrDB = new KV_T();
+        TxDB = new KV_KC_T();
+        AddrDB = new KV_KC_T();
         filesystem::path tpath, apath;
         tpath = OPTS.cachedir / TxFileName;
         apath = OPTS.cachedir / AddrFileName;

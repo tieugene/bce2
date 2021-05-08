@@ -6,7 +6,7 @@ project(bce2 VERSION 0.0.4)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(include)
+include_directories(include include/kv)
 aux_source_directory(src SRC_LIST)
 aux_source_directory(src/load SRC_LIST)
 aux_source_directory(src/parse SRC_LIST)

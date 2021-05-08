@@ -19,9 +19,9 @@ enum    DBG_LVL_T {
 };
 
 struct  OPT_T {      ///< program CLI options
-    filesystem::path  datdir;       // blk*.dat folder path
-    filesystem::path  locsfile;     // locs-file path
-    filesystem::path  cachedir;     // file-based k-v dir path
+    std::filesystem::path  datdir;       // blk*.dat folder path
+    std::filesystem::path  locsfile;     // locs-file path
+    std::filesystem::path  cachedir;     // file-based k-v dir path
     uint32_t    from = MAX_UINT32;  // bk start from
     uint32_t    num = 1;            // bks to process
     bool        fromcin = false;    // input from stdin
@@ -119,7 +119,7 @@ extern long     start_mem;
 
 inline bool     kv_mode(void) {return OPTS.cash;}
 
-const string TAB = "\t";
+const std::string TAB = "\t";
 const uint32_t COINBASE_vout = 0xFFFFFFFF;
 
 #endif // BCE_H

@@ -27,6 +27,8 @@ static time_t T0;
 // consts
 const uint32_t  BULK_SIZE = 1000;
 
+using namespace std;
+
 int     main(int argc, char *argv[]) {
   // TODO: local BUFFER = char *const ptr;
   bool (*bkloader)(char *, const uint32_t) = &stdin_bk;
@@ -44,7 +46,7 @@ int     main(int argc, char *argv[]) {
       if (!bk_qty)
         return 2;
       if (bk_qty <= OPTS.from) {
-          cerr << "Loaded blocks (" << bk_qty << ") <= 'from' " << OPTS.from << endl;
+          std::cerr << "Loaded blocks (" << bk_qty << ") <= 'from' " << OPTS.from << std::endl;
           return 3;
       }
       bkloader = load_bk;

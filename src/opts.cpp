@@ -10,6 +10,8 @@
 #include "misc.h"
 #include "config_file.h"  // https://github.com/fbarberm/SimpleConfigFile
 
+using namespace std;
+
 const string cfg_file_name = ".bce2.cfg";
 const string  help_txt = "\
 Usage: [options] (- | <dat_dir> <locs_file>)\n\
