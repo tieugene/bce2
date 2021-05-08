@@ -45,7 +45,7 @@ int     main(int argc, char *argv[]) {
       auto bk_qty = init_bkloader(OPTS.datdir, OPTS.locsfile);
       if (!bk_qty)
         return 2;
-      if (bk_qty <= OPTS.from) {
+      if ((OPTS.from != MAX_UINT32) and (bk_qty <= OPTS.from)) {
           std::cerr << "Loaded blocks (" << bk_qty << ") <= 'from' " << OPTS.from << std::endl;
           return 3;
       }

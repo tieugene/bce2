@@ -8,15 +8,13 @@
 
 using namespace std;
 
-bool        KV_TK_HASH_T::init(const string &s)
-{
+bool        KV_TK_HASH_T::init(const string &s) {
     if (db.Open(s + ".tkh", true, tkrzw::File::OPEN_TRUNCATE) != tkrzw::Status::SUCCESS)
         cerr << "Can't open db '" << s << "'." << endl;
     return db.IsOpen();
 }
 
-bool    KV_TK_HASH_T::close(void)
-{
+bool    KV_TK_HASH_T::close(void) {
     if (db.IsOpen()) {
         db.Synchronize(true);
         db.Close();
@@ -28,8 +26,7 @@ void  KV_TK_HASH_T::clear(void) {
   db.Clear();
 }
 
-uint32_t    KV_TK_HASH_T::count(void)
-{
+uint32_t    KV_TK_HASH_T::count(void) {
     auto retvalue = db.CountSimple();
     return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
 }
