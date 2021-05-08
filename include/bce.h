@@ -27,7 +27,7 @@ struct  OPT_T {      ///< program CLI options
     bool        fromcin = false;      // input from stdin
     bool        out = false;          // produce output
     DBG_LVL_T   verbose = DBG_NONE;   // verbosity
-    std::string kvngin = "kch";       // k-v engine
+    std::string kvngin = "kcf";       // k-v engine
     uint64_t    kvtune = 0;           // k-v tuning
     // dependents
     bool        cash = false;       // use k-v (in-mem and/or file-based)

@@ -23,7 +23,7 @@ Options:\n\
 -l <path> - locs-file\n\
 -c        - hex input from stdin (conflicts w/ -d and -l)\n\
 -k <path> - file-based key-value folder\n\
--e <name> - key-value engine (kch/kcs/tkh)\n\
+-e <name> - key-value engine (kcf/kcm/tkf/tkm)\n\
 -t n      - k-v tuning (depends on engine)\n\
 -o        - output results\n\
 -v[n]     - verbosity (0..3, to stderr)\
