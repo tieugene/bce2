@@ -9,6 +9,7 @@
 #include <ctime>
 #include <fstream>
 #include <array>
+#include <filesystem>
 #include "kv.h"
 
 enum    DBG_LVL_T {
