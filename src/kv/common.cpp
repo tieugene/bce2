@@ -9,7 +9,7 @@ using namespace std;
 
 bool open_kv(KV_BASE_T *kv, const string &name) {
   filesystem::path kvpath = OPTS.cachedir / name;
-  if (!kv->init(kvpath))
+  if (!kv->init(kvpath, OPTS.kvtune))
     throw "Cannot init k-v " + name;
   auto isfull = bool(kv->count());
   if (!isfull and OPTS.from > 0)
@@ -22,18 +22,22 @@ bool open_kv(KV_BASE_T *kv, const string &name) {
 bool    set_cache(void) {
     if (OPTS.cash) {
         string kvtitle;
-        if (OPTS.kvngin == "kch") {
+        if (OPTS.kvngin == "kcf") {
           kvtitle = "Kyotocabinet HashDB";
-          TxDB = new KV_KC_HASH_T();
-          AddrDB = new KV_KC_HASH_T();
-        } else if (OPTS.kvngin == "kcs") {
+          TxDB = new KV_KC_DISK_T();
+          AddrDB = new KV_KC_DISK_T();
+        } else if (OPTS.kvngin == "kcm") {
           kvtitle = "Kyotocabinet StashDB";
-          TxDB = new KV_KC_STASH_T();
-          AddrDB = new KV_KC_STASH_T();
-        } else if (OPTS.kvngin == "tkh") {
+          TxDB = new KV_KC_INMEM_T();
+          AddrDB = new KV_KC_INMEM_T();
+        } else if (OPTS.kvngin == "tkf") {
           kvtitle = "Tkrzw HashDBM";
-          TxDB = new KV_TK_HASH_T();
-          AddrDB = new KV_TK_HASH_T();
+          TxDB = new KV_TK_DISK_T();
+          AddrDB = new KV_TK_DISK_T();
+          } else if (OPTS.kvngin == "tkm") {
+            kvtitle = "Tkrzw TinyDBM";
+            TxDB = new KV_TK_INMEM_T();
+            AddrDB = new KV_TK_INMEM_T();
         } else {
           cerr << OPTS.kvngin << " not implemented" << endl;
           return false;

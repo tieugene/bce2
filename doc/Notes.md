@@ -106,6 +106,16 @@ E.g.
   - 0x83 0xA7 0xCC 0x77 - vUndoOffset
 
 ----
+- bce2.ini:
+  - [inih](https://github.com/benhoyt/inih) - .h-only
+  - [inipp](https://github.com/mcmtroffaes/inipp) - .h-only
+  - [SimpleConfigFile](https://github.com/fbarberm/SimpleConfigFile) - .h-only
+  - [miniconf](https://github.com/c-w-m/miniconf) - .h-only, CLI too
+  - [libconfig](https://github.com/hyperrealm/libconfig) - lib
+  - [iniparser](https://github.com/ndevilla/iniparser) - lib
+  - [inicpp](https://github.com/SemaiCZE/inicpp) - lib
+
+----
 Note: tune = builtin cache:
 - &oplus; soft
 - &#8860; inmem

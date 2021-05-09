@@ -3,15 +3,33 @@
 
 #ifdef USE_TK
 
-#include <tkrzw_dbm_hash.h>
 #include "kv/base.h"
+#include <tkrzw_dbm_hash.h>
+#include <tkrzw_dbm_tiny.h>
 
-class KV_TK_HASH_T : public KV_BASE_T {
+class KV_TK_DISK_T : public KV_BASE_T {
 private:
     tkrzw::HashDBM  db;
 public:
-    bool        init(const std::string &);
+    bool        init(const std::string &, uint64_t);
     bool        close(void);
+    void        clear(void);
+    uint32_t    count(void);
+    uint32_t    add(std::string_view key);
+    uint32_t    add(const uint256_t &key)
+                { return add(std::string_view(reinterpret_cast<const char *>(std::data(key)), sizeof(uint256_t))); }
+    uint32_t    get(std::string_view key);
+    uint32_t    get(const uint256_t &key)
+                { return get(std::string_view(reinterpret_cast<const char *>(std::data(key)), sizeof(uint256_t))); }
+    uint32_t    get_or_add(std::string_view key);
+};
+
+class KV_TK_INMEM_T : public KV_BASE_T {
+private:
+    tkrzw::TinyDBM  db;
+public:
+    bool        init(const std::string &, uint64_t) { return true;}
+    bool        close(void) { return true;}
     void        clear(void);
     uint32_t    count(void);
     uint32_t    add(std::string_view key);

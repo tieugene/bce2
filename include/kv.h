@@ -8,7 +8,7 @@
 #include "kv/tk.h"
 #endif
 
-const std::set<std::string> kvnames = {"kch", "kcs", "tkh", "tkt"};
+const std::set<std::string> kvnames = {"kcf", "kcm", "tkf", "tkm"};
 
 bool    set_cache(void);  ///< setup k-v storages
 void    stop_cache(void); ///< reset k-v storages

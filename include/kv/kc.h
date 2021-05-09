@@ -5,12 +5,12 @@
 #include <kchashdb.h>
 #include <kcstashdb.h>
 
-class KV_KC_HASH_T : public KV_BASE_T {
+class KV_KC_DISK_T : public KV_BASE_T {
 protected:
     kyotocabinet::HashDB           db;
     bool        opened = false;
 public:
-    bool        init(const std::string &);
+    bool        init(const std::string &, uint64_t);
     bool        close(void);
     void        clear(void);
     uint32_t    count(void);
@@ -23,12 +23,12 @@ public:
     uint32_t    get_or_add(std::string_view key);
 };
 
-class KV_KC_STASH_T : public KV_BASE_T {
+class KV_KC_INMEM_T : public KV_BASE_T {
 protected:
     kyotocabinet::StashDB           db;
     bool        opened = false;
 public:
-    bool        init(const std::string &);
+    bool        init(const std::string &, uint64_t);
     bool        close(void);
     void        clear(void);
     uint32_t    count(void);
