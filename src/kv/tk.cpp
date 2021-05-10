@@ -76,7 +76,7 @@ bool        KV_TK_INMEM_T::init(const string &s, uint64_t tune) {
         delete db;
       db = new tkrzw::TinyDBM(1<<tune);
   };
-  return (db->IsOpen());
+  return true; // (db->IsOpen());
 }
 
 uint32_t    KV_TK_INMEM_T::count(void) {

@@ -72,7 +72,7 @@ bool  KV_KC_INMEM_T::init(const string &s, uint64_t tune) {
       return false;
   } else if (tune) {
     if (!db.tune_buckets(1<<tune)) {  // must be _before_ creating DB
-      cerr << "Cannot tune KC::HashDB" << endl;
+      cerr << "Cannot tune KC::StashDB" << endl;
       return false;
     }
   }
