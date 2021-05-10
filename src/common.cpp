@@ -1,3 +1,4 @@
+#include <iostream>
 #include "common.h"
 
 const uint8_t *UNIPTR_T::take_u8_ptr(uint32_t const size) {
@@ -24,4 +25,14 @@ uint32_t    UNIPTR_T::take_varuint(void) {
         }
     }
     return retvalue;
+}
+
+bool b_error(const std::string &s) {
+  std::cerr << s << std::endl;
+  return false;
+}
+
+u_int32_t u32_error(const std::string &s) {
+  std::cerr << s << std::endl;
+  return MAX_UINT32;
 }

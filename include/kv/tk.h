@@ -13,7 +13,7 @@ private:
 public:
     bool        init(const std::string &, uint64_t);
     bool        close(void);
-    void        clear(void);
+    void        clear(void) { db.Clear(); }
     uint32_t    count(void);
     uint32_t    add(std::string_view key);
     uint32_t    add(const uint256_t &key)
@@ -26,11 +26,12 @@ public:
 
 class KV_TK_INMEM_T : public KV_BASE_T {
 private:
-    tkrzw::TinyDBM  db;
+    tkrzw::TinyDBM  *db = nullptr;
 public:
-    bool        init(const std::string &, uint64_t) { return true;}
-    bool        close(void) { return true;}
-    void        clear(void);
+    KV_TK_INMEM_T() { db = new tkrzw::TinyDBM; }
+    bool        init(const std::string &, uint64_t);
+    bool        close(void) { return db->Close().IsOK(); }
+    void        clear(void) { db->Clear(); }
     uint32_t    count(void);
     uint32_t    add(std::string_view key);
     uint32_t    add(const uint256_t &key)
