@@ -18,7 +18,7 @@ KV_TK_DISK_T::KV_TK_DISK_T(const string &s, uint64_t tune) {
     else
       tuning_params.num_buckets = 1<<tune;
   }
-  if (!db->OpenAdvanced(s + ".tkh", true, tkrzw::File::OPEN_TRUNCATE, tuning_params).IsOK())
+  if (!db->OpenAdvanced(s + ".tkh", true, tkrzw::File::OPEN_DEFAULT, tuning_params).IsOK())
     throw BCException("tkf: Cannot open db " + s);
 }
 

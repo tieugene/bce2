@@ -9,10 +9,13 @@ using namespace std;
 
 bool open_kv(KV_BASE_T *kv, const string &name) {
   auto isfull = bool(kv->count());
-  if (!isfull and OPTS.from > 0)
-    throw BCException("-f > 0 but " + name + " k-v is empty. Use '-f 0' to clean.");
-  if (isfull and OPTS.from == MAX_UINT32)
-    throw BCException(name + " is not empty. Set -f option properly.");
+  if (isfull) {
+    if (OPTS.from == MAX_UINT32)
+      throw BCException(name + " is not empty. Set -f option properly.");
+  } else {
+    if (OPTS.from > 0 and OPTS.from != MAX_UINT32)
+      throw BCException("-f > 0 but " + name + " k-v is empty. Use '-f 0' or ommit it.");
+  }
   return isfull;
 }
 
@@ -47,6 +50,7 @@ bool    set_cache(void) {
           cerr << "K-V engine: " << kvtitle << endl;
         auto tx_full = open_kv(TxDB, "tx");
         auto addr_full = open_kv(AddrDB, "addr");
+        // TODO: assert tx_full == addr_full
         if (OPTS.from == 0) {
           if (tx_full)
               TxDB->clear();
@@ -55,9 +59,9 @@ bool    set_cache(void) {
         }
         COUNT.tx = TxDB->count();
         COUNT.addr = AddrDB->count();
-    } else    // not k-v mode
-        if (OPTS.from == MAX_UINT32)
-            OPTS.from = 0;
+    }
+    if (OPTS.from == MAX_UINT32)
+        OPTS.from = 0;
     return true;
 }
 
