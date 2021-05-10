@@ -65,23 +65,16 @@ uint32_t    KV_TK_DISK_T::get_or_add(std::string_view key) {
   return value;
 }
 
-// In-mem
+/// In-mem
 
-bool        KV_TK_INMEM_T::init(const string &s, uint64_t tune) {
+KV_TK_INMEM_T::KV_TK_INMEM_T(uint64_t tune) {
   if (tune) {
     if (tune > 30)
-      return b_error("Tuning parameter is too big: " + to_string(tune));
+      throw BCException("tkm: Tuning parameter is too big: " + to_string(tune));
     else
-      if (db)
-        delete db;
       db = new tkrzw::TinyDBM(1<<tune);
-  };
-  return true; // (db->IsOpen());
-}
-
-uint32_t    KV_TK_INMEM_T::count(void) {
-    auto retvalue = db->CountSimple();
-    return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
+  } else
+    db = new tkrzw::TinyDBM();
 }
 
 uint32_t    KV_TK_INMEM_T::add(string_view key) {

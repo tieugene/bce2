@@ -30,8 +30,8 @@ bool    set_cache(void) {
             break;
           case KVTYPE_KCMEM:
             kvtitle = "Kyotocabinet StashDB";
-            TxDB = new KV_KC_INMEM_T();
-            AddrDB = new KV_KC_INMEM_T();
+            TxDB = new KV_KC_INMEM_T(OPTS.kvtune);
+            AddrDB = new KV_KC_INMEM_T(OPTS.kvtune);
             break;
           case KVTYPE_TKFILE:
             kvtitle = "Tkrzw HashDBM";
@@ -40,8 +40,8 @@ bool    set_cache(void) {
             break;
           case KVTYPE_TKMEM:
             kvtitle = "Tkrzw TinyDBM";
-            TxDB = new KV_TK_INMEM_T();
-            AddrDB = new KV_TK_INMEM_T();
+            TxDB = new KV_TK_INMEM_T(OPTS.kvtune);
+            AddrDB = new KV_TK_INMEM_T(OPTS.kvtune);
             break;
           default:
             return b_error("k-v not implemented");
