@@ -8,7 +8,6 @@ const uint32_t NOT_FOUND_U32 = MAX_UINT32;
 
 class KV_BASE_T {
 public:
-    virtual bool        init(const std::string &, uint64_t) = 0;
     virtual bool        close(void) = 0;
     virtual void        clear(void) = 0;
     virtual uint32_t    count(void) = 0;

@@ -8,9 +8,6 @@ KV_BASE_T  *TxDB = nullptr, *AddrDB = nullptr;
 using namespace std;
 
 bool open_kv(KV_BASE_T *kv, const string &name) {
-  filesystem::path kvpath = OPTS.cachedir / name;
-  if (!kv->init(kvpath, OPTS.kvtune))
-    throw BCException("Cannot init k-v " + name);
   auto isfull = bool(kv->count());
   if (!isfull and OPTS.from > 0)
     throw BCException("-f > 0 but " + name + " k-v is empty. Use '-f 0' to clean.");
@@ -35,8 +32,8 @@ bool    set_cache(void) {
             break;
           case KVTYPE_TKFILE:
             kvtitle = "Tkrzw HashDBM";
-            TxDB = new KV_TK_DISK_T();
-            AddrDB = new KV_TK_DISK_T();
+            TxDB = new KV_TK_DISK_T(OPTS.cachedir / "tx", OPTS.kvtune);
+            AddrDB = new KV_TK_DISK_T(OPTS.cachedir / "addr", OPTS.kvtune);
             break;
           case KVTYPE_TKMEM:
             kvtitle = "Tkrzw TinyDBM";

@@ -10,7 +10,6 @@ protected:
     kyotocabinet::HashDB *db;
 public:
     KV_KC_DISK_T(const std::string &, uint64_t = 0);
-    bool        init(const std::string &, uint64_t) { return true; }
     bool        close(void) { db->synchronize(); return db->close(); }
     void        clear(void) { db->clear(); }
     uint32_t    count(void);
@@ -28,7 +27,6 @@ protected:
     kyotocabinet::StashDB *db = nullptr;
 public:
     KV_KC_INMEM_T(u_int64_t = 0);
-    bool        init(const std::string &, uint64_t) { return true; }
     bool        close(void) { return db->close(); }
     void        clear(void) { db->clear(); }
     uint32_t    count(void) { return db->count(); }

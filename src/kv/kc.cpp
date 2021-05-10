@@ -17,7 +17,7 @@ KV_KC_DISK_T::KV_KC_DISK_T(const string &s, uint64_t tune) {
         throw BCException("kcf: Cannot tune");
   }
   if (!db->open(s + ".kch", kyotocabinet::HashDB::OWRITER | kyotocabinet::HashDB::OCREATE))
-    throw BCException("kcf: Cannot open DB");
+    throw BCException("kcf: Cannot open DB " + s);
 }
 
 uint32_t    KV_KC_DISK_T::count(void) {
