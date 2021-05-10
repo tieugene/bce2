@@ -25,8 +25,8 @@ bool    set_cache(void) {
         switch (OPTS.kvngin) {
           case KVTYPE_KCFILE:
             kvtitle = "Kyotocabinet HashDB";
-            TxDB = new KV_KC_DISK_T();
-            AddrDB = new KV_KC_DISK_T();
+            TxDB = new KV_KC_DISK_T(OPTS.cachedir / "tx", OPTS.kvtune);
+            AddrDB = new KV_KC_DISK_T(OPTS.cachedir / "addr", OPTS.kvtune);
             break;
           case KVTYPE_KCMEM:
             kvtitle = "Kyotocabinet StashDB";

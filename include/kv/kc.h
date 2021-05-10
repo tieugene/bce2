@@ -7,12 +7,12 @@
 
 class KV_KC_DISK_T : public KV_BASE_T {
 protected:
-    kyotocabinet::HashDB           db;
-    bool        opened = false;
+    kyotocabinet::HashDB *db;
 public:
-    bool        init(const std::string &, uint64_t);
-    bool        close(void);
-    void        clear(void);
+    KV_KC_DISK_T(const std::string &, uint64_t = 0);
+    bool        init(const std::string &, uint64_t) { return true; }
+    bool        close(void) { db->synchronize(); return db->close(); }
+    void        clear(void) { db->clear(); }
     uint32_t    count(void);
     uint32_t    add(std::string_view key);
     uint32_t    add(const uint256_t &key)
