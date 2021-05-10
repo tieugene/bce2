@@ -10,37 +10,41 @@ using namespace std;
 bool open_kv(KV_BASE_T *kv, const string &name) {
   filesystem::path kvpath = OPTS.cachedir / name;
   if (!kv->init(kvpath, OPTS.kvtune))
-    throw "Cannot init k-v " + name;
+    throw BCException("Cannot init k-v " + name);
   auto isfull = bool(kv->count());
   if (!isfull and OPTS.from > 0)
-    throw "-f > 0 but " + name + " k-v is empty. Use '-f 0' to clean.";
+    throw BCException("-f > 0 but " + name + " k-v is empty. Use '-f 0' to clean.");
   if (isfull and OPTS.from == MAX_UINT32)
-    throw name + " is not empty. Set -f option properly.";
+    throw BCException(name + " is not empty. Set -f option properly.");
   return isfull;
 }
 
 bool    set_cache(void) {
-    if (OPTS.cash) {
+    if (kv_mode()) {
         string kvtitle;
-        if (OPTS.kvngin == "kcf") {
-          kvtitle = "Kyotocabinet HashDB";
-          TxDB = new KV_KC_DISK_T();
-          AddrDB = new KV_KC_DISK_T();
-        } else if (OPTS.kvngin == "kcm") {
-          kvtitle = "Kyotocabinet StashDB";
-          TxDB = new KV_KC_INMEM_T();
-          AddrDB = new KV_KC_INMEM_T();
-        } else if (OPTS.kvngin == "tkf") {
-          kvtitle = "Tkrzw HashDBM";
-          TxDB = new KV_TK_DISK_T();
-          AddrDB = new KV_TK_DISK_T();
-          } else if (OPTS.kvngin == "tkm") {
+        switch (OPTS.kvngin) {
+          case KVTYPE_KCFILE:
+            kvtitle = "Kyotocabinet HashDB";
+            TxDB = new KV_KC_DISK_T();
+            AddrDB = new KV_KC_DISK_T();
+            break;
+          case KVTYPE_KCMEM:
+            kvtitle = "Kyotocabinet StashDB";
+            TxDB = new KV_KC_INMEM_T();
+            AddrDB = new KV_KC_INMEM_T();
+            break;
+          case KVTYPE_TKFILE:
+            kvtitle = "Tkrzw HashDBM";
+            TxDB = new KV_TK_DISK_T();
+            AddrDB = new KV_TK_DISK_T();
+            break;
+          case KVTYPE_TKMEM:
             kvtitle = "Tkrzw TinyDBM";
             TxDB = new KV_TK_INMEM_T();
             AddrDB = new KV_TK_INMEM_T();
-        } else {
-          cerr << OPTS.kvngin << " not implemented" << endl;
-          return false;
+            break;
+          default:
+            return b_error("k-v not implemented");
         }
         if (OPTS.verbose)
           cerr << "K-V engine: " << kvtitle << endl;
@@ -62,7 +66,7 @@ bool    set_cache(void) {
 
 void stop_cache(void)
 {
-  if (OPTS.cash) {
+  if (kv_mode()) {
       TxDB->close();
       AddrDB->close();
   }

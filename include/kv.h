@@ -2,13 +2,19 @@
 #ifndef KV_H
 #define KV_H
 
-#include <set>
+#include <map>
 #include "kv/kc.h"
 #ifdef USE_TK
 #include "kv/tk.h"
 #endif
 
-const std::set<std::string> kvnames = {"kcf", "kcm", "tkf", "tkm"};
+enum KVNGIN_T {
+  KVTYPE_NONE,
+  KVTYPE_KCFILE,
+  KVTYPE_KCMEM,
+  KVTYPE_TKFILE,
+  KVTYPE_TKMEM
+};
 
 bool    set_cache(void);  ///< setup k-v storages
 void    stop_cache(void); ///< reset k-v storages

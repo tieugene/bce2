@@ -28,10 +28,8 @@ struct  OPT_T {      ///< program CLI options
     bool        fromcin = false;      // input from stdin
     bool        out = false;          // produce output
     DBG_LVL_T   verbose = DBG_NONE;   // verbosity
-    std::string kvngin = "kcf";       // k-v engine
+    KVNGIN_T    kvngin = KVTYPE_NONE; // k-v engine
     uint64_t    kvtune = 0;           // k-v tuning
-    // dependents
-    bool        cash = false;       // use k-v (in-mem and/or file-based)
 };
 
 struct  COUNT_T {    ///< through counters
@@ -120,7 +118,7 @@ extern KV_BASE_T     *TxDB, *AddrDB;
 extern time_t   start_time;
 extern long     start_mem;
 
-inline bool     kv_mode(void) {return OPTS.cash;}
+inline bool     kv_mode(void) { return OPTS.kvngin != KVTYPE_NONE; }
 
 const std::string TAB = "\t";
 const uint32_t COINBASE_vout = 0xFFFFFFFF;
