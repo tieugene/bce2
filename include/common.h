@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <array>
 #include <string_view>
-#include <exception>
+#include <stdexcept>
 
 const uint32_t MAX_UINT32 = 0xFFFFFFFF;
 template <size_t Size>
@@ -34,9 +34,15 @@ union   UNIPTR_T    ///< Universal ptr
     const uint32_t    *take_32_ptr(void) { return u32_ptr++; }
     const uint256_t    *take_256_ptr(void) { return u256_ptr++; }
 };
-class BCException : public std::exception {
-  const char* what() const throw() {
-    return "BCE exception";
-  }
+
+class BCException : public std::runtime_error {
+public:
+  BCException(const std::string &msg) : std::runtime_error(msg) {}
+  BCException(const char *msg) : std::runtime_error(msg) {}
 };
+
+// error shortcuts
+bool b_error(const std::string &);
+u_int32_t u32_error(const std::string &);
+
 #endif // COMMON_H
