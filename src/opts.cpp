@@ -45,9 +45,13 @@ void        __prn_opts(void) {
 
 void load_cfg(void) {
   string datdir, locsfile, kvdir;
+  int verbose = -1;
   ifstream f_in(filesystem::path(getenv("HOME")) / cfg_file_name);
   if(f_in) {
-      CFG::ReadFile(f_in, vector<string>{"datdir", "locsfile", "kvdir", "kvtype", "tune", "verbose", "out"}, datdir, locsfile, kvdir, OPTS.kvngin, OPTS.kvtune, OPTS.verbose, OPTS.out);
+      CFG::ReadFile(
+            f_in,
+            vector<string>{"datdir", "locsfile", "kvdir", "kvtype", "tune", "verbose", "out"},
+            datdir, locsfile, kvdir, OPTS.kvngin, OPTS.kvtune, verbose, OPTS.out);
       f_in.close();
       if (!datdir.empty())
         OPTS.datdir = datdir;
@@ -55,6 +59,8 @@ void load_cfg(void) {
         OPTS.locsfile = locsfile;
       if (!kvdir.empty())
         OPTS.cachedir = kvdir;
+      if (verbose >= 0)
+        OPTS.verbose = DBG_LVL_T(verbose);
   }
 }
 
