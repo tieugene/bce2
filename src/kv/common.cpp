@@ -7,16 +7,15 @@ KV_BASE_T  *TxDB = nullptr, *AddrDB = nullptr;
 
 using namespace std;
 
-bool open_kv(KV_BASE_T *kv, const string &name) {
-  auto isfull = bool(kv->count());
+bool chk_kv(bool isfull, const string &name) {
   if (isfull) {
     if (OPTS.from == MAX_UINT32)
-      throw BCException(name + " is not empty. Set -f option properly.");
+      return b_error(name + " is not empty. Set -f option properly.");
   } else {
     if (OPTS.from > 0 and OPTS.from != MAX_UINT32)
-      throw BCException("-f > 0 but " + name + " k-v is empty. Use '-f 0' or ommit it.");
+      return b_error("-f > 0 but " + name + " k-v is empty. Use '-f 0' or ommit it.");
   }
-  return isfull;
+  return true;
 }
 
 bool    set_cache(void) {
@@ -48,14 +47,17 @@ bool    set_cache(void) {
         }
         if (OPTS.verbose)
           cerr << "K-V engine: " << kvtitle << endl;
-        auto tx_full = open_kv(TxDB, "tx");
-        auto addr_full = open_kv(AddrDB, "addr");
-        // TODO: assert tx_full == addr_full
+        auto tx_full = bool(TxDB->count());
+        auto addr_full = bool(AddrDB->count());
+        if (!chk_kv(tx_full, "tx") or !chk_kv(addr_full, "addr"))
+          return false;
+        if (tx_full xor addr_full)
+          return b_error("One from tx or addr is empty, another one is full. It is impossible.");
         if (OPTS.from == 0) {
           if (tx_full)
-              TxDB->clear();
+            TxDB->clear();
           if (addr_full)
-              AddrDB->clear();
+            AddrDB->clear();
         }
         COUNT.tx = TxDB->count();
         COUNT.addr = AddrDB->count();

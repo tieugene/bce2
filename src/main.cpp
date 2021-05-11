@@ -48,7 +48,7 @@ int     main(int argc, char *argv[]) {
     // 1.3. prepare k-v storages (and normalize OPTS.from)
     start_mem = memused();
     if (!set_cache())
-        return 1;
+        return 3;
     // 1.4. last prestart
     char *const BUFFER = new char[MAX_BK_SIZE];
     if (OPTS.verbose)
