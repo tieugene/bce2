@@ -15,3 +15,5 @@
 - disabled 2-level k-v ('-m' switch)
 - multiengine k-v (2 x kyotocabinet + 2 x tkrzw)
 - added k-v tuning switch
+- hex stdin speedup
+- hex2bin speedup
