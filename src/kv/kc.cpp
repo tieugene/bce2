@@ -47,7 +47,7 @@ uint32_t    KV_KC_DISK_T::get_or_add(std::string_view key) {
   if (v == NOT_FOUND_U32) {
     v = add(key);
     if (v == NOT_FOUND_U32)
-      cerr << "Cannot add key '" << ptr2hex(key) << endl;
+      return u32_error("Cannot add key '" + ptr2hex(key));
   }
   return v;
 }
@@ -88,7 +88,7 @@ uint32_t    KV_KC_INMEM_T::get_or_add(string_view key) {
   if (v == NOT_FOUND_U32) {
     v = add(key);
     if (v == NOT_FOUND_U32)
-      cerr << "Cannot add key '" << ptr2hex(key) << endl;
+      return u32_error("Cannot add key " + ptr2hex(key));
   }
   return v;
 }
