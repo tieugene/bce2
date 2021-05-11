@@ -23,8 +23,15 @@ size_t test_old(void) {
   return count;
 }
 
+inline int htoi(int x) {
+    return 9 * (x >> 6) + (x & 017);
+}
+
 int main(void)
 {
-  std::cerr << test_old() << " lines read." << std::endl;
+  //std::cerr << test_old() << " lines read." << std::endl;
+  for (char i = '0'; i < 127; i++) {
+    std::cout << i << " = " << std::to_string(i) << " => " << std::to_string(htoi(i)) << std::endl;
+  }
   return 0;
 }
