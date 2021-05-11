@@ -12,6 +12,7 @@
 #include "bce.h"
 #include "misc.h"
 #include "script.h" // cur_addr only
+#include "fasthex.h"
 #if defined(__APPLE__)
 #include <mach/mach.h>
 #endif
@@ -52,14 +53,12 @@ string  ptr2hex(string_view data) {
     return s;
 }
 
-int hex2bytes(const string& s, char *dst) {
-    auto src_ptr = s.c_str();
-    auto src_end = src_ptr + s.length();
-    char *dst_ptr;
+int hex2bytes(string_view s, char *const dst) {
+  auto src_ptr = s.cbegin();
+  auto src_end = src_ptr + s.length();
+  char *dst_ptr;
 
-    for (dst_ptr = dst; src_ptr < src_end; src_ptr += 2, dst_ptr++) {
-        if (sscanf(src_ptr, "%2hhx", dst_ptr) != 1)
-          break;
-    }
-    return dst_ptr - dst;
+  for (dst_ptr = dst; src_ptr < src_end; src_ptr += 2, dst_ptr++)
+    *dst_ptr = (hextoint(src_ptr[0]) << 4) | hextoint(src_ptr[1]);
+  return dst_ptr - dst;
 }

@@ -22,8 +22,6 @@ VOUT_T      CUR_VOUT;
 UNIPTR_T    CUR_PTR;
 long        start_mem;
 time_t      start_time;
-// locals
-static time_t T0;
 // consts
 const uint32_t  BULK_SIZE = 1000;
 
@@ -31,32 +29,27 @@ using namespace std;
 
 int     main(int argc, char *argv[]) {
   // TODO: local BUFFER = char *const ptr;
+  char BUFFER[MAX_BK_SIZE];
   bool (*bkloader)(char *, const uint32_t) = &stdin_bk;
 
     // 1. prepare
     // 1.1. handle options
-    load_cfg();
-    if (!cli(argc, argv))
-        return 1;
-    // TODO: check options after all
-    T0 = time(nullptr);
+    if (!load_opts(argc, argv))
+      return 1;
     // 1.2. prepare bk info
     if (!OPTS.fromcin) {
       auto bk_qty = init_bkloader(OPTS.datdir, OPTS.locsfile);
       if (!bk_qty)
         return 2;
-      if ((OPTS.from != MAX_UINT32) and (bk_qty <= OPTS.from)) {
-          std::cerr << "Loaded blocks (" << bk_qty << ") <= 'from' " << OPTS.from << std::endl;
-          return 3;
-      }
+      if ((OPTS.from != MAX_UINT32) and (bk_qty <= OPTS.from))
+        return u32_error("Loaded blocks (" + to_string(bk_qty) + ") <= 'from' " + to_string(OPTS.from), 3);
       bkloader = load_bk;
     }
     // 1.3. prepare k-v storages (and normalize OPTS.from)
     start_mem = memused();
     if (!set_cache())
-        return 1;
+        return 3;
     // 1.4. last prestart
-    char *const BUFFER = new char[MAX_BK_SIZE];
     if (OPTS.verbose)
       __prn_head();
     start_time = time(nullptr);
