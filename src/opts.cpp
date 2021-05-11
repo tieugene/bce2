@@ -50,40 +50,42 @@ void        __prn_opts(void) {
     ;
 }
 
-void load_cfg(void) {
+bool load_cfg(void) {
   string datdir, locsfile, kvdir, kvngin;
   int verbose = -1;
   ifstream f_in(filesystem::path(getenv("HOME")) / cfg_file_name);
   if(f_in) {
-      CFG::ReadFile(
-            f_in,
-            vector<string>{"datdir", "locsfile", "kvdir", "kvtype", "tune", "verbose", "out"},
-            datdir, locsfile, kvdir, kvngin, OPTS.kvtune, verbose, OPTS.out);
-      f_in.close();
-      if (verbose >= 0)
-        OPTS.verbose = DBG_LVL_T(verbose);
-      if (!datdir.empty())
-        OPTS.datdir = datdir;
-      if (!locsfile.empty())
-        OPTS.locsfile = locsfile;
-      if (!kvdir.empty())
-        OPTS.cachedir = kvdir;
-      if (!kvngin.empty()) {
-        auto kt = kvnames.find(kvngin);
-        if (kt != kvnames.end())
-          OPTS.kvngin = kt->second;
-        else
-          if (OPTS.verbose)
-            cerr << "Unknow k-v type: " << optarg << endl;
-      }
+    CFG::ReadFile(
+          f_in,
+          vector<string>{"datdir", "locsfile", "kvdir", "kvtype", "tune", "verbose", "out", "stdin"},
+          datdir, locsfile, kvdir, kvngin, OPTS.kvtune, verbose, OPTS.out, OPTS.fromcin);
+    f_in.close();
+    if (verbose >= 0)
+      OPTS.verbose = DBG_LVL_T(verbose);
+    if (!datdir.empty())
+      OPTS.datdir = datdir;
+    if (!locsfile.empty())
+      OPTS.locsfile = locsfile;
+    if (!kvdir.empty())
+      OPTS.cachedir = kvdir;
+    if (!kvngin.empty()) {
+      auto kt = kvnames.find(kvngin);
+      if (kt != kvnames.end())
+        OPTS.kvngin = kt->second;
+      else
+        if (OPTS.verbose)
+          return b_error("Unknow k-v type: " + kvngin);
+    }
   }
+  return true;
 }
 
+///< Handle CLI. Return 0 if error, argv's index of 1st filename on success.
 bool        cli(int argc, char *argv[]) {
     int opt, tmp;
     long tmp_l;
     auto kt = kvnames.begin();
-    bool retvalue = false, direct = false;
+    bool direct = false;
 
     while ((opt = getopt(argc, argv, "hf:n:d:l:k:e:t:cov::")) != -1) {  // FIXME: v?
       switch (opt) {
@@ -104,26 +106,16 @@ bool        cli(int argc, char *argv[]) {
         case 'd':
           if (OPTS.fromcin)
             return b_error("-d conflicts with -c");
-          if (!filesystem::exists(optarg))
-            return b_error("-d: '" + string(optarg) + "' not exists");
-          if (!filesystem::is_directory(optarg))
-            return b_error("-d: '" + string(optarg) + "' is not dir");
           OPTS.datdir = optarg;
           direct = true;
           break;
         case 'l':
           if (OPTS.fromcin)
             return b_error("-l conflicts with -c");
-          if (!filesystem::exists(optarg))
-            return b_error("-l: '" + string(optarg) + "' not exists");
           OPTS.locsfile = optarg;
           direct = true;
           break;
         case 'k':
-          if (!filesystem::exists(optarg))
-            return b_error("-k: '" + string(optarg) + "' not exists");
-          if (!filesystem::is_directory(optarg))
-            return b_error("-k: '" + string(optarg) + "' is not dir");
           OPTS.cachedir = optarg;
           break;
         case 'e':
@@ -141,29 +133,51 @@ bool        cli(int argc, char *argv[]) {
         case 'c':
           if (direct)
             return b_error("-c conflicts with -d/-l.");
-          // check stdin
-          fseek(stdin, 0, SEEK_END);
-          if (ftell(stdin) >= 0)
-            return b_error("Stdin is empty");
-          rewind(stdin);
           OPTS.fromcin = true;
           break;
         case 'o':
           OPTS.out = true;
           break;
         case 'v':   // FIXME: optarg = 0..5
-          OPTS.verbose = (optarg) ? (DBG_LVL_T)atoi(optarg) : DBG_MIN;
+          tmp = atoi(optarg);
+          if (tmp < 0 or tmp > DBG_MAX)
+            return b_error("-v: Bad verbose level " + string(optarg));
+          OPTS.verbose = DBG_LVL_T(tmp);
           break;
         case 'h':
         case '?':   // can handle optopt
-          cerr << help_txt << endl;
-          return false;
+          return b_error(help_txt);
       }
     }
     // opterr - always 1; optind - 1-st unhandled is argv[optarg] (if argc > optind), so argc_last = argc - optind;
-    //OPTS.cash = !OPTS.cachedir.empty();
-    retvalue = true;
     if (OPTS.verbose > 1)   // TODO: up v-level
         __prn_opts();
-    return retvalue;
+    return true;
+}
+
+bool load_opts(int argc, char *argv[]) {
+  if (load_cfg() and cli(argc, argv)) {
+    // post-check
+    if (OPTS.fromcin) {
+      fseek(stdin, 0, SEEK_END);
+      if (ftell(stdin) >= 0)
+        return b_error("Stdin is empty");
+      rewind(stdin);
+    } else {
+      if (!filesystem::exists(OPTS.datdir))
+        return b_error("datdir: '" + string(OPTS.datdir) + "' not exists");
+      if (!filesystem::is_directory(OPTS.datdir))
+        return b_error("datdir: '" + string(OPTS.datdir) + "' is not dir");
+      if (!filesystem::exists(OPTS.locsfile))
+        return b_error("locsfile: '" + string(OPTS.locsfile) + "' not exists");
+    }
+    if (kv_mode()) {
+      if (!filesystem::exists(OPTS.cachedir))
+        return b_error("k-v: '" + string(OPTS.cachedir) + "' not exists");
+      if (!filesystem::is_directory(OPTS.cachedir))
+        return b_error("k-v: '" + string(OPTS.cachedir) + "' is not dir");
+    }
+    return true;
+  }
+  return false;
 }

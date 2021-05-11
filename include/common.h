@@ -43,6 +43,6 @@ public:
 
 // error shortcuts
 bool b_error(const std::string &);
-u_int32_t u32_error(const std::string &);
+u_int32_t u32_error(const std::string &, uint32_t = MAX_UINT32);
 
 #endif // COMMON_H

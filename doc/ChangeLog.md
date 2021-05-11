@@ -12,5 +12,6 @@
 
 0.0.4:
 - bce2.cfg
+- disabled 2-level k-v ('-m' switch)
 - multiengine k-v (2 x kyotocabinet + 2 x tkrzw)
-- k-v tuning
+- added k-v tuning switch

@@ -32,7 +32,7 @@ bool b_error(const std::string &s) {
   return false;
 }
 
-u_int32_t u32_error(const std::string &s) {
+u_int32_t u32_error(const std::string &s, uint32_t retcode) {
   std::cerr << s << std::endl;
-  return MAX_UINT32;
+  return retcode;
 }

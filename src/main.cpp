@@ -22,8 +22,6 @@ VOUT_T      CUR_VOUT;
 UNIPTR_T    CUR_PTR;
 long        start_mem;
 time_t      start_time;
-// locals
-static time_t T0;
 // consts
 const uint32_t  BULK_SIZE = 1000;
 
@@ -35,20 +33,16 @@ int     main(int argc, char *argv[]) {
 
     // 1. prepare
     // 1.1. handle options
-    load_cfg();
-    if (!cli(argc, argv))
-        return 1;
+    if (!load_opts(argc, argv))
+      return 1;
     // TODO: check options after all
-    T0 = time(nullptr);
     // 1.2. prepare bk info
     if (!OPTS.fromcin) {
       auto bk_qty = init_bkloader(OPTS.datdir, OPTS.locsfile);
       if (!bk_qty)
         return 2;
-      if ((OPTS.from != MAX_UINT32) and (bk_qty <= OPTS.from)) {
-          std::cerr << "Loaded blocks (" << bk_qty << ") <= 'from' " << OPTS.from << std::endl;
-          return 3;
-      }
+      if ((OPTS.from != MAX_UINT32) and (bk_qty <= OPTS.from))
+        return u32_error("Loaded blocks (" + to_string(bk_qty) + ") <= 'from' " + to_string(OPTS.from), 3);
       bkloader = load_bk;
     }
     // 1.3. prepare k-v storages (and normalize OPTS.from)
