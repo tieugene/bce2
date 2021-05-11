@@ -50,10 +50,8 @@ bool    hash_tx(const uint8_t *tx_beg)   // calc tx hash on demand
     for (uint32_t i = 0; i < CUR_TX.vins; i++)
         parse_vin(false);
     CUR_TX.vouts = CUR_PTR.take_varuint();
-    if (!CUR_TX.vouts) {
-        cerr << "Vouts == 0" << endl;
-        return false;
-    }
+    if (!CUR_TX.vouts)
+        return b_error("Vouts == 0");
     for (uint32_t i = 0; i < CUR_TX.vouts; i++)
         parse_vout(false);
     if (!CUR_TX.segwit) {
@@ -88,27 +86,21 @@ bool    parse_tx(void) // TODO: hash
     if (CUR_TX.segwit)
         CUR_PTR.u16_ptr++;  // skip witness signature
     CUR_TX.vins = CUR_PTR.take_varuint();
-    if (CUR_TX.vins == 0) {
-        cerr << "Vins == 0" << endl;
-        return false;
-    }
+    if (CUR_TX.vins == 0)
+        return b_error("Vins == 0");
     if (OPTS.out or kv_mode()) {
         if (!hash_tx(tx_beg))
             return false;
         if (kv_mode()) {
-            auto tx_added = TxDB->add(CUR_TX.hash);
-            if (tx_added == NOT_FOUND_U32) {
-                    cerr << "Can't add tx " << hash2hex(CUR_TX.hash) << endl;
-                    return false;
-            }
-            if (tx_added != COUNT.tx) {
-                    cerr << "Tx " << hash2hex(CUR_TX.hash) << " added as " << tx_added << " against waiting " << COUNT.tx << endl;
-                    return false;
-            }
-            if (OPTS.out)
-                out_tx();
+          auto tx_added = TxDB->add(CUR_TX.hash);
+          if (tx_added == NOT_FOUND_U32)
+            return b_error("Can't add tx " + hash2hex(CUR_TX.hash));
+          if (tx_added != COUNT.tx)
+            return b_error("Tx " + hash2hex(CUR_TX.hash) + " added as " + to_string(tx_added) + " against waiting " + to_string(COUNT.tx));
+          if (OPTS.out)
+            out_tx();
         } else  // cashless & out
-            __prn_tx();
+          __prn_tx();
     }
     for (LOCAL.vin = 0; LOCAL.vin < CUR_TX.vins; LOCAL.vin++)
         if (!parse_vin(true))
@@ -144,10 +136,8 @@ bool    parse_vin(const bool dojob)
     {
         if (CUR_VIN.vout != COINBASE_vout) {
             CUR_VIN.txno = TxDB->get(*CUR_VIN.txid);
-            if (CUR_VIN.txno == NOT_FOUND_U32) {
-                cerr << "txid " << hash2hex(*CUR_VIN.txid) << " not found." << endl;
-                return false;
-            }
+            if (CUR_VIN.txno == NOT_FOUND_U32)
+                return b_error("txid " + hash2hex(*CUR_VIN.txid) + " not found.");
         }
         if (OPTS.out)
             out_vin();
