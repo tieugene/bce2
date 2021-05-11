@@ -2,10 +2,8 @@
  * locs- and *.dat files handler
  */
 #include <iostream>
-//#include <format>
 #include <filesystem>
-//#include <cstdint>
-//#include <fstream>
+#include <stdio.h>
 
 #include "bkidx.h"
 #include "datfarm.h"
@@ -13,9 +11,10 @@
 
 using namespace std;
 
+const uint32_t  BK_SIGN = 0xD9B4BEF9;   // LE
 FOFF_T    *FOFF;
 DATFARM_T *datfarm;
-const uint32_t  BK_SIGN = 0xD9B4BEF9;   // LE
+char *line = nullptr;
 
 ///< load file-offset file
 size_t  load_fileoffsets(const string fn) {
@@ -61,17 +60,25 @@ bool    load_bk(char *dst, const uint32_t bk_no) {
 }
 
 bool    stdin_bk(char *dst, const uint32_t bk_no) {
-  string line;
+  const int BUF_SIZE = (MAX_BK_SIZE << 1) + 3;  ///< bk + \n + \0 + reserved
+  if (!line)
+    line = new char[BUF_SIZE];
 
-  getline(cin, line);
-  if (!line.empty()) {
-    auto line_len = line.length();
-    if (line_len > (MAX_BK_SIZE << 1))
-      return b_error("Bk too big: " + to_string(bk_no));
-    auto done = hex2bytes(line, dst);
+  if (std::fgets(line, BUF_SIZE, stdin)) {
+    auto line_len = strlen(line);
+    if (line_len < 2)
+      return b_error("Hex-line of bk " + to_string(bk_no) + " too small: " + to_string(line_len));
+    if (line_len >= (BUF_SIZE - 1))   ///< max_bk_size exceeded
+      return b_error("Hex-line of bk " + to_string(bk_no) + " too big: " + to_string(line_len));
+    if (line[line_len - 1] == '\n')
+      line[--line_len] = '\0';   // rtrim line
+    if (line_len & 1)
+      return b_error("Hex-line of bk " + to_string(bk_no) + " has odd symbols: " + to_string(line_len));
+    auto done = hex2bytes(string_view(line, line_len), dst);
     if (done != (line_len >> 1))
       return b_error(to_string(done) + "/" + to_string(line_len >> 1) + " bytes converted");
     return true;
-  } else
+  } else {
     return false;
+  }
 }

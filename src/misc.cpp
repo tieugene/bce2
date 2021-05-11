@@ -52,14 +52,15 @@ string  ptr2hex(string_view data) {
     return s;
 }
 
-int hex2bytes(const string& s, char *dst) {
-    auto src_ptr = s.c_str();
-    auto src_end = src_ptr + s.length();
-    char *dst_ptr;
+int hex2bytes(string_view s, char *dst) {
+  // bitcoin-cli receives lower hex (0-9a-f == 0x30..39,0x61..66[,0x41..46])
+  auto src_ptr = s.cbegin();
+  auto src_end = src_ptr + s.length();
+  char *dst_ptr;
 
-    for (dst_ptr = dst; src_ptr < src_end; src_ptr += 2, dst_ptr++) {
-        if (sscanf(src_ptr, "%2hhx", dst_ptr) != 1)
-          break;
-    }
-    return dst_ptr - dst;
+  for (dst_ptr = dst; src_ptr < src_end; src_ptr += 2, dst_ptr++) {
+    if (sscanf(src_ptr, "%2hhx", dst_ptr) != 1)
+      break;
+  }
+  return dst_ptr - dst;
 }

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 project(bce2 LANGUAGES CXX)
 project(bce2 VERSION 0.0.4)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(include include/kv)
