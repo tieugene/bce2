@@ -6,12 +6,17 @@
 #ifndef BASE58_H
 #define BASE58_H
 
-#include <stdint.h>
-#include <string>
+//#include <stdint.h>
 #include "common.h"
 
 // from bitcoin-core 0.19.1/src/base58
 // pbegin must be const...
-std::string EncodeBase58(u8_t*, const u8_t*);
+/**
+ * @brief EncodeBase58
+ * @param pbegin
+ * @param pend
+ * @return
+ */
+std::string EncodeBase58(std::string_view data);
 
 #endif // BASE58_H

@@ -1,17 +1,20 @@
 /*
  * Just Base58 encoder
  */
+#include <string>
+#include <string_view>
 #include <vector>
 #include <cassert>
 #include "base58.h"
 
 static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
-std::string EncodeBase58(u8_t* pbegin, const u8_t* pend)
+std::string EncodeBase58(std::string_view data)
 {
     // Skip & count leading zeroes.
     int zeroes = 0;
     int length = 0;
+    auto pbegin = data.begin(), pend = data.end();
     while (pbegin != pend && *pbegin == 0) {
         pbegin++;
         zeroes++;

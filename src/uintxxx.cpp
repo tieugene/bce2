@@ -40,7 +40,7 @@ const string  ripe2addr(const u8_t *src, const u8_t pfx) {
   uint256_t tmp2;
   hash256(tmp1, sizeof (uint160_t)+1, tmp2);  // 2. 2 x sha256
   memcpy(tmp1+21, &(tmp2[0]), 4);             // 3. add crc
-  return EncodeBase58(tmp1, tmp1+25);
+  return EncodeBase58(u8string_view(tmp1, 25));
 }
 
 template<int frombits, int tobits, bool pad, typename O, typename I>
