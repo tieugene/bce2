@@ -8,9 +8,10 @@
 
 #include <stdint.h>
 #include <string>
+#include "common.h"
 
 // from bitcoin-core 0.19.1/src/base58
 // pbegin must be const...
-std::string EncodeBase58(uint8_t*, const uint8_t*);
+std::string EncodeBase58(u8_t*, const u8_t*);
 
 #endif // BASE58_H

@@ -42,7 +42,7 @@ bool    parse_bk(void)
     return true;
 }
 
-bool    hash_tx(const uint8_t *tx_beg)   // calc tx hash on demand
+bool    hash_tx(const u8_t *tx_beg)   // calc tx hash on demand
 {
     // CUR_PTR.v_ptr == &CUR_TX.vin[0]
     auto backup_ptr = CUR_PTR.v_ptr;    // tmp ptr to go back after hash calc
@@ -65,7 +65,7 @@ bool    hash_tx(const uint8_t *tx_beg)   // calc tx hash on demand
         CUR_TX.locktime = CUR_PTR.take_32();
         // prepare buffer for hashing
         auto tmp_size = wit_ptr - tx_beg - sizeof(uint16_t) + sizeof(uint32_t);     // -segwit_sign +locktime
-        uint8_t tmp_buf[tmp_size]; // , *tmp_ptr = tmp_buf;
+        u8_t tmp_buf[tmp_size]; // , *tmp_ptr = tmp_buf;
         memcpy(tmp_buf, tx_beg, sizeof(uint32_t));                                  // tx.ver
         auto vin_ptr = tx_beg + sizeof(uint32_t) + sizeof(uint16_t);                // +ver +segwit_sign
         memcpy(tmp_buf + sizeof(uint32_t), vin_ptr, wit_ptr - vin_ptr);             // vins & vouts

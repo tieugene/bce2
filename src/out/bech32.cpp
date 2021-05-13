@@ -10,7 +10,7 @@
 #include <vector>
 #include "bech32.h"
 
-typedef std::vector<uint8_t> data;
+typedef std::vector<u8_t> data;
 
 /** The Bech32 character set for encoding. */
 const static char* CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";

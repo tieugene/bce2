@@ -31,26 +31,26 @@ private:
     uint8_t     qty;
     uint16_t    len;
     union   {
-        uint8_t     u8[16*sizeof(uint160_t)];    // max P2MS size
+        u8_t      u8[16*sizeof(uint160_t)];    // max P2MS size
         std::array<uint160_t, 16>   u160;
-        uint256_t   *u256;
+        uint256_t *u256;
     } buffer;
 public:
     void                reset(void);
     inline void         set_id(const uint32_t v) { id = v; }
     inline uint32_t     get_id(void) { return id; }
     inline SCTYPE       get_type(void) { return type; }
-    const char          *get_type_name(void);
+    const char         *get_type_name(void);
     inline uint8_t      get_qty(void) { return qty; }
     const string_list   get_strings(void);
-    void                add_data(const SCTYPE, const uint8_t *);
+    void                add_data(const SCTYPE, const u8_t *);
     inline uint16_t     get_len(void) { return len; }
-    inline uint8_t      *get_data() { return buffer.u8; }
-    std::string_view    get_view(void) { return std::string_view(reinterpret_cast<const char *>(buffer.u8), len); }
+    inline u8_t        *get_data() { return buffer.u8; }
+    std::string_view    get_view(void) { return std::string_view((char *) buffer.u8, len); }
     void                sort_multisig(void);
 };
 
-bool        script_decode(const uint8_t *, const uint32_t);
+bool        script_decode(const u8_t *, const uint32_t);
 
 extern ADDR_FOUND_T CUR_ADDR;
 

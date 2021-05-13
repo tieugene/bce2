@@ -7,7 +7,7 @@
 
 static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
-std::string EncodeBase58(uint8_t* pbegin, const uint8_t* pend)
+std::string EncodeBase58(u8_t* pbegin, const u8_t* pend)
 {
     // Skip & count leading zeroes.
     int zeroes = 0;
