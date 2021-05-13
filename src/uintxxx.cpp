@@ -33,8 +33,8 @@ const string  ripe2hex(const uint160_t &r) {
   return string(tmp);
 }
 
-const string  ripe2addr(const uint8_t *src, const uint8_t pfx) {
-  uint8_t tmp1[sizeof(uint160_t)+5];
+const string  ripe2addr(const u8_t *src, const u8_t pfx) {
+  u8_t tmp1[sizeof(uint160_t)+5];
   tmp1[0] = pfx;
   memcpy(tmp1+1, src, sizeof (uint160_t));   // 1. add leading 0
   uint256_t tmp2;
@@ -74,14 +74,14 @@ bool  __ConvertBits(const O& outfn, I it, I end) {
   return true;
 }
 
-const string  wpkh2addr(const uint8_t *v) {
+const string  wpkh2addr(const u8_t *v) {
   std::vector<unsigned char> data = {0};
   data.reserve(33);
   __ConvertBits<8, 5, true>([&](unsigned char c) { data.push_back(c); }, v, v + sizeof (uint160_t));
   return Bech32Encode(data);
 }
 
-const string  wsh2addr(const uint8_t *v) {
+const string  wsh2addr(const u8_t *v) {
   std::vector<unsigned char> data = {0};
   data.reserve(53);
   __ConvertBits<8, 5, true>([&](unsigned char c) { data.push_back(c); }, v, v + sizeof (uint256_t));
@@ -114,14 +114,14 @@ void  hash256(const void *src, const uint32_t size, uint256_t &dst) {
  * @param src Data to hash
  * @param dst Destination stroage
  */
-void  __ripe160(const uint256_t &src, uint8_t *dst) {
+void  __ripe160(const uint256_t &src, u8_t *dst) {
   RIPEMD160_CTX context;
   RIPEMD160_Init(&context);
   RIPEMD160_Update(&context, reinterpret_cast<void const *>(&src), sizeof(uint256_t));
   RIPEMD160_Final(dst, &context);
 }
 
-void  hash160(const void *src, const uint32_t size, uint8_t *dst) {
+void  hash160(const void *src, const uint32_t size, u8_t *dst) {
   uint256_t tmp;
   __sha256(src, size, tmp);
   __ripe160(tmp, dst);

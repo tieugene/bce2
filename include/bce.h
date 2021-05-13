@@ -92,14 +92,14 @@ struct  VIN_T {      ///< vin data
     uint64_t    txno;       // ?
     uint32_t    vout;
     uint32_t    ssize;      // vint
-    const uint8_t     *script;
+    const u8_t *script;
     uint32_t    seq;
 };
 
 struct  VOUT_T {     ///< vout data
     uint64_t    satoshi;
     uint32_t    ssize;      // vint
-    const uint8_t     *script;
+    const u8_t *script;
 };
 
 extern OPT_T    OPTS;

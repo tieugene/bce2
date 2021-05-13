@@ -7,18 +7,20 @@
 #include <stdexcept>
 
 const uint32_t MAX_UINT32 = 0xFFFFFFFF;
+typedef unsigned char u8_t;
 template <size_t Size>
-using byte_array = std::array<uint8_t, Size>;
+using byte_array = std::array<u8_t, Size>;
 typedef byte_array<32> uint256_t;   ///< hash representation
 typedef byte_array<20> uint160_t;   ///< addr representation
-/*std::string_view::string_view(const uint256_t &v) {
-  return string_view(reinterpret_cast<const char *>(v.cbegin(), sizeo(v)));
-}*/
+inline std::string_view u8string_view(const u8_t *s, size_t size) {
+  return std::string_view((const char *) s, size);
+}
+
 union   UNIPTR_T    ///< Universal ptr
 {
     const void        *v_ptr;
-    const char        *ch_ptr;
-    const uint8_t     *u8_ptr;
+    //const char        *ch_ptr;
+    const u8_t        *u8_ptr;
     const uint16_t    *u16_ptr;
     const uint32_t    *u32_ptr;
     const uint64_t    *u64_ptr;
@@ -30,9 +32,9 @@ union   UNIPTR_T    ///< Universal ptr
     uint32_t    take_32(void) { return *u32_ptr++; }
     uint64_t    take_64(void) { return *u64_ptr++; }
     uint32_t    take_varuint(void);
-    const uint8_t     *take_u8_ptr(const uint32_t);
+    const u8_t        *take_u8_ptr(const uint32_t);
     const uint32_t    *take_32_ptr(void) { return u32_ptr++; }
-    const uint256_t    *take_256_ptr(void) { return u256_ptr++; }
+    const uint256_t   *take_256_ptr(void) { return u256_ptr++; }
 };
 
 class BCException : public std::runtime_error {

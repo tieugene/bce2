@@ -26,7 +26,7 @@ void    dump_script(const string &);
 
 ADDR_FOUND_T CUR_ADDR;
 
-static const uint8_t  *script_ptr;    // ptr to currently decoded opcode
+static const u8_t  *script_ptr;    // ptr to currently decoded opcode
 static uint32_t script_size;    // script size
 
 bool cmp_uint160(const uint160_t &l, const uint160_t &r)    // desc
@@ -84,7 +84,7 @@ const string_list ADDR_FOUND_T::get_strings(void)
     return retvalue;
 }
 
-void ADDR_FOUND_T::add_data(const SCTYPE t, const uint8_t *src)
+void ADDR_FOUND_T::add_data(const SCTYPE t, const u8_t *src)
 {
     type = t;
     switch (t) {
@@ -141,7 +141,7 @@ inline void ADDR_FOUND_T::sort_multisig(void)
         std::sort(buffer.u160.begin(), buffer.u160.end(), cmp_uint160);
 }
 
-inline bool chk_PKu_pfx(const uint8_t pfx)    // check PKu prefix
+inline bool chk_PKu_pfx(const u8_t pfx)    // check PKu prefix
 {
     /*
      * Prefix byte must be 0x04, but there are some exceptions, e.g.
@@ -153,7 +153,7 @@ inline bool chk_PKu_pfx(const uint8_t pfx)    // check PKu prefix
     return (pfx & 0xFC) == 0x04 and pfx != 0x05;
 }
 
-inline bool chk_PKc_pfx(const uint8_t pfx)    // check PKu prefix
+inline bool chk_PKc_pfx(const u8_t pfx)    // check PKu prefix
 {
     // prefix byte == 2..3
     return (pfx & 0xFE) == 0x02;
@@ -260,7 +260,7 @@ bool    do_P2MS(void)                   ///< multisig
     return retvalue;
 }
 
-bool    script_decode(const uint8_t *script, const uint32_t size)
+bool    script_decode(const u8_t *script, const uint32_t size)
 {
     /// FIXME: empty script
     CUR_ADDR.reset();
@@ -320,6 +320,6 @@ void    dump_script(const string &s)
             << "bk = " << COUNT.bk
             << ", tx = " << LOCAL.tx << " (" << COUNT.tx << ")"
             << ", vout = " << LOCAL.vout
-            << ", script: " << ptr2hex(string_view(reinterpret_cast<const char *>(script_ptr), script_size))
+            << ", script: " << ptr2hex(u8string_view(script_ptr, script_size))
             << ")" << endl;
 }

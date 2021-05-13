@@ -1,7 +1,7 @@
 #include <iostream>
 #include "common.h"
 
-const uint8_t *UNIPTR_T::take_u8_ptr(uint32_t const size) {
+const u8_t *UNIPTR_T::take_u8_ptr(uint32_t const size) {
     auto retvalue = u8_ptr;
     u8_ptr += size;
     return retvalue;
