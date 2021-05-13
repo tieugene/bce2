@@ -29,8 +29,8 @@ using namespace std;
 
 int     main(int argc, char *argv[]) {
   // TODO: local BUFFER = char *const ptr;
-  char BUFFER[MAX_BK_SIZE];
-  bool (*bkloader)(char *, const uint32_t) = &stdin_bk;
+  u8_t BUFFER[MAX_BK_SIZE];
+  bool (*bkloader)(u8_t *, const uint32_t) = &stdin_bk;
 
     // 1. prepare
     // 1.1. handle options

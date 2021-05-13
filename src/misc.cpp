@@ -44,7 +44,6 @@ long        memused(void) {
 string  ptr2hex(string_view data) {
     static string hex_chars = "0123456789abcdef";
     string s;
-    //auto cptr = reinterpret_cast<char const *>(vptr);
     auto cptr = data.cbegin();
     for (size_t i = 0; i < data.length(); i++, cptr++) {
         s.push_back(hex_chars[(*cptr & 0xF0) >> 4]);
@@ -53,12 +52,12 @@ string  ptr2hex(string_view data) {
     return s;
 }
 
-int hex2bytes(string_view s, char *const dst) {
+int hex2bytes(string_view s, u8_t *const dst) {
   auto src_ptr = s.cbegin();
   auto src_end = src_ptr + s.length();
-  char *dst_ptr;
+  auto *dst_ptr = dst;
 
-  for (dst_ptr = dst; src_ptr < src_end; src_ptr += 2, dst_ptr++)
+  for (; src_ptr < src_end; src_ptr += 2, dst_ptr++)
     *dst_ptr = (hextoint(src_ptr[0]) << 4) | hextoint(src_ptr[1]);
   return dst_ptr - dst;
 }

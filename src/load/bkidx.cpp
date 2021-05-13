@@ -43,7 +43,7 @@ size_t  init_bkloader(const std::string datdir, const std::string locsfile) {
 }
 
 ///< load bk to buffer
-bool    load_bk(char *dst, const uint32_t bk_no) {
+bool    load_bk(u8_t *dst, const uint32_t bk_no) {
   // load_bk(datfarm, FOFF[COUNT.bk].fileno, FOFF[COUNT.bk].offset)
   // load_bk(DATFARM_T &datfarm, const uint32_t fileno, const uint32_t offset)
     uint32_t sig, size;
@@ -59,7 +59,7 @@ bool    load_bk(char *dst, const uint32_t bk_no) {
     return datfarm->read(fileno, offset, size, dst);
 }
 
-bool    stdin_bk(char *dst, const uint32_t bk_no) {
+bool    stdin_bk(u8_t *dst, const uint32_t bk_no) {
   const int BUF_SIZE = (MAX_BK_SIZE << 1) + 3;  ///< bk + \n + \0 + reserved
   if (!line)
     line = new char[BUF_SIZE];

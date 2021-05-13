@@ -320,6 +320,6 @@ void    dump_script(const string &s)
             << "bk = " << COUNT.bk
             << ", tx = " << LOCAL.tx << " (" << COUNT.tx << ")"
             << ", vout = " << LOCAL.vout
-            << ", script: " << ptr2hex(string_view(reinterpret_cast<const char *>(script_ptr), script_size))
+            << ", script: " << ptr2hex(u8string_view(script_ptr, script_size))
             << ")" << endl;
 }
