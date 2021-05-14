@@ -32,6 +32,7 @@ bool    set_cache(void) {
             TxDB = new KV_KC_INMEM_T(OPTS.kvtune);
             AddrDB = new KV_KC_INMEM_T(OPTS.kvtune);
             break;
+#ifdef USE_TK
           case KVTYPE_TKFILE:
             kvtitle = "Tkrzw HashDBM";
             TxDB = new KV_TK_DISK_T(OPTS.cachedir / "tx", OPTS.kvtune);
@@ -42,6 +43,7 @@ bool    set_cache(void) {
             TxDB = new KV_TK_INMEM_T(OPTS.kvtune);
             AddrDB = new KV_TK_INMEM_T(OPTS.kvtune);
             break;
+#endif
           default:
             return b_error("k-v not implemented");
         }

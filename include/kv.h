@@ -9,11 +9,13 @@
 #endif
 
 enum KVNGIN_T {
-  KVTYPE_NONE,
-  KVTYPE_KCFILE,
-  KVTYPE_KCMEM,
-  KVTYPE_TKFILE,
-  KVTYPE_TKMEM
+  KVTYPE_NONE
+  ,KVTYPE_KCFILE
+  ,KVTYPE_KCMEM
+#ifdef USE_TK
+  ,KVTYPE_TKFILE
+  ,KVTYPE_TKMEM
+#endif
 };
 
 bool    set_cache(void);  ///< setup k-v storages

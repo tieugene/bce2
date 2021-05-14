@@ -13,11 +13,13 @@
 using namespace std;
 
 const std::map<std::string, KVNGIN_T> kvnames = {
-  {"none", KVTYPE_NONE},
-  {"kcf", KVTYPE_KCFILE},
-  {"kcm", KVTYPE_KCMEM},
-  {"tkf", KVTYPE_TKFILE},
-  {"tkm", KVTYPE_TKMEM}
+  {"none", KVTYPE_NONE}
+  ,{"kcf", KVTYPE_KCFILE}
+  ,{"kcm", KVTYPE_KCMEM}
+#ifdef USE_TK
+  ,{"tkf", KVTYPE_TKFILE}
+  ,{"tkm", KVTYPE_TKMEM}
+#endif
 };
 const string cfg_file_name = ".bce2.cfg";
 const string  help_txt = "\
