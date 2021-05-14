@@ -1,14 +1,18 @@
-/*
- * Just Bech32 encoder
- */
 // Copyright (c) 2017 Pieter Wuille
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+// Bech32 is a string encoding format used in newer address types.
+// The output consists of a human-readable part (alphanumeric), a
+// separator character (1), and a base32 data section, the last
+// 6 characters of which are a checksum.
+//
+// For more information, see BIP 173.
 // Source:
 // https://github.com/bitcoin/bitcoin/blob/master/src/bech32.cpp
 
-#include <vector>
-#include "bech32.h"
+#include <string>
+#include "encode.h"
 
 typedef std::vector<u8_t> data;
 

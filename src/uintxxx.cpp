@@ -6,8 +6,7 @@
 #include <openssl/ripemd.h>
 #include "uintxxx.h"
 #include "misc.h"
-#include "base58.h"
-#include "bech32.h"
+#include "encode.h"
 
 using namespace std;
 

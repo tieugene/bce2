@@ -12,7 +12,7 @@
 #include "misc.h"
 #include "script.h"
 #include "opcode.h"
-#include "bech32.h"
+#include "encode.h"
 
 using namespace std;
 

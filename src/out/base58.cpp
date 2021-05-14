@@ -1,11 +1,14 @@
-/*
- * Just Base58 encoder
+/* Copyright (c) 2009-2010 Satoshi Nakamoto
+ * Copyright (c) 2009-2019 The Bitcoin Core developers
+ * Distributed under the MIT software license, see the accompanying
+ * file COPYING or http://www.opensource.org/licenses/mit-license.php.
  */
+
 #include <string>
 #include <string_view>
 #include <vector>
 #include <cassert>
-#include "base58.h"
+#include "encode.h"
 
 static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
