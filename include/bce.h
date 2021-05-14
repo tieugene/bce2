@@ -24,14 +24,15 @@ enum    DBG_LVL_T {
 struct  OPT_T {
     std::filesystem::path  datdir;    // blk*.dat folder path
     std::filesystem::path  locsfile;  // locs-file path
-    std::filesystem::path  cachedir;  // file-based k-v dir path
+    std::filesystem::path  kvdir;     // file-based k-v dir path
+    KVNGIN_T    kvngin = KVTYPE_NONE; // k-v engine
+    uint64_t    kvtune = 0;           // k-v tuning
     uint32_t    from = MAX_UINT32;    // bk start from
     uint32_t    num = 1;              // bks to process
     bool        fromcin = false;      // input from stdin
     bool        out = false;          // produce output
     DBG_LVL_T   verbose = DBG_NONE;   // verbosity
-    KVNGIN_T    kvngin = KVTYPE_NONE; // k-v engine
-    uint64_t    kvtune = 0;           // k-v tuning
+    uint64_t    logstep = 1;          // logging step
 };
 
 /// Through counters

@@ -151,7 +151,7 @@ void    __prn_tail(void)
 
 void    __prn_interim(void) {
     cerr <<
-         (COUNT.bk+1)/1000 <<
+         COUNT.bk+1 <<
          TAB << COUNT.tx <<
          TAB << STAT.vins <<
          TAB << STAT.vouts <<

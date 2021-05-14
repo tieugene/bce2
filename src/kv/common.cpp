@@ -25,8 +25,8 @@ bool    set_cache(void) {
 #ifdef USE_KC
           case KVTYPE_KCFILE:
             kvtitle = "Kyotocabinet HashDB";
-            TxDB = new KV_KC_DISK_T(OPTS.cachedir / "tx", OPTS.kvtune);
-            AddrDB = new KV_KC_DISK_T(OPTS.cachedir / "addr", OPTS.kvtune);
+            TxDB = new KV_KC_DISK_T(OPTS.kvdir / "tx", OPTS.kvtune);
+            AddrDB = new KV_KC_DISK_T(OPTS.kvdir / "addr", OPTS.kvtune);
             break;
           case KVTYPE_KCMEM:
             kvtitle = "Kyotocabinet StashDB";
@@ -37,8 +37,8 @@ bool    set_cache(void) {
 #ifdef USE_TK
           case KVTYPE_TKFILE:
             kvtitle = "Tkrzw HashDBM";
-            TxDB = new KV_TK_DISK_T(OPTS.cachedir / "tx", OPTS.kvtune);
-            AddrDB = new KV_TK_DISK_T(OPTS.cachedir / "addr", OPTS.kvtune);
+            TxDB = new KV_TK_DISK_T(OPTS.kvdir / "tx", OPTS.kvtune);
+            AddrDB = new KV_TK_DISK_T(OPTS.kvdir / "addr", OPTS.kvtune);
             break;
           case KVTYPE_TKMEM:
             kvtitle = "Tkrzw TinyDBM";

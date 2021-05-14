@@ -23,7 +23,7 @@ UNIPTR_T    CUR_PTR;
 long        start_mem;
 time_t      start_time;
 // consts
-const uint32_t  BULK_SIZE = 1000;
+//const uint32_t  BULK_SIZE = 1000;
 
 using namespace std;
 
@@ -60,7 +60,7 @@ int     main(int argc, char *argv[]) {
           __prn_trace();
           break;
       }
-      if ((OPTS.verbose) and (((COUNT.bk+1) % BULK_SIZE) == 0))
+      if ((OPTS.verbose) and (((COUNT.bk+1) % OPTS.logstep) == 0))
           __prn_interim();
       if (OPTS.num)   // not 'untill the end'
         if (--OPTS.num == 0)
