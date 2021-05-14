@@ -22,26 +22,30 @@ bool    set_cache(void) {
     if (kv_mode()) {
         string kvtitle;
         switch (OPTS.kvngin) {
+#ifdef USE_KC
           case KVTYPE_KCFILE:
             kvtitle = "Kyotocabinet HashDB";
-            TxDB = new KV_KC_DISK_T(OPTS.cachedir / "tx", OPTS.kvtune);
-            AddrDB = new KV_KC_DISK_T(OPTS.cachedir / "addr", OPTS.kvtune);
+            TxDB = new KV_KC_DISK_T(OPTS.kvdir / "tx", OPTS.kvtune);
+            AddrDB = new KV_KC_DISK_T(OPTS.kvdir / "addr", OPTS.kvtune);
             break;
           case KVTYPE_KCMEM:
             kvtitle = "Kyotocabinet StashDB";
             TxDB = new KV_KC_INMEM_T(OPTS.kvtune);
             AddrDB = new KV_KC_INMEM_T(OPTS.kvtune);
             break;
+#endif
+#ifdef USE_TK
           case KVTYPE_TKFILE:
             kvtitle = "Tkrzw HashDBM";
-            TxDB = new KV_TK_DISK_T(OPTS.cachedir / "tx", OPTS.kvtune);
-            AddrDB = new KV_TK_DISK_T(OPTS.cachedir / "addr", OPTS.kvtune);
+            TxDB = new KV_TK_DISK_T(OPTS.kvdir / "tx", OPTS.kvtune);
+            AddrDB = new KV_TK_DISK_T(OPTS.kvdir / "addr", OPTS.kvtune);
             break;
           case KVTYPE_TKMEM:
             kvtitle = "Tkrzw TinyDBM";
             TxDB = new KV_TK_INMEM_T(OPTS.kvtune);
             AddrDB = new KV_TK_INMEM_T(OPTS.kvtune);
             break;
+#endif
           default:
             return b_error("k-v not implemented");
         }

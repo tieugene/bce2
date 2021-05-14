@@ -1,9 +1,8 @@
 /*
  * Block body processors
  */
-#include <stdio.h>  // printf
+//#include <stdio.h>  // printf
 #include "script.h"
-
 #include "bce.h"
 #include "handlers.h"
 #include "misc.h"
@@ -12,6 +11,7 @@
 
 using namespace std;
 
+/// Blocks with duplicated tx's
 static uint32_t BK_GLITCH[] = {91722, 91842};    // dup 91880, 91812
 
 bool    parse_tx(void); // TODO: hash
@@ -20,8 +20,7 @@ bool    parse_vout(const bool);
 bool    parse_wit();
 bool    parse_script(void);
 
-bool    parse_bk(void)
-{
+bool    parse_bk(void) {
     BUSY.bk = true;
     CUR_BK.head_ptr = static_cast<const BK_HEAD_T*> ((const void *) CUR_PTR.take_u8_ptr(sizeof (BK_HEAD_T)));
     CUR_BK.txs = CUR_PTR.take_varuint();
@@ -42,8 +41,8 @@ bool    parse_bk(void)
     return true;
 }
 
-bool    hash_tx(const uint8_t *tx_beg)   // calc tx hash on demand
-{
+/// Calc TX hash on demand
+bool    hash_tx(const u8_t *tx_beg) {
     // CUR_PTR.v_ptr == &CUR_TX.vin[0]
     auto backup_ptr = CUR_PTR.v_ptr;    // tmp ptr to go back after hash calc
     // 1. fast rewind
@@ -65,7 +64,7 @@ bool    hash_tx(const uint8_t *tx_beg)   // calc tx hash on demand
         CUR_TX.locktime = CUR_PTR.take_32();
         // prepare buffer for hashing
         auto tmp_size = wit_ptr - tx_beg - sizeof(uint16_t) + sizeof(uint32_t);     // -segwit_sign +locktime
-        uint8_t tmp_buf[tmp_size]; // , *tmp_ptr = tmp_buf;
+        u8_t tmp_buf[tmp_size]; // , *tmp_ptr = tmp_buf;
         memcpy(tmp_buf, tx_beg, sizeof(uint32_t));                                  // tx.ver
         auto vin_ptr = tx_beg + sizeof(uint32_t) + sizeof(uint16_t);                // +ver +segwit_sign
         memcpy(tmp_buf + sizeof(uint32_t), vin_ptr, wit_ptr - vin_ptr);             // vins & vouts
@@ -77,8 +76,8 @@ bool    hash_tx(const uint8_t *tx_beg)   // calc tx hash on demand
     return true;
 }
 
-bool    parse_tx(void) // TODO: hash
-{
+
+bool    parse_tx(void) { // TODO: hash
     BUSY.tx = true;
     auto tx_beg = CUR_PTR.u8_ptr;
     CUR_TX.ver = CUR_PTR.take_32();
@@ -121,8 +120,7 @@ bool    parse_tx(void) // TODO: hash
     return true;
 }
 
-bool    parse_vin(const bool dojob)
-{
+bool    parse_vin(const bool dojob) {
     // FIXME: coinbase = 32x00 + 4xFF (txid+vout)
     CUR_VIN.txid = CUR_PTR.take_256_ptr();
     CUR_VIN.vout = CUR_PTR.take_32();
@@ -147,16 +145,14 @@ bool    parse_vin(const bool dojob)
     return true;
 }
 
-bool    parse_wit()
-{
+bool    parse_wit() {
     auto count = CUR_PTR.take_varuint();
     for (uint32_t i = 0; i < count; i++)
         CUR_PTR.u8_ptr += CUR_PTR.take_varuint();
     return true;
 }
 
-bool    parse_vout(const bool dojob)
-{
+bool    parse_vout(const bool dojob) {
     CUR_VOUT.satoshi = CUR_PTR.take_64();
     CUR_VOUT.ssize = CUR_PTR.take_varuint();
     CUR_VOUT.script = CUR_PTR.take_u8_ptr(CUR_VOUT.ssize);
@@ -175,8 +171,7 @@ bool    parse_vout(const bool dojob)
     return true;
 }
 
-bool    parse_script(void)
-{
+bool    parse_script(void) {
     /// FIXME: nulldata is not spendable
     /// FIXME: empty script
     auto script_ok = script_decode(CUR_VOUT.script, CUR_VOUT.ssize);

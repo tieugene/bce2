@@ -1,25 +1,26 @@
-/*
- * Just Bech32 encoder
- */
 // Copyright (c) 2017 Pieter Wuille
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+// Bech32 is a string encoding format used in newer address types.
+// The output consists of a human-readable part (alphanumeric), a
+// separator character (1), and a base32 data section, the last
+// 6 characters of which are a checksum.
+//
+// For more information, see BIP 173.
 // Source:
 // https://github.com/bitcoin/bitcoin/blob/master/src/bech32.cpp
 
-#include <vector>
-#include "bech32.h"
+#include <string>
+#include "encode.h"
 
-typedef std::vector<uint8_t> data;
-
-/** The Bech32 character set for encoding. */
+/// The Bech32 character set for encoding.
 const static char* CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
 const std::string hrp = "bc";  // BTC mainnet
 
-/** Concatenate two vectors, moving elements. */
+/// Concatenate two vectors, moving elements.
 template<typename V>
-inline V Cat(V v1, V&& v2)
-{
+inline V Cat(V v1, V&& v2) {
     v1.reserve(v1.size() + v2.size());
     for (auto& arg : v2) {
         v1.push_back(std::move(arg));
@@ -27,10 +28,9 @@ inline V Cat(V v1, V&& v2)
     return v1;
 }
 
-/** Concatenate two vectors. */
+/// Concatenate two vectors.
 template<typename V>
-inline V Cat(V v1, const V& v2)
-{
+inline V Cat(V v1, const V& v2) {
     v1.reserve(v1.size() + v2.size());
     for (const auto& arg : v2) {
         v1.push_back(arg);
@@ -40,9 +40,9 @@ inline V Cat(V v1, const V& v2)
 
 /** This function will compute what 6 5-bit values to XOR into the last 6 input values, in order to
  *  make the checksum 0. These 6 values are packed together in a single 30-bit integer. The higher
- *  bits correspond to earlier values. */
-uint32_t PolyMod(const data& v)
-{
+ *  bits correspond to earlier values.
+ */
+uint32_t PolyMod(const u8vector& v) {
     uint32_t c = 1;
     for (const auto v_i : v) {
         uint8_t c0 = c >> 25;
@@ -56,11 +56,9 @@ uint32_t PolyMod(const data& v)
     return c;
 }
 
-/** Expand a HRP for use in checksum computation. */
-// FIXME: const
-data ExpandHRP()
-{
-    data ret;
+/// Expand a HRP for use in checksum computation.
+u8vector ExpandHRP(void) {
+    u8vector ret;
     ret.reserve(hrp.size() + 90);
     ret.resize(hrp.size() * 2 + 1);
     for (size_t i = 0; i < hrp.size(); ++i) {
@@ -72,13 +70,12 @@ data ExpandHRP()
     return ret;
 }
 
-/** Create a checksum. */
-data CreateChecksum(const data& values)
-{
-    data enc = Cat(ExpandHRP(), values);
+/// Create a checksum.
+u8vector CreateChecksum(const u8vector& values) {
+    u8vector enc = Cat(ExpandHRP(), values);
     enc.resize(enc.size() + 6); // Append 6 zeroes
     uint32_t mod = PolyMod(enc) ^ 1; // Determine what to XOR into those 6 zeroes.
-    data ret(6);
+    u8vector ret(6);
     for (size_t i = 0; i < 6; ++i) {
         // Convert the 5-bit groups in mod to checksum values.
         ret[i] = (mod >> (5 * (5 - i))) & 31;
@@ -86,10 +83,9 @@ data CreateChecksum(const data& values)
     return ret;
 }
 
-/** Encode a Bech32 string. */
-std::string Bech32Encode(const data& values) {
-    data checksum = CreateChecksum(values);
-    data combined = Cat(values, checksum);
+std::string Bech32Encode(const u8vector& values) {
+    u8vector checksum = CreateChecksum(values);
+    u8vector combined = Cat(values, checksum);
     std::string ret = hrp + '1';
     ret.reserve(ret.size() + combined.size());
     for (const auto c : combined) {

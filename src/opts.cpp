@@ -13,11 +13,15 @@
 using namespace std;
 
 const std::map<std::string, KVNGIN_T> kvnames = {
-  {"none", KVTYPE_NONE},
-  {"kcf", KVTYPE_KCFILE},
-  {"kcm", KVTYPE_KCMEM},
-  {"tkf", KVTYPE_TKFILE},
-  {"tkm", KVTYPE_TKMEM}
+  {"none", KVTYPE_NONE}
+#ifdef USE_KC
+  ,{"kcf", KVTYPE_KCFILE}
+  ,{"kcm", KVTYPE_KCMEM}
+#endif
+#ifdef USE_TK
+  ,{"tkf", KVTYPE_TKFILE}
+  ,{"tkm", KVTYPE_TKMEM}
+#endif
 };
 const string cfg_file_name = ".bce2.cfg";
 const string  help_txt = "\
@@ -33,6 +37,7 @@ Options:\n\
 -e <name> - key-value engine (kcf/kcm/tkf/tkm)\n\
 -t n      - k-v tuning (depends on engine)\n\
 -o        - output results\n\
+-s n      - logging step (default 1)\n\
 -v[n]     - verbosity (0..3, to stderr)\
 ";
 
@@ -43,13 +48,17 @@ void        __prn_opts(void) {
         << TAB << "Num:" << TAB << OPTS.num << endl
         << TAB << "Dat dir:" << TAB << OPTS.datdir << endl
         << TAB << "Locs file:" << TAB << OPTS.locsfile << endl
-        << TAB << "K-V dir:" << TAB << OPTS.cachedir << endl
+        << TAB << "K-V dir:" << TAB << OPTS.kvdir << endl
+        << TAB << "K-V type:" << TAB << OPTS.kvngin << endl
+        << TAB << "K-V tune:" << TAB << OPTS.kvtune << endl
         << TAB << "Cin:" << TAB << OPTS.fromcin << endl
         << TAB << "Debug:" << TAB << OPTS.verbose << endl
         << TAB << "Out:" << TAB << OPTS.out << endl
+        << TAB << "Log by:" << TAB << OPTS.logstep << endl
     ;
 }
 
+/// Load options from config
 bool load_cfg(void) {
   string datdir, locsfile, kvdir, kvngin;
   int verbose = -1;
@@ -57,17 +66,18 @@ bool load_cfg(void) {
   if(f_in) {
     CFG::ReadFile(
           f_in,
-          vector<string>{"datdir", "locsfile", "kvdir", "kvtype", "tune", "verbose", "out", "stdin"},
-          datdir, locsfile, kvdir, kvngin, OPTS.kvtune, verbose, OPTS.out, OPTS.fromcin);
+          vector<string>{"datdir", "locsfile", "kvdir", "kvtype", "tune", "verbose", "out", "stdin", "logby"},
+          datdir, locsfile, kvdir, kvngin, OPTS.kvtune, verbose, OPTS.out, OPTS.fromcin, OPTS.logstep);
     f_in.close();
     if (verbose >= 0)
       OPTS.verbose = DBG_LVL_T(verbose);
+    // fileststem::path workaround
     if (!datdir.empty())
       OPTS.datdir = datdir;
     if (!locsfile.empty())
       OPTS.locsfile = locsfile;
     if (!kvdir.empty())
-      OPTS.cachedir = kvdir;
+      OPTS.kvdir = kvdir;
     if (!kvngin.empty()) {
       auto kt = kvnames.find(kvngin);
       if (kt != kvnames.end())
@@ -80,14 +90,14 @@ bool load_cfg(void) {
   return true;
 }
 
-///< Handle CLI. Return 0 if error, argv's index of 1st filename on success.
+/// Handle CLI. Return 0 if error, argv's index of 1st filename on success.
 bool        cli(int argc, char *argv[]) {
     int opt, tmp;
     long tmp_l;
     auto kt = kvnames.begin();
     bool direct = false;
 
-    while ((opt = getopt(argc, argv, "hf:n:d:l:k:e:t:cov::")) != -1) {  // FIXME: v?
+    while ((opt = getopt(argc, argv, "hf:n:d:l:k:e:t:s:cov::")) != -1) {  // FIXME: v?
       switch (opt) {
         case 'f':   // FIXME: optarg < 0 | > 999999
           tmp = atoi(optarg);
@@ -116,7 +126,7 @@ bool        cli(int argc, char *argv[]) {
           direct = true;
           break;
         case 'k':
-          OPTS.cachedir = optarg;
+          OPTS.kvdir = optarg;
           break;
         case 'e':
           kt = kvnames.find(optarg);
@@ -143,6 +153,12 @@ bool        cli(int argc, char *argv[]) {
           if (tmp < 0 or tmp > DBG_MAX)
             return b_error("-v: Bad verbose level " + string(optarg));
           OPTS.verbose = DBG_LVL_T(tmp);
+          break;
+        case 's':   // FIXME: optarg < 0 | > 999999
+          tmp = atoi(optarg);
+          if (tmp < 1 or tmp > 700000)
+            return b_error("Bad -s: " + string(optarg));
+          OPTS.logstep = tmp;
           break;
         case 'h':
         case '?':   // can handle optopt
@@ -172,10 +188,10 @@ bool load_opts(int argc, char *argv[]) {
         return b_error("locsfile: '" + string(OPTS.locsfile) + "' not exists");
     }
     if (kv_mode()) {
-      if (!filesystem::exists(OPTS.cachedir))
-        return b_error("k-v: '" + string(OPTS.cachedir) + "' not exists");
-      if (!filesystem::is_directory(OPTS.cachedir))
-        return b_error("k-v: '" + string(OPTS.cachedir) + "' is not dir");
+      if (!filesystem::exists(OPTS.kvdir))
+        return b_error("k-v: '" + string(OPTS.kvdir) + "' not exists");
+      if (!filesystem::is_directory(OPTS.kvdir))
+        return b_error("k-v: '" + string(OPTS.kvdir) + "' is not dir");
     }
     return true;
   }

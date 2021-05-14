@@ -1,5 +1,3 @@
-//#include <cstdint>
-
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -10,7 +8,9 @@
 
 using namespace std;
 
+/// Cached files number
 const uint8_t WIN_SIZE = 16;
+/// Cached files flags
 static queue<size_t> opened;
 
 bool  DATFARM_T::open(const size_t no) {
@@ -24,10 +24,10 @@ bool  DATFARM_T::open(const size_t no) {
     }
     ostringstream ss;
     ss << setw(5) << setfill('0') << no;
-    string fn = folder + "blk" + ss.str() + ".dat";
+    auto fn = folder / (string("blk") + ss.str() + ".dat");
     file[no].open(fn, ios::in|ios::binary);
     if (!file[no].is_open())
-      return b_error("Can't open file " + fn);
+      return b_error("Can't open file " + fn.string());
     opened.push(no);
     return true;
 }
