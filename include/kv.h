@@ -3,15 +3,19 @@
 #define KV_H
 
 #include <map>
+#ifdef USE_KC
 #include "kv/kc.h"
+#endif
 #ifdef USE_TK
 #include "kv/tk.h"
 #endif
 
 enum KVNGIN_T {
   KVTYPE_NONE
+#ifdef USE_KC
   ,KVTYPE_KCFILE
   ,KVTYPE_KCMEM
+#endif
 #ifdef USE_TK
   ,KVTYPE_TKFILE
   ,KVTYPE_TKMEM

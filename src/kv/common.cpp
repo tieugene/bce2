@@ -22,6 +22,7 @@ bool    set_cache(void) {
     if (kv_mode()) {
         string kvtitle;
         switch (OPTS.kvngin) {
+#ifdef USE_KC
           case KVTYPE_KCFILE:
             kvtitle = "Kyotocabinet HashDB";
             TxDB = new KV_KC_DISK_T(OPTS.cachedir / "tx", OPTS.kvtune);
@@ -32,6 +33,7 @@ bool    set_cache(void) {
             TxDB = new KV_KC_INMEM_T(OPTS.kvtune);
             AddrDB = new KV_KC_INMEM_T(OPTS.kvtune);
             break;
+#endif
 #ifdef USE_TK
           case KVTYPE_TKFILE:
             kvtitle = "Tkrzw HashDBM";

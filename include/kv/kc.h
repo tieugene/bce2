@@ -1,6 +1,8 @@
 #ifndef KV_KC_H
 #define KV_KC_H
 
+#ifdef USE_KC
+
 #include "kv/base.h"
 #include <kchashdb.h>
 #include <kcstashdb.h>
@@ -38,5 +40,7 @@ public:
                 { return get(u8string_view(std::data(key), sizeof(uint256_t))); }
     uint32_t    get_or_add(std::string_view key);
 };
+
+#endif // USE_KC
 
 #endif // KV_KC_H

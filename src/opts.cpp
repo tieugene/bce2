@@ -14,8 +14,10 @@ using namespace std;
 
 const std::map<std::string, KVNGIN_T> kvnames = {
   {"none", KVTYPE_NONE}
+#ifdef USE_KC
   ,{"kcf", KVTYPE_KCFILE}
   ,{"kcm", KVTYPE_KCMEM}
+#endif
 #ifdef USE_TK
   ,{"tkf", KVTYPE_TKFILE}
   ,{"tkm", KVTYPE_TKMEM}

@@ -17,6 +17,7 @@ add_executable(btcbklocs tools/btcbklocs.cpp)
 add_executable(btclocview tools/btclocview.cpp)
 # add_executable(test_cin tools/test_cin.cpp)
 
+find_package(PkgConfig REQUIRED)
 ## openssl
 if (APPLE)
     # brew hack
@@ -27,12 +28,22 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} ${OPENSSL_CRYPTO_LIBRARY})
 
 # Define k-v backend
-find_package(PkgConfig REQUIRED)
-## kyotocabinet
-pkg_check_modules(kyotocabinet REQUIRED IMPORTED_TARGET kyotocabinet)
-target_link_libraries(${PROJECT_NAME} PkgConfig::kyotocabinet)
-## tkrzw
-option(USE_TK "Tkrzw" OFF)
+
+## Kyotocabinet
+option(USE_KC "Kyotocabinet" ON)
+if (USE_KC)
+  pkg_search_module(KC IMPORTED_TARGET kyotocabinet)
+  if (KC_FOUND)
+    add_definitions(-DUSE_KC)
+    target_link_libraries(${PROJECT_NAME} PkgConfig::KC)
+  else ()
+    set(USE_KC OFF)
+  endif ()
+endif ()
+message(STATUS "Kyotocabinet: ${USE_KC}")
+
+## Tkrzw
+option(USE_TK "Tkrzw" ON)
 if (USE_TK)
   pkg_search_module(TK IMPORTED_TARGET tkrzw)
   if (TK_FOUND)
