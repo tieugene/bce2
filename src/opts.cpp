@@ -54,6 +54,7 @@ void        __prn_opts(void) {
     ;
 }
 
+/// Load options from config
 bool load_cfg(void) {
   string datdir, locsfile, kvdir, kvngin;
   int verbose = -1;
@@ -84,7 +85,7 @@ bool load_cfg(void) {
   return true;
 }
 
-///< Handle CLI. Return 0 if error, argv's index of 1st filename on success.
+/// Handle CLI. Return 0 if error, argv's index of 1st filename on success.
 bool        cli(int argc, char *argv[]) {
     int opt, tmp;
     long tmp_l;

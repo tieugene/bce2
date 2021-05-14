@@ -16,7 +16,7 @@ FOFF_T    *FOFF;
 DATFARM_T *datfarm;
 char *line = nullptr;
 
-///< load file-offset file
+/// Load file-offset file
 size_t  load_fileoffsets(const string fn) {
     ifstream file (fn, ios::in|ios::binary|ios::ate);
     if (!file)            // 1. open
@@ -35,14 +35,14 @@ size_t  load_fileoffsets(const string fn) {
     return blocks;
 }
 
-size_t  init_bkloader(const std::string datdir, const std::string locsfile) {
+size_t  init_bkloader(const std::filesystem::path datdir, const std::filesystem::path locsfile) {
   auto bk_qty = load_fileoffsets(locsfile);
   if (bk_qty)
-    datfarm = new DATFARM_T(bk_qty, (datdir.back() == '/') ? datdir : datdir + '/');
+    datfarm = new DATFARM_T(bk_qty, datdir);
   return bk_qty;
 }
 
-///< load bk to buffer
+/// Load bk to buffer
 bool    load_bk(u8_t *dst, const uint32_t bk_no) {
   // load_bk(datfarm, FOFF[COUNT.bk].fileno, FOFF[COUNT.bk].offset)
   // load_bk(DATFARM_T &datfarm, const uint32_t fileno, const uint32_t offset)

@@ -10,6 +10,7 @@
 #include "kv/tk.h"
 #endif
 
+/// K-V storage engine type
 enum KVNGIN_T {
   KVTYPE_NONE
 #ifdef USE_KC
@@ -22,7 +23,12 @@ enum KVNGIN_T {
 #endif
 };
 
-bool    set_cache(void);  ///< setup k-v storages
-void    stop_cache(void); ///< reset k-v storages
+/**
+ * @brief Set up K-V storages
+ * @return True on success
+ */
+bool    set_cache(void);
+/// Reset k-v storages
+void    stop_cache(void);
 
 #endif // KV_H

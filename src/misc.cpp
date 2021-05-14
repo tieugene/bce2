@@ -19,7 +19,8 @@
 
 using namespace std;
 
-long        get_statm(void) {   ///< returns used memory in kilobytes
+/// Returns used memory in kilobytes
+long        get_statm(void) {
     long    total = 0;  // rss, shared, text, lib, data, dt; man proc
 #if defined (__linux__)
     ifstream statm("/proc/self/statm");

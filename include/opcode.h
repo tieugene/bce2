@@ -3,6 +3,7 @@
 
 #include "common.h"
 
+/// Blockchain script opcodes
 enum OPCODE : u8_t {
     OP_0            = 0x00,
     OP_1            = 0x51,

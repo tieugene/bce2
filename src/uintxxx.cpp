@@ -74,14 +74,14 @@ bool  __ConvertBits(const O& outfn, I it, I end) {
 }
 
 const string  wpkh2addr(const u8_t *v) {
-  std::vector<unsigned char> data = {0};
+  u8vector data = {0};
   data.reserve(33);
   __ConvertBits<8, 5, true>([&](unsigned char c) { data.push_back(c); }, v, v + sizeof (uint160_t));
   return Bech32Encode(data);
 }
 
 const string  wsh2addr(const u8_t *v) {
-  std::vector<unsigned char> data = {0};
+  u8vector data = {0};
   data.reserve(53);
   __ConvertBits<8, 5, true>([&](unsigned char c) { data.push_back(c); }, v, v + sizeof (uint256_t));
   return Bech32Encode(data);
