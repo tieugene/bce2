@@ -1,0 +1,37 @@
+= btcbklocs(1)
+TI\_Eugene (ti.eugene@gmail.com)
+:doctype: manpage
+:manmanual: BCE2 Commands Manual
+:mansource: BCE2
+
+== Name
+
+btcbklocs - create locs-file
+
+== Synopsis
+
+*btcbklocs* [_-h_] [_-i <path>_] _<ldbdir>_ _<outfile>_
+
+== Description
+
+Creates locs-file required by bce2 for direct blockchain parsing.
+Sources are blockchain LevelDB database and blocks hashes (from stdin or input file).
+Result is writing into _outfile_.
+
+== Options
+
+*-h*::
+  Help.
+
+*-i* _path_::
+  Hashes file (stdin if ommit)
+
+_ldbdir_::
+  Folder with blockchain LevelDB
+
+_outfile_::
+  Target locs-file
+
+== See Also
+
+*btclocview*(1)
