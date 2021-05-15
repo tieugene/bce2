@@ -9,17 +9,39 @@
 
 using namespace std;
 
-KV_KC_DISK_T::KV_KC_DISK_T(const string &s, uint64_t tune) {
+/// HashDB
+KV_KC_DISK_T::KV_KC_DISK_T(const filesystem::path &s, uint64_t tune) {
+  if (!open(s, tune))
+    throw BCException("kcf: Cannot init DB");
+}
+
+KV_KC_DISK_T::~KV_KC_DISK_T() {
+  if (db)
+    close();
+  delete db;
+}
+
+bool        KV_KC_DISK_T::open(const filesystem::path &s, uint64_t tune) {
   db = new kyotocabinet::HashDB();
   if (tune) {
     if (tune > 30)
-      throw BCException("kcf: Tuning parameter is too big: " + to_string(tune));
+      return b_error("kcf: Tuning parameter is too big: " + to_string(tune));
     else
       if (!db->tune_buckets(1<<tune))  // must be _before_ creating DB
-        throw BCException("kcf: Cannot tune");
+        return b_error("kcf: Cannot tune");
   }
-  if (!db->open(s + ".kch", kyotocabinet::HashDB::OWRITER | kyotocabinet::HashDB::OCREATE))
-    throw BCException("kcf: Cannot open DB " + s);
+  if (!db->open(s.string() + ".kch", kyotocabinet::HashDB::OWRITER | kyotocabinet::HashDB::OCREATE))
+    return b_error("kcf: Cannot open DB " + s.string());
+  return true;
+}
+
+bool        KV_KC_DISK_T::close(void) {
+  bool retvalue = true;
+  if (!db->synchronize())
+    retvalue = b_error("Cannot sync DB");
+  if (!db->close())
+    retvalue = b_error("Cannot close DB");
+  return retvalue;
 }
 
 uint32_t    KV_KC_DISK_T::count(void) {
@@ -55,18 +77,23 @@ uint32_t    KV_KC_DISK_T::get_or_add(std::string_view key) {
 }
 
 /// StashDB
-
 KV_KC_INMEM_T::KV_KC_INMEM_T(u_int64_t tune) {
+  if (!open(tune))
+    throw BCException("kcm: Cannot init DB.");
+}
+
+bool        KV_KC_INMEM_T::open(u_int64_t tune) {
   db = new kyotocabinet::StashDB();
   if (tune) {
     if (tune > 30)
-      throw BCException("kcm: Tuning parameter is too big: " + to_string(tune));
+      return b_error("kcm: Tuning parameter is too big: " + to_string(tune));
     else
       if (!db->tune_buckets(1<<tune))
-        throw BCException("kcm: Cannot tune");
+        return b_error("kcm: Cannot tune");
   }
   if (!db->open(":"))
-    throw BCException("kcm: Cannot open DB");
+    return b_error("kcm: Cannot open DB");
+  return true;
 }
 
 uint32_t    KV_KC_INMEM_T::add(string_view key) {

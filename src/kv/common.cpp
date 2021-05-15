@@ -74,7 +74,7 @@ bool    set_cache(void) {
 void stop_cache(void)
 {
   if (kv_mode()) {
-      TxDB->close();
-      AddrDB->close();
+      delete TxDB;
+      delete AddrDB;
   }
 }

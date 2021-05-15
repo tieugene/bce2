@@ -3,16 +3,19 @@
 
 #ifdef USE_TK
 
-#include "kv/base.h"
+#include <filesystem>
 #include <tkrzw_dbm_hash.h>
 #include <tkrzw_dbm_tiny.h>
+#include "kv/base.h"
 
 class KV_TK_DISK_T : public KV_BASE_T {
 private:
     tkrzw::HashDBM *db;
+    bool        open(const std::filesystem::path &, uint64_t = 0);
+    bool        close(void);
 public:
-    KV_TK_DISK_T(const std::string &, uint64_t = 0);
-    bool        close(void) { db->Synchronize(true); return db->Close().IsOK(); }
+    KV_TK_DISK_T(const std::filesystem::path &, uint64_t = 0);
+    ~KV_TK_DISK_T();
     void        clear(void) { db->Clear(); }
     uint32_t    count(void);
     uint32_t    add(std::string_view key);
@@ -23,9 +26,10 @@ public:
 class KV_TK_INMEM_T : public KV_BASE_T {
 private:
     tkrzw::TinyDBM  *db = nullptr;
+    bool        open(uint64_t = 0);
 public:
     KV_TK_INMEM_T(uint64_t = 0);
-    bool        close(void) { return db->Close().IsOK(); }
+    ~KV_TK_INMEM_T() { delete db; }
     void        clear(void) { db->Clear(); }
     uint32_t    count(void) { return db->CountSimple(); }
     uint32_t    add(std::string_view key);
