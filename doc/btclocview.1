@@ -1,10 +1,18 @@
-.TH TRML2PDF "1"
+.TH btclocview 1 "0.0.5" "TI_Eugene <ti.eugene@gmail.com>" ""
 .SH NAME
-trml2pdf \- RML to PDF converter
+btclocview \- locsfile viewer
 .SH SYNOPSIS
-.B trml2pdf
-\fI\,filename.rml\/\fR [> \fI\,OUTPUTFILE\/\fR]
+.B btclocbiew
+.B <locsfile>
+.B <bkno>
+.PP
 .SH DESCRIPTION
-Converts given RML-file into PDF one to stdout.
+Print location of block according to content of locs\-file \- dat\-file and offset in it..br 
+The \fIlocsfile\fR argument is path of locs\-file..br 
+The \fIbkno\fR is block height.
 .SH AUTHOR
-This code is copyrighted by Fabien Pinckaers (http://tiny.be)
+Written by TI_Eugene <ti.eugene@gmail.com>
+.SH EXAMPLE
+.B$ btclocview bk.locs.650k.bin 10
+Bk 10: bk00000.2308.br
+(block with height=\fI10\fR is in file \fIbk00000.dat\fR starting from offset \fI2308\fR bytes)
