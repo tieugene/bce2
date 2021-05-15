@@ -11,21 +11,18 @@ public:
     virtual bool        close(void) = 0;
     virtual void        clear(void) = 0;
     virtual uint32_t    count(void) = 0;
-    //bool        add(const string &key, const uint32_t value);
     /**
      * @brief Add new key
      * @param key Key to add
      * @return Value of new key added or NOT_FOUND_U32
      */
     virtual uint32_t    add(std::string_view key) = 0;
-    virtual uint32_t    add(const uint256_t &key) = 0;  // tx, WSH
     /**
      * @brief Get key value
      * @param key Key to find
      * @return Key value or NOT_FOUND_U32
      */
     virtual uint32_t    get(std::string_view key) = 0;
-    virtual uint32_t    get(const uint256_t &key) = 0;
     /**
      * @brief Try to get existing k-v or add new
      * @param key Key to find

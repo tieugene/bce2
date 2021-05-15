@@ -16,11 +16,7 @@ public:
     void        clear(void) { db->clear(); }
     uint32_t    count(void);
     uint32_t    add(std::string_view key);
-    uint32_t    add(const uint256_t &key)
-                { return add(u8string_view(std::data(key), sizeof(uint256_t))); }
     uint32_t    get(std::string_view key);
-    uint32_t    get(const uint256_t &key)
-                { return get(u8string_view(std::data(key), sizeof(uint256_t))); }
     uint32_t    get_or_add(std::string_view key);
 };
 
@@ -33,11 +29,7 @@ public:
     void        clear(void) { db->clear(); }
     uint32_t    count(void) { return db->count(); }
     uint32_t    add(std::string_view key);
-    uint32_t    add(const uint256_t &key)
-                { return add(u8string_view(std::data(key), sizeof(uint256_t))); }
     uint32_t    get(std::string_view key);
-    uint32_t    get(const uint256_t &key)
-                { return get(u8string_view(std::data(key), sizeof(uint256_t))); }
     uint32_t    get_or_add(std::string_view key);
 };
 

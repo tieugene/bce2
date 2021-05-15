@@ -91,7 +91,7 @@ bool    parse_tx(void) { // TODO: hash
         if (!hash_tx(tx_beg))
             return false;
         if (kv_mode()) {
-          auto tx_added = TxDB->add(CUR_TX.hash);
+          auto tx_added = TxDB->add(u256string_view(CUR_TX.hash));
           if (tx_added == NOT_FOUND_U32)
             return b_error("Can't add tx " + hash2hex(CUR_TX.hash));
           if (tx_added != COUNT.tx)
@@ -133,7 +133,7 @@ bool    parse_vin(const bool dojob) {
     if (kv_mode())
     {
         if (CUR_VIN.vout != COINBASE_vout) {
-            CUR_VIN.txno = TxDB->get(*CUR_VIN.txid);
+            CUR_VIN.txno = TxDB->get(u256string_view(*CUR_VIN.txid));
             if (CUR_VIN.txno == NOT_FOUND_U32)
                 return b_error("txid " + hash2hex(*CUR_VIN.txid) + " not found.");
         }
