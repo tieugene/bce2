@@ -2,6 +2,8 @@
  * Key-value backend.
  * Kyotocabinet version.
  */
+#ifdef USE_KC
+
 #include "kv/kc.h"
 #include "misc.h"
 
@@ -92,3 +94,5 @@ uint32_t    KV_KC_INMEM_T::get_or_add(string_view key) {
   }
   return v;
 }
+
+#endif

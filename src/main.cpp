@@ -23,14 +23,14 @@ UNIPTR_T    CUR_PTR;
 long        start_mem;
 time_t      start_time;
 // consts
-const uint32_t  BULK_SIZE = 1000;
+//const uint32_t  BULK_SIZE = 1000;
 
 using namespace std;
 
 int     main(int argc, char *argv[]) {
   // TODO: local BUFFER = char *const ptr;
-  char BUFFER[MAX_BK_SIZE];
-  bool (*bkloader)(char *, const uint32_t) = &stdin_bk;
+  u8_t BUFFER[MAX_BK_SIZE];
+  bool (*bkloader)(u8_t *, const uint32_t) = &stdin_bk;
 
     // 1. prepare
     // 1.1. handle options
@@ -60,7 +60,7 @@ int     main(int argc, char *argv[]) {
           __prn_trace();
           break;
       }
-      if ((OPTS.verbose) and (((COUNT.bk+1) % BULK_SIZE) == 0))
+      if ((OPTS.verbose) and (((COUNT.bk+1) % OPTS.logstep) == 0))
           __prn_interim();
       if (OPTS.num)   // not 'untill the end'
         if (--OPTS.num == 0)

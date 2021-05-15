@@ -1,9 +1,10 @@
 #ifndef OPCODE_H
 #define OPCODE_H
 
-#include <cstdint>
+#include "common.h"
 
-enum OPCODE : uint8_t {
+/// Blockchain script opcodes
+enum OPCODE : u8_t {
     OP_0            = 0x00,
     OP_1            = 0x51,
     OP_2            = 0x52,

@@ -1,17 +1,23 @@
-/*
- * Just Base58 encoder
+/* Copyright (c) 2009-2010 Satoshi Nakamoto
+ * Copyright (c) 2009-2019 The Bitcoin Core developers
+ * Distributed under the MIT software license, see the accompanying
+ * file COPYING or http://www.opensource.org/licenses/mit-license.php.
  */
+
+#include <string>
+#include <string_view>
 #include <vector>
 #include <cassert>
-#include "base58.h"
+#include "encode.h"
 
 static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
-std::string EncodeBase58(uint8_t* pbegin, const uint8_t* pend)
+std::string EncodeBase58(std::string_view data)
 {
     // Skip & count leading zeroes.
     int zeroes = 0;
     int length = 0;
+    auto pbegin = data.begin(), pend = data.end();
     while (pbegin != pend && *pbegin == 0) {
         pbegin++;
         zeroes++;

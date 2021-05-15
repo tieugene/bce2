@@ -2,22 +2,25 @@
 #define DATFARM_H
 
 #include <fstream>
+#include <filesystem>
 
-struct  FOFF_T      ///< files-offset array
-    { uint32_t  fileno, offset; };
+/// File-offset array
+struct  FOFF_T {
+  uint32_t  fileno, offset;
+};
 
-class   DATFARM_T   ///< represents blk*.dat, opening on demand
-{
+/// Representation of blk*.dat, opening on demand
+class   DATFARM_T {
 private:
-    std::ifstream *file;
-    std::string   folder;
-    size_t        qty;
-    bool          open(const size_t);
+  std::ifstream        *file;
+  std::filesystem::path folder;
+  size_t                qty;
+  bool                  open(const size_t);
 public:
-    DATFARM_T(const size_t qty, const std::string &folder)
-        : folder(folder), qty(qty)
-        { file = new std::ifstream[qty]; }
-    bool        read(const size_t, const size_t, const int, void *);
+  DATFARM_T(const size_t qty, const std::filesystem::path &folder)
+    : folder(folder), qty(qty)
+    { file = new std::ifstream[qty]; }
+  bool                  read(const size_t, const size_t, const int, void *);
 };
 
 #endif // DATFARM_H

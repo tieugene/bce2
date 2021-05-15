@@ -7,33 +7,33 @@
 #include <iostream>
 #include <cstring>  // memset
 #include <algorithm>
-//include <unistr.h> // u8_cmp
 #include "bce.h"
 #include "misc.h"
 #include "script.h"
 #include "opcode.h"
-#include "bech32.h"
+#include "encode.h"
 
 using namespace std;
 
-enum    KYE_TYPE_T {
-    KEY_0,
-    KEY_S,
-    KEY_W
+/// Address prefix for K-V storage
+enum    KEY_TYPE_T {
+    KEY_0,  // PK, PKH
+    KEY_S,  // SH
+    KEY_W   // W*
 };
 
 void    dump_script(const string &);
 
 ADDR_FOUND_T CUR_ADDR;
 
-static const uint8_t  *script_ptr;    // ptr to currently decoded opcode
-static uint32_t script_size;    // script size
+static const u8_t  *script_ptr; ///< ptr to currently decoding opcode
+static uint32_t script_size;    ///< script size
 
+/// compare 2 addresses for sorting
 bool cmp_uint160(const uint160_t &l, const uint160_t &r)    // desc
     { return memcmp(&l, &r, sizeof (uint160_t)) > 0; }
 
-const char *ADDR_FOUND_T::get_type_name(void)
-{
+const char *ADDR_FOUND_T::get_type_name(void) {
     static const char *ScriptType_s[] = {  // for 0..550k
         "pubkey",
         "pubkey",
@@ -48,16 +48,14 @@ const char *ADDR_FOUND_T::get_type_name(void)
     return ScriptType_s[CUR_ADDR.type];
 }
 
-void ADDR_FOUND_T::reset(void)
-{
+void ADDR_FOUND_T::reset(void) {
     type = NONSTANDARD;
     qty = 0;
     len = 0;
     memset(buffer.u8, 0, sizeof (buffer.u8));
 }
 
-const string_list ADDR_FOUND_T::get_strings(void)
-{
+const string_list ADDR_FOUND_T::get_strings(void) {
     string_list retvalue;
     switch (type) {
     case PUBKEYu:
@@ -84,8 +82,7 @@ const string_list ADDR_FOUND_T::get_strings(void)
     return retvalue;
 }
 
-void ADDR_FOUND_T::add_data(const SCTYPE t, const uint8_t *src)
-{
+void ADDR_FOUND_T::add_data(const SCTYPE t, const u8_t *src) {
     type = t;
     switch (t) {
     case NONSTANDARD:
@@ -135,14 +132,13 @@ void ADDR_FOUND_T::add_data(const SCTYPE t, const uint8_t *src)
     }
 }
 
-inline void ADDR_FOUND_T::sort_multisig(void)
-{
+inline void ADDR_FOUND_T::sort_multisig(void) {
     if (qty > 1)
         std::sort(buffer.u160.begin(), buffer.u160.end(), cmp_uint160);
 }
 
-inline bool chk_PKu_pfx(const uint8_t pfx)    // check PKu prefix
-{
+/// check PK (uncompressed) prefix
+inline bool chk_PKu_pfx(const u8_t pfx) {
     /*
      * Prefix byte must be 0x04, but there are some exceptions, e.g.
      * bk 230217
@@ -153,14 +149,14 @@ inline bool chk_PKu_pfx(const uint8_t pfx)    // check PKu prefix
     return (pfx & 0xFC) == 0x04 and pfx != 0x05;
 }
 
-inline bool chk_PKc_pfx(const uint8_t pfx)    // check PKu prefix
-{
+/// check PK (compressed) prefix
+inline bool chk_PKc_pfx(const u8_t pfx) {
     // prefix byte == 2..3
     return (pfx & 0xFE) == 0x02;
 }
 
-bool    do_P2PKu(void)                  ///< pubkey (uncompressed)
-{
+/// pubkey (uncompressed)
+bool    do_P2PKu(void) {
     // https://learnmeabitcoin.com/technical/public-key
     if (script_size == 67
         and chk_PKu_pfx(script_ptr[1])
@@ -173,8 +169,8 @@ bool    do_P2PKu(void)                  ///< pubkey (uncompressed)
     return false;
 }
 
-bool    do_P2PKc(void)                  ///< pubkey (compressed)
-{
+/// pubkey (compressed)
+bool    do_P2PKc(void) {
     if (script_size == 35                   // compressed
         and chk_PKc_pfx(script_ptr[1])
         and script_ptr[34] == OP_CHECKSIG)
@@ -186,8 +182,8 @@ bool    do_P2PKc(void)                  ///< pubkey (compressed)
     return false;
 }
 
-bool    do_P2PKH(void)                  ///< pubkeyhash
-{
+/// pubkeyhash
+bool    do_P2PKH(void) {
     if (script_size == 25 and       // was >= dirty hack for 71036.?.? and w/ OP_NOP @ end
         script_ptr[1] == OP_HASH160 and
         script_ptr[2] == 20 and
@@ -201,8 +197,8 @@ bool    do_P2PKH(void)                  ///< pubkeyhash
     return false;
 }
 
-bool    do_P2SH(void)                   ///< scripthash
-{
+/// scripthash
+bool    do_P2SH(void) {
     if (
         script_size == 23 and
         script_ptr[1] == 20 and
@@ -216,20 +212,20 @@ bool    do_P2SH(void)                   ///< scripthash
     return false;
 }
 
-bool    do_P2WPKH(void)                 ///< witness_v0_keyhash
-{
+/// witness_v0_keyhash
+bool    do_P2WPKH(void) {
     CUR_ADDR.add_data(W0KEYHASH, script_ptr+2);
     return true;
 }
 
-bool    do_P2WSH(void)                  ///< witness_v0_scripthash
-{
+/// witness_v0_scripthash
+bool    do_P2WSH(void) {
     CUR_ADDR.add_data(W0SCRIPTHASH, script_ptr+2);
     return true;
 }
 
-bool    do_P2MS(void)                   ///< multisig
-{
+/// multisig
+bool    do_P2MS(void) {
     auto keys_qty_ptr = script_ptr + script_size - 2;
     auto keys_qty = *keys_qty_ptr - 0x50;
     auto retvalue = false;
@@ -260,8 +256,7 @@ bool    do_P2MS(void)                   ///< multisig
     return retvalue;
 }
 
-bool    script_decode(const uint8_t *script, const uint32_t size)
-{
+bool    script_decode(const u8_t *script, const uint32_t size) {
     /// FIXME: empty script
     CUR_ADDR.reset();
     auto opcode = *script;
@@ -312,14 +307,14 @@ bool    script_decode(const uint8_t *script, const uint32_t size)
     return retvalue;
 }
 
-void    dump_script(const string &s)
-{
+/// Dump script into stderr
+void    dump_script(const string &s) {
     if (OPTS.verbose == DBG_MAX)
         cerr
             << "Script err: " << s << "\t("
             << "bk = " << COUNT.bk
             << ", tx = " << LOCAL.tx << " (" << COUNT.tx << ")"
             << ", vout = " << LOCAL.vout
-            << ", script: " << ptr2hex(string_view(reinterpret_cast<const char *>(script_ptr), script_size))
+            << ", script: " << ptr2hex(u8string_view(script_ptr, script_size))
             << ")" << endl;
 }
