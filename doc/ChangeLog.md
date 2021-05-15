@@ -17,3 +17,8 @@
 - added k-v tuning switch
 - hex stdin speedup
 - hex2bin speedup
+
+0.0.5:
+- Lite code refactoring
+- Code documenting
+- 'logstep' option added
