@@ -38,6 +38,12 @@ popd > /dev/null
 
 %install
 %{cmake_install}
+# mans
+install -d %{buildroot}%{_mandir}/man1
+install -t %{buildroot}%{_mandir}/man1 -m 0644 -p man/*.1
+install -d %{buildroot}%{_mandir}/man5
+install -t %{buildroot}%{_mandir}/man5 -m 0644 -p man/*.5
+
 
 
 %files
@@ -46,6 +52,7 @@ popd > /dev/null
 %{_bindir}/%{name}
 %{_bindir}/btcbklocs
 %{_bindir}/btclocview
+%{_mandir}/man?/*.?
 
 
 %changelog
