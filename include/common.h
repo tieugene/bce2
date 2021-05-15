@@ -17,6 +17,9 @@ typedef byte_array<20> uint160_t;   ///< addr representation
 inline std::string_view u8string_view(const u8_t *s, size_t size) {
   return std::string_view((const char *) s, size);
 }
+inline std::string_view u256string_view(const uint256_t &key) {
+  return u8string_view(std::data(key), sizeof(uint256_t));
+}
 /// Universal ptr
 union   UNIPTR_T {
     const void        *v_ptr;
