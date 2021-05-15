@@ -14,8 +14,8 @@ btcbklocs - create locs-file
 
 == Description
 
-Creates locs-file required by bce2 for direct blockchain parsing.
-Sources are blockchain LevelDB database and blocks hashes (from stdin or input file).
+Creates locs-file required by bce2 for direct blockchain parsing. +
+Sources are blockchain LevelDB database and blocks hashes (from stdin or input file). +
 Result is writing into _outfile_.
 
 == Options

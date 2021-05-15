@@ -1,0 +1,43 @@
+= bce2.cfg(5)
+TI\_Eugene (ti.eugene@gmail.com)
+:doctype: manpage
+:manmanual: BCE2 Commands Manual
+:mansource: BCE2
+
+== Name
+
+bce2.cfg - default settings for bce2.
+
+== Synopsis
+
+~/.bce2.cfg
+
+== Description
+
+Set default options for _bce2_. +
+CLI options oweverwirite them.
+
+== Options
+
+*datdir =* _path_::
+  blk*.dat folder (== *-d* in CLI)
+*locsfile =* _path_::
+  Locs-file (== *-l* in CLI)
+*stdin =* _False|True_::
+  Hex input from stdin (screens *datdir* and *locsfile* if _True_; == *-c* in CLI))
+*kvdir =* _path_::
+  Key-value folder (== *-k* in CLI)
+*kvtype =* _name_::
+  Key-value engine (none/kcf/kcm/tkf/tkm; == *-e* in CLI))
+*tune =* _num_::
+  Key-value tuning  (== *-t* in CLI)
+*out =* _False|True_::
+  Generate output  (== *-o* in CLI)
+*logby =* _num_::
+  Logging step  (*-s* in CLI)
+*verbose =* _num_::
+  Verbosity (== *-v* in CLI)
+
+== See Also
+
+*bce2*(1)

@@ -7,10 +7,13 @@ URL:		https://github.com/tieugene/bce2
 Source:		https://github.com/tieugene/bce2/archive/%{version}.tar.gz/%{name}-%{version}.tar.gz
 BuildRequires:	gcc-c++
 BuildRequires:	cmake
+BuildRequires:	asciidoctor
 # openssl-devel
 BuildRequires:	pkgconfig(libcrypto)
 # kyotocabinet-devel
 BuildRequires:	pkgconfig(kyotocabinet)
+# tkrzw-devel
+BuildRequires:	pkgconfig(tkrzw) >= 0.9.9
 # leveldb-devel
 BuildRequires:	cmake(leveldb)
 # for tools/btcbklocs.py
@@ -28,6 +31,9 @@ BitCoin Export 2 is tool to export BTC blockchain into SQL loadable files.
 %build
 %{cmake}
 %{cmake_build}
+pushd man > /dev/null
+make
+popd > /dev/null
 
 
 %install

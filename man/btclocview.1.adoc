@@ -14,7 +14,8 @@ btclocview - locs-file viewer
 
 == Description
 
-Print location of block _bkno_ according to content of _locsfile_. Output is dat-file name and offset in it.
+Print location of block _bkno_ according to content of _locsfile_. +
+Output is dat-file name and offset in it.
 
 == Arguments
 
@@ -25,10 +26,13 @@ _bkno_::
   Block height
 
 == Example
+[source,]
+----
+$ btclocview bk.locs.650k.bin 10
+Bk 10: bk00000.2308
+----
 
-  $ btclocview bk.locs.650k.bin 10
-  Bk 10: bk00000.2308
-  (block with height=10 is in file bk00000.dat starting from offset 2308 bytes)
+Block with height=10 is in file bk00000.dat starting from offset 2308 bytes
 
 == See Also
 
