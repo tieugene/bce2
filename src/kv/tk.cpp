@@ -21,6 +21,7 @@ KV_TK_DISK_T::~KV_TK_DISK_T() {
 }
 
 bool        KV_TK_DISK_T::open(const filesystem::path &s, uint64_t tune) {
+  // FIXME: CountBuckets()
   db = new tkrzw::HashDBM();
   tkrzw::HashDBM::TuningParameters tuning_params;
   tuning_params.offset_width = 5;

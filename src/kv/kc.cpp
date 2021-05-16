@@ -4,6 +4,7 @@
  */
 #ifdef USE_KC
 
+#include <cstdlib>
 #include "kv/kc.h"
 #include "misc.h"
 
@@ -22,16 +23,31 @@ KV_KC_DISK_T::~KV_KC_DISK_T() {
 }
 
 bool        KV_KC_DISK_T::open(const filesystem::path &s, uint64_t tune) {
+  long bnum_need = 0;
+  // FIXME: status() => buckets
   db = new kyotocabinet::HashDB();
   if (tune) {
     if (tune > 30)
       return b_error("kcf: Tuning parameter is too big: " + to_string(tune));
-    else
-      if (!db->tune_buckets(1<<tune))  // must be _before_ creating DB
+    else {
+      bnum_need = 1<<tune;
+      if (!db->tune_buckets(bnum_need))  // must be _before_ creating DB
         return b_error("kcf: Cannot tune");
+      }
   }
   if (!db->open(s.string() + ".kch", kyotocabinet::HashDB::OWRITER | kyotocabinet::HashDB::OCREATE))
     return b_error("kcf: Cannot open DB " + s.string());
+  if (OPTS.verbose and bnum_need) { // chk tune
+    map<string, string> status;
+    if (db->status(&status)) {
+      auto it = status.find("bnum");
+      if (it != status.end()) {
+        auto bnum_found = atol(it->second.c_str());
+        if (bnum_found < bnum_need)
+          cerr << s.string() << " buckets: found " << bnum_found << " < " << bnum_need << " required." << endl;
+      }
+    }
+  }
   return true;
 }
 
