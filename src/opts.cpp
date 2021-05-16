@@ -22,6 +22,9 @@ const std::map<std::string, KVNGIN_T> kvnames = {
   ,{"tkf", KVTYPE_TKFILE}
   ,{"tkm", KVTYPE_TKMEM}
 #endif
+#ifdef USE_BDB
+  ,{"bdb", KVTYPE_BDB}
+#endif
 };
 const string cfg_file_name = ".bce2.cfg";
 const string  help_txt = "\

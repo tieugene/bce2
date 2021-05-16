@@ -9,6 +9,9 @@
 #ifdef USE_TK
 #include "kv/tk.h"
 #endif
+#ifdef USE_BDB
+#include "kv/bdb.h"
+#endif
 
 /// K-V storage engine type
 enum KVNGIN_T {
@@ -20,6 +23,9 @@ enum KVNGIN_T {
 #ifdef USE_TK
   ,KVTYPE_TKFILE
   ,KVTYPE_TKMEM
+#endif
+#ifdef USE_BDB
+  ,KVTYPE_BDB
 #endif
 };
 
