@@ -60,14 +60,15 @@ void        __prn_opts(void) {
 
 /// Load options from config
 bool load_cfg(void) {
-  string datdir, locsfile, kvdir, kvngin;
-  int verbose = -1;
   ifstream f_in(filesystem::path(getenv("HOME")) / cfg_file_name);
   if(f_in) {
+    string datdir, locsfile, kvdir, kvngin;
+    int verbose = -1;
+    unsigned long logstep = 0;
     CFG::ReadFile(
           f_in,
           vector<string>{"datdir", "locsfile", "kvdir", "kvtype", "tune", "verbose", "out", "stdin", "logby"},
-          datdir, locsfile, kvdir, kvngin, OPTS.kvtune, verbose, OPTS.out, OPTS.fromcin, OPTS.logstep);
+          datdir, locsfile, kvdir, kvngin, OPTS.kvtune, verbose, OPTS.out, OPTS.fromcin, logstep);
     f_in.close();
     if (verbose >= 0)
       OPTS.verbose = DBG_LVL_T(verbose);
@@ -86,6 +87,8 @@ bool load_cfg(void) {
         if (OPTS.verbose)
           return b_error("Unknow k-v type: " + kvngin);
     }
+    if (logstep > 0)
+      OPTS.logstep = logstep;
   }
   return true;
 }

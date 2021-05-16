@@ -21,17 +21,25 @@ KV_TK_DISK_T::~KV_TK_DISK_T() {
 }
 
 bool        KV_TK_DISK_T::open(const filesystem::path &s, uint64_t tune) {
+  auto bnum_need = 0;
   db = new tkrzw::HashDBM();
   tkrzw::HashDBM::TuningParameters tuning_params;
   tuning_params.offset_width = 5;
   if (tune) {
     if (tune > 30)
       return b_error("tkf: Tuning parameter is too big: " + to_string(tune));
-    else
-      tuning_params.num_buckets = 1<<tune;
+    else {
+      bnum_need = 1 << tune;
+      tuning_params.num_buckets = bnum_need;
+    }
   }
   if (!db->OpenAdvanced(s.string() + ".tkh", true, tkrzw::File::OPEN_DEFAULT, tuning_params).IsOK())
     return b_error("tkf: Cannot open db " + s.string());
+  if (OPTS.verbose and bnum_need) { // chk tune
+    auto bnum_found = db->CountBuckets();
+    if (bnum_found < bnum_need)
+      cerr << s.string() << " buckets: found " << bnum_found << " < " << bnum_need << " required." << endl;
+  }
   return true;
 }
 
