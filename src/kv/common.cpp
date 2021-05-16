@@ -7,8 +7,10 @@ KV_BASE_T  *TxDB = nullptr, *AddrDB = nullptr;
 
 using namespace std;
 
-bool chk_kv(bool isfull, const string &name) {
-  if (isfull) {
+bool chk_kv(uint32_t count, const string &name) {
+  if (count == NOT_FOUND_U32)
+    return b_error("Cannot count" + name);
+  if (count) {
     if (OPTS.from == MAX_UINT32)
       return b_error(name + " is not empty. Set -f option properly.");
   } else {
@@ -46,25 +48,36 @@ bool    set_cache(void) {
             AddrDB = new KV_TK_INMEM_T(OPTS.kvtune);
             break;
 #endif
+#ifdef USE_BDB
+          case KVTYPE_BDB:
+            kvtitle = "BerkeleyDB Hash";
+            TxDB = new KV_BDB_T(OPTS.kvdir / "tx", OPTS.kvtune);
+            AddrDB = new KV_BDB_T(OPTS.kvdir / "addr", OPTS.kvtune);
+            break;
+#endif
           default:
             return b_error("k-v not implemented");
         }
         if (OPTS.verbose)
           cerr << "K-V engine: " << kvtitle << endl;
-        auto tx_full = bool(TxDB->count());
-        auto addr_full = bool(AddrDB->count());
-        if (!chk_kv(tx_full, "tx") or !chk_kv(addr_full, "addr"))
+        auto tx_count = TxDB->count();
+        auto addr_count = AddrDB->count();
+        if (!chk_kv(tx_count, "tx") or !chk_kv(addr_count, "addr"))
           return false;
-        if (tx_full xor addr_full)
+        if (bool(tx_count) xor bool(addr_count))
           return b_error("One from tx or addr is empty, another one is full. It is impossible.");
         if (OPTS.from == 0) {
-          if (tx_full)
+          if (tx_count)
             TxDB->clear();
-          if (addr_full)
+          if (addr_count)
             AddrDB->clear();
         }
         COUNT.tx = TxDB->count();
+        if (COUNT.tx == NOT_FOUND_U32)
+          return b_error("Cannot count tx #2");
         COUNT.addr = AddrDB->count();
+        if (COUNT.addr == NOT_FOUND_U32)
+          return b_error("Cannot count addr #2");
     }
     if (OPTS.from == MAX_UINT32)
         OPTS.from = 0;
