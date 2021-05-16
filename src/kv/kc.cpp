@@ -24,7 +24,6 @@ KV_KC_DISK_T::~KV_KC_DISK_T() {
 
 bool        KV_KC_DISK_T::open(const filesystem::path &s, uint64_t tune) {
   long bnum_need = 0;
-  // FIXME: status() => buckets
   db = new kyotocabinet::HashDB();
   if (tune) {
     if (tune > 30)
