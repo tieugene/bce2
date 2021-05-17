@@ -30,7 +30,7 @@ BitCoin Export 2 is tool to export BTC blockchain into SQL loadable files.
 
 
 %build
-%{cmake}
+%{cmake} -DUSE_BDB=ON
 %{cmake_build}
 make -C doc
 
@@ -53,10 +53,10 @@ install -t %{buildroot}%{_mandir}/man5 -m 0644 -p doc/*.5
 
 
 %changelog
-* Fri May 14 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.5-1
+* Tue May 18 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.5-1
 - Version bump
 
-* Thu May 11 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.4-1
+* Tue May 11 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.4-1
 - Version bump
 
 * Thu May 06 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.3-1

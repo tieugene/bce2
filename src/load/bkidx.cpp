@@ -73,7 +73,7 @@ bool    stdin_bk(u8_t *dst, const uint32_t bk_no) {
     if (line_len & 1)
       return b_error("Hex-line of bk " + to_string(bk_no) + " has odd symbols: " + to_string(line_len));
     auto done = hex2bytes(string_view(line, line_len), dst);
-    if (done != (line_len >> 1))
+    if (done != (line_len >> 1))  // FIXME: WARNING: comare int and unsigned
       return b_error(to_string(done) + "/" + to_string(line_len >> 1) + " bytes converted");
     return true;
   } else {
