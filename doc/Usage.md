@@ -21,47 +21,22 @@ In short bce2 operates with 3 data "streams":
 
 Additional output (stderr) is logging if `-v` option used.
 
-### 1.1. CLI options:
+### Options
 
-Options:
+Run options can be set using [config](bce2.cfg.5.adoc) file and/or [CLI](bce2.1.adoc) (command line interface).  
+_Note: CLI overwrites config values._  
+Combining `-e`, `-o` and `-v` options requires additional explanation:
 
-- `-h` : this help
-- `-f <n>` : block to start from
-- `-n <n>` : blocks to process
-- `-d <path>` : *.dat folder
-- `-l <path>` : locs-file
-- `-c` : use `bitcoin-cli getblock <hash> 0` output in stdin
-- `-k <path>` : key-value folder
-- `-o` : output results to stdout; format depens on `-k` is set
-- `-v <n>` : verbosity (to stderr) - show processed blocks, transactions, vins, vouts, addresses and some other info (depends on k-v set and vebosity level), each 1000 blocks and summary
-
-Combining `-k`, `-o` and `-v` options requires additional explanation:
-
--k | -o| -v| Usage
----|---|---|-------
-\- | - | - | Fast walk quietly (test blockchain parsing)
-\- | - | + | Fast walk logging (count bk, tx, vins, vouts, addrs)
-\- | + | - | Explore blockchain (debugging)
-\- | + | + | Explore blockchain logging
-\+ | - | - | Full walk quietly (test +k-v)
-\+ | - | + | Full walk logging (count +uniq addresses)
-\+ | + | - | Main job quietly
-\+ | + | + | Main job logging
-
-### 1.2. bce.cfg:
-
-Default options can be set in `~/.bce2.cfg` like this:
-
-```
-# comments available, any order
-datdir = /var/lib/bitcoin/blocks
-locsfile = /tmp/bce2/bk.locs.670k.bin
-kvdir = /tmp/bce2/kv
-#verbose = True
-#out = True
-```
-
-*Note: CLI overwrites config values.*
+-e   | -o| -v| Usage
+-----|:-:|:-:|-------
+none | - | - | Fast walk quietly (test blockchain parsing)
+none | - | + | Fast walk with log (count bk, tx, vins, vouts, addrs)
+none | + | - | Explore blockchain (debugging)
+none | + | + | Explore blockchain with log
+k-v  | - | - | Full walk quietly (test +k-v)
+k-v  | - | + | Full walk with log (count +uniq addresses)
+k-v  | + | - | Main job quietly
+k-v  | + | + | Main job with log
 
 ## 2. Pre-run stage
 
@@ -71,34 +46,49 @@ To achieve this a special utility prepares helping locs-file (block **loc**ation
 Let's make locs-file for **670k** blocks. Blockchain is stored in `$BTCDIR`.
 
 1. run bitcoind:
+
    ```bash
    sudo systemctl start bitcoin
    ```
+
 1. get block count (*to check how many blocks we have*):
+
    ```bash
    bitcoin-cli getblockcount
    ```
+
 1. get 1-st 670k block hashes into `tmp.hex` (filename is not matter):
+
    ```bash
    (for i in `seq 0 669999`; do bitcoin-cli getblockhash $i; done) > tmp.hex
    ```
+
 1. stop bitcoind:
+
    ```bash
    sudo systemctl stop bitcoin
    ```
+
 1. fix blockchain permissions:
+
    ```bash
    sudo chmod -R o-w+rX $BTCDIR
    ```
+
 1. copy LevelDB folder into somewhere (e.g. here):
+
    ```bash
    cp $BTSDIR/blocks/index .
    ```
+
 1. make locs-file `bk.locs.670k.bin` (filename is not matter):
+
    ```bash
    btcbklocs -i tmp.hex index bk.locs.670k.bin
    ```
+
    or (requires python3-plyvel):
+
    ```bash
    tools/btcbklocs.py -i tmp.hex index bk.locs.670k.bin
    ```
