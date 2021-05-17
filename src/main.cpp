@@ -35,12 +35,12 @@ int     main(int argc, char *argv[]) {
     // 1. prepare
     // 1.1. handle options
     if (!load_opts(argc, argv))
-      return 1;
+      return u32_error("Load_opts oops.", 1);
     // 1.2. prepare bk info
     if (!OPTS.fromcin) {
       auto bk_qty = init_bkloader(OPTS.datdir, OPTS.locsfile);
       if (!bk_qty)
-        return 2;
+        return u32_error("Init_bkloader oops.", 2);
       if ((OPTS.from != MAX_UINT32) and (bk_qty <= OPTS.from))
         return u32_error("Loaded blocks (" + to_string(bk_qty) + ") <= 'from' " + to_string(OPTS.from), 3);
       bkloader = load_bk;
@@ -48,7 +48,7 @@ int     main(int argc, char *argv[]) {
     // 1.3. prepare k-v storages (and normalize OPTS.from)
     start_mem = memused();
     if (!set_cache())
-        return 3;
+        return u32_error("Set_cache oops.", 3);
     // 1.4. last prestart
     if (OPTS.verbose)
       __prn_head();
@@ -57,7 +57,8 @@ int     main(int argc, char *argv[]) {
     for (COUNT.bk = OPTS.from; bkloader(BUFFER, COUNT.bk); COUNT.bk++) {
       CUR_PTR.v_ptr = BUFFER;
       if (!parse_bk()) {
-          __prn_trace();
+          //__prn_trace();
+          v_error("Bk # " + to_string(COUNT.bk));
           break;
       }
       if ((OPTS.verbose) and (((COUNT.bk+1) % OPTS.logstep) == 0))

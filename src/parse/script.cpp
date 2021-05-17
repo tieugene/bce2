@@ -22,7 +22,7 @@ enum    KEY_TYPE_T {
     KEY_W   // W*
 };
 
-void    dump_script(const string &);
+bool    dump_script(const string &);
 
 ADDR_FOUND_T CUR_ADDR;
 
@@ -165,8 +165,7 @@ bool    do_P2PKu(void) {
         CUR_ADDR.add_data(PUBKEYu, script_ptr+1);   // &pfx_byte
         return true;
     }
-    dump_script("Bad P2PKu");
-    return false;
+    return dump_script("Bad P2PKu");
 }
 
 /// pubkey (compressed)
@@ -178,8 +177,7 @@ bool    do_P2PKc(void) {
         CUR_ADDR.add_data(PUBKEYc, script_ptr+1);
         return true;
     }
-    dump_script("Bad P2PKc");
-    return false;
+    return dump_script("Bad P2PKc");
 }
 
 /// pubkeyhash
@@ -193,8 +191,7 @@ bool    do_P2PKH(void) {
         CUR_ADDR.add_data(PUBKEYHASH, script_ptr+3);
         return true;
     }
-    dump_script("Bad P2PKH");
-    return false;
+    return dump_script("Bad P2PKH");
 }
 
 /// scripthash
@@ -208,8 +205,7 @@ bool    do_P2SH(void) {
         CUR_ADDR.add_data(SCRIPTHASH, script_ptr+2);
         return true;
     }
-    dump_script("Bad P2SH");
-    return false;
+    return dump_script("Bad P2SH");
 }
 
 /// witness_v0_keyhash
@@ -251,7 +247,7 @@ bool    do_P2MS(void) {
         retvalue = true;
     } else {
         CUR_ADDR.reset();
-        dump_script("Bad P2MS");
+        retvalue = dump_script("Bad P2MS");
     }
     return retvalue;
 }
@@ -284,15 +280,14 @@ bool    script_decode(const u8_t *script, const uint32_t size) {
         break;
     case OP_0:              // 5. P2W* ver.0 (BIP-141)
         switch (script_ptr[1]) {
-        case 0x14:          // 5.1. P2WPKH (uint160_t)
-            retvalue = do_P2WPKH();
-            break;
-        case 0x20:          // 5.2. P2WSH (uint256_t)
-            retvalue = do_P2WSH();
-            break;
-        default:
-            dump_script("Bad P2Wx");
-            retvalue = false;
+          case 0x14:          // 5.1. P2WPKH (uint160_t)
+              retvalue = do_P2WPKH();
+              break;
+          case 0x20:          // 5.2. P2WSH (uint256_t)
+              retvalue = do_P2WSH();
+              break;
+          default:
+              retvalue = dump_script("Bad P2Wx");
         }
         break;
     case OP_1 ... OP_16:    // 4. P2MS 0x5x
@@ -300,15 +295,15 @@ bool    script_decode(const u8_t *script, const uint32_t size) {
         break;
     default:
         if (opcode <= 0xB9) // x. last defined opcode
-            dump_script("Not impl-d");
+            retvalue = dump_script("Not impl-d");
         else
-            dump_script("Invalid");
+            retvalue = dump_script("Invalid");
     }
     return retvalue;
 }
 
 /// Dump script into stderr
-void    dump_script(const string &s) {
+bool    dump_script(const string &s) {
     if (OPTS.verbose == DBG_MAX)
         cerr
             << "Script err: " << s << "\t("
@@ -317,4 +312,5 @@ void    dump_script(const string &s) {
             << ", vout = " << LOCAL.vout
             << ", script: " << ptr2hex(u8string_view(script_ptr, script_size))
             << ")" << endl;
+    return false;
 }
