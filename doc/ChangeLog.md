@@ -1,16 +1,14 @@
 # Changelog
 
-0.0.1 2021-02-18:
-- generally works
+0.0.5:
 
-0.0.2 2021-02-20:
-- bugfixes
-- CLI changed
+- Lite code refactoring
+- Dox: code documenting, man-pages
+- 'logstep' option
+- BDB backend
 
-0.0.3 2021-05-05:
-- hex input
+0.0.4 *2021-05-11*:
 
-0.0.4:
 - bce2.cfg
 - disabled 2-level k-v ('-m' switch)
 - multiengine k-v (2 x kyotocabinet + 2 x tkrzw)
@@ -18,7 +16,15 @@
 - hex stdin speedup
 - hex2bin speedup
 
-0.0.5:
-- Lite code refactoring
-- Code documenting
-- 'logstep' option added
+0.0.3 *2021-05-05*:
+
+- hex input
+
+0.0.2 *2021-02-20*:
+
+- bugfixes
+- CLI changed
+
+0.0.1 *2021-02-18*:
+
+- generally works

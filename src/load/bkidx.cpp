@@ -18,21 +18,21 @@ char *line = nullptr;
 
 /// Load file-offset file
 size_t  load_fileoffsets(const filesystem::path &fn) {
-    ifstream file (fn, ios::in|ios::binary|ios::ate);
-    if (!file)            // 1. open
-      return u32_error("File '" + fn.string() + "' opening failed", 0);
-    auto data_size = file.tellg();
-    if ((data_size < 0) or (data_size & 0x7) or (data_size > (8 << 20)))    // 2. chk filesize
-      return u32_error("Wrong file size (<0 or != 8x or >8MB (1M bks)): " + fn.string() + "=" + to_string(data_size), 0);
-    auto blocks = size_t(data_size >> 3);
-    FOFF = new FOFF_T[blocks];
-    if (!FOFF)
-      return u32_error("Can't allocate mem for file-offset list.", 0);
-    file.seekg (0, ios::beg);
-    auto tmp = reinterpret_cast<char *>(FOFF);
-    file.read (tmp, data_size);
-    file.close();
-    return blocks;
+  ifstream file (fn, ios::in|ios::binary|ios::ate);
+  if (!file)            // 1. open
+    return u32_error("File '" + fn.string() + "' opening failed", 0);
+  auto data_size = file.tellg();
+  if ((data_size < 0) or (data_size & 0x7) or (data_size > (8 << 20)))    // 2. chk filesize
+    return u32_error("Wrong file size (<0 or != 8x or >8MB (1M bks)): " + fn.string() + "=" + to_string(data_size), 0);
+  auto blocks = size_t(data_size >> 3);
+  FOFF = new FOFF_T[blocks];
+  if (!FOFF)
+    return u32_error("Can't allocate mem for file-offset list.", 0);
+  file.seekg (0, ios::beg);
+  auto tmp = reinterpret_cast<char *>(FOFF);
+  file.read (tmp, data_size);
+  file.close();
+  return blocks;
 }
 
 size_t  init_bkloader(const std::filesystem::path datdir, const std::filesystem::path locsfile) {
@@ -44,19 +44,17 @@ size_t  init_bkloader(const std::filesystem::path datdir, const std::filesystem:
 
 /// Load bk to buffer
 bool    load_bk(u8_t *dst, const uint32_t bk_no) {
-  // load_bk(datfarm, FOFF[COUNT.bk].fileno, FOFF[COUNT.bk].offset)
-  // load_bk(DATFARM_T &datfarm, const uint32_t fileno, const uint32_t offset)
-    uint32_t sig, size;
-    uint32_t fileno=FOFF[bk_no].fileno, offset=FOFF[bk_no].offset;
-    if (!datfarm->read(fileno, offset-8, sizeof(sig), &sig))
-      return b_error("Can't read bk signature.");
-    if (sig != BK_SIGN)
-      return b_error("Bad block signature found: " + ptr2hex(string_view((char *) &sig, sizeof(sig))));
-    if (!datfarm->read(fileno, offset-4, sizeof(size), &size))
-      return b_error("Can't read bk size.");
-    if (size > MAX_BK_SIZE)
-      return b_error("Block too big: " + to_string(size));
-    return datfarm->read(fileno, offset, size, dst);
+  uint32_t sig, size;
+  uint32_t fileno=FOFF[bk_no].fileno, offset=FOFF[bk_no].offset;
+  if (!datfarm->read(fileno, offset-8, sizeof(sig), &sig))
+    return b_error("Can't read bk signature.");
+  if (sig != BK_SIGN)
+    return b_error("Bad block signature found: " + ptr2hex(string_view((char *) &sig, sizeof(sig))));
+  if (!datfarm->read(fileno, offset-4, sizeof(size), &size))
+    return b_error("Can't read bk size.");
+  if (size > MAX_BK_SIZE)
+    return b_error("Block too big: " + to_string(size));
+  return datfarm->read(fileno, offset, size, dst);
 }
 
 bool    stdin_bk(u8_t *dst, const uint32_t bk_no) {

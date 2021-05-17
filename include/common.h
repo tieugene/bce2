@@ -46,9 +46,13 @@ public:
   BCException(const char *msg) : std::runtime_error(msg) {}
 };
 
+/// Error shortcut (void)
+void v_error(const std::string &);
 /// Error shortcut (bool)
-bool b_error(const std::string &);
+inline bool b_error(const std::string &s)
+  { v_error(s); return false; }
 /// Error shortcut (uint32_t)
-u_int32_t u32_error(const std::string &, uint32_t = MAX_UINT32);
+inline u_int32_t u32_error(const std::string &s, uint32_t retcode = MAX_UINT32)
+  { v_error(s); return retcode; }
 
 #endif // COMMON_H

@@ -10,31 +10,33 @@
 
 class KV_TK_DISK_T : public KV_BASE_T {
 private:
-    tkrzw::HashDBM *db;
-    bool        open(const std::filesystem::path &, uint64_t = 0);
-    bool        close(void);
+  std::string dbpath;
+  tkrzw::HashDBM *db;
+  bool        open(const std::filesystem::path &, uint64_t = 0);
+  bool        close(void);
 public:
-    KV_TK_DISK_T(const std::filesystem::path &, uint64_t = 0);
-    ~KV_TK_DISK_T();
-    void        clear(void) { db->Clear(); }
-    uint32_t    count(void);
-    uint32_t    add(std::string_view key);
-    uint32_t    get(std::string_view key);
-    uint32_t    get_or_add(std::string_view key);
+  KV_TK_DISK_T(const std::filesystem::path &, uint64_t = 0);
+  ~KV_TK_DISK_T();
+  void        clear(void) { db->Clear(); }
+  uint32_t    count(void);
+  uint32_t    add(std::string_view key);
+  uint32_t    get(std::string_view key);
+  uint32_t    get_or_add(std::string_view key);
 };
 
 class KV_TK_INMEM_T : public KV_BASE_T {
 private:
-    tkrzw::TinyDBM  *db = nullptr;
-    bool        open(uint64_t = 0);
+  std::string dbname;
+  tkrzw::TinyDBM  *db = nullptr;
+  bool        open(const char *, uint64_t = 0);
 public:
-    KV_TK_INMEM_T(uint64_t = 0);
-    ~KV_TK_INMEM_T() { delete db; }
-    void        clear(void) { db->Clear(); }
-    uint32_t    count(void) { return db->CountSimple(); }
-    uint32_t    add(std::string_view key);
-    uint32_t    get(std::string_view key);
-    uint32_t    get_or_add(std::string_view key);
+  KV_TK_INMEM_T(const char *, uint64_t = 0);
+  ~KV_TK_INMEM_T() { delete db; }
+  void        clear(void) { db->Clear(); }
+  uint32_t    count(void) { return db->CountSimple(); }
+  uint32_t    add(std::string_view key);
+  uint32_t    get(std::string_view key);
+  uint32_t    get_or_add(std::string_view key);
 };
 
 #endif // USE_TK

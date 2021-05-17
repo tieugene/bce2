@@ -22,35 +22,29 @@ bool chk_kv(uint32_t count, const string &name) {
 
 bool    set_cache(void) {
     if (kv_mode()) {
-        string kvtitle;
         switch (OPTS.kvngin) {
 #ifdef USE_KC
           case KVTYPE_KCFILE:
-            kvtitle = "Kyotocabinet HashDB";
             TxDB = new KV_KC_DISK_T(OPTS.kvdir / "tx", OPTS.kvtune);
             AddrDB = new KV_KC_DISK_T(OPTS.kvdir / "addr", OPTS.kvtune);
             break;
           case KVTYPE_KCMEM:
-            kvtitle = "Kyotocabinet StashDB";
-            TxDB = new KV_KC_INMEM_T(OPTS.kvtune);
-            AddrDB = new KV_KC_INMEM_T(OPTS.kvtune);
+            TxDB = new KV_KC_INMEM_T("Tx", OPTS.kvtune);
+            AddrDB = new KV_KC_INMEM_T("Addr", OPTS.kvtune);
             break;
 #endif
 #ifdef USE_TK
           case KVTYPE_TKFILE:
-            kvtitle = "Tkrzw HashDBM";
             TxDB = new KV_TK_DISK_T(OPTS.kvdir / "tx", OPTS.kvtune);
             AddrDB = new KV_TK_DISK_T(OPTS.kvdir / "addr", OPTS.kvtune);
             break;
           case KVTYPE_TKMEM:
-            kvtitle = "Tkrzw TinyDBM";
-            TxDB = new KV_TK_INMEM_T(OPTS.kvtune);
-            AddrDB = new KV_TK_INMEM_T(OPTS.kvtune);
+            TxDB = new KV_TK_INMEM_T("Tx", OPTS.kvtune);
+            AddrDB = new KV_TK_INMEM_T("Addr", OPTS.kvtune);
             break;
 #endif
 #ifdef USE_BDB
           case KVTYPE_BDB:
-            kvtitle = "BerkeleyDB Hash";
             TxDB = new KV_BDB_T(OPTS.kvdir / "tx", OPTS.kvtune);
             AddrDB = new KV_BDB_T(OPTS.kvdir / "addr", OPTS.kvtune);
             break;
@@ -58,8 +52,6 @@ bool    set_cache(void) {
           default:
             return b_error("k-v not implemented");
         }
-        if (OPTS.verbose)
-          cerr << "K-V engine: " << kvtitle << endl;
         auto tx_count = TxDB->count();
         auto addr_count = AddrDB->count();
         if (!chk_kv(tx_count, "tx") or !chk_kv(addr_count, "addr"))

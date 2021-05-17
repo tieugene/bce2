@@ -76,5 +76,5 @@ Thumbs.db
 build*
 CMakeLists.txt.user
 _*
-man/*.1
-man/*.5
+doc/*.1
+doc/*.5

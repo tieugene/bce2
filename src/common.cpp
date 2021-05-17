@@ -21,18 +21,12 @@ uint32_t    UNIPTR_T::take_varuint(void) {
                 retvalue = *u32_ptr++;
                 break;
             case 3: // 0xFF
-                throw "Value too big";
+                throw BCException("Value 0xFF too big");
         }
     }
     return retvalue;
 }
 
-bool b_error(const std::string &s) {
-  std::cerr << s << std::endl;
-  return false;
-}
-
-u_int32_t u32_error(const std::string &s, uint32_t retcode) {
-  std::cerr << s << std::endl;
-  return retcode;
+void v_error(const std::string &s) {
+  std::cerr << "Err: " << s << std::endl;
 }

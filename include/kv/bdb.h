@@ -10,9 +10,10 @@
 class KV_BDB_T : public KV_BASE_T {
   // TODO: Hash table size
 private:
+  std::string dbpath;
   Db       *db = nullptr;
   uint32_t  reccount = NOT_FOUND_U32;
-  bool      open(const std::filesystem::path &, uint64_t = 0);
+  bool      open(const std::filesystem::path &, uint64_t);
   bool      close(void);
 public:
   KV_BDB_T(const std::filesystem::path &, uint64_t = 0);

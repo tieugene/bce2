@@ -37,28 +37,28 @@ Options:\n\
 -l <path> - locs-file\n\
 -c        - hex input from stdin (conflicts w/ -d and -l)\n\
 -k <path> - file-based key-value folder\n\
--e <name> - key-value engine (kcf/kcm/tkf/tkm)\n\
+-e <name> - key-value engine (kcf/kcm/tkf/tkm/bdb)\n\
 -t n      - k-v tuning (depends on engine)\n\
 -o        - output results\n\
--s n      - logging step (default 1)\n\
+-s n      - logging step (default=1)\n\
 -v[n]     - verbosity (0..3, to stderr)\
 ";
 
-void        __prn_opts(void) {
-    cerr
-        << "Options:" << endl
-        << TAB << "From:" << TAB << OPTS.from << endl
-        << TAB << "Num:" << TAB << OPTS.num << endl
-        << TAB << "Dat dir:" << TAB << OPTS.datdir << endl
-        << TAB << "Locs file:" << TAB << OPTS.locsfile << endl
-        << TAB << "K-V dir:" << TAB << OPTS.kvdir << endl
-        << TAB << "K-V type:" << TAB << OPTS.kvngin << endl
-        << TAB << "K-V tune:" << TAB << OPTS.kvtune << endl
-        << TAB << "Cin:" << TAB << OPTS.fromcin << endl
-        << TAB << "Debug:" << TAB << OPTS.verbose << endl
-        << TAB << "Out:" << TAB << OPTS.out << endl
-        << TAB << "Log by:" << TAB << OPTS.logstep << endl
-    ;
+void __prn_opts(void) {
+  cerr
+    << "Options:" << endl
+    << TAB << "From:" << TAB << OPTS.from << endl
+    << TAB << "Num:" << TAB << OPTS.num << endl
+    << TAB << "Dat dir:" << TAB << OPTS.datdir << endl
+    << TAB << "Locs file:" << TAB << OPTS.locsfile << endl
+    << TAB << "K-V dir:" << TAB << OPTS.kvdir << endl
+    << TAB << "K-V type:" << TAB << OPTS.kvngin << endl
+    << TAB << "K-V tune:" << TAB << OPTS.kvtune << endl
+    << TAB << "Cin:" << TAB << OPTS.fromcin << endl
+    << TAB << "Debug:" << TAB << OPTS.verbose << endl
+    << TAB << "Out:" << TAB << OPTS.out << endl
+    << TAB << "Log by:" << TAB << OPTS.logstep << endl
+  ;
 }
 
 /// Load options from config
@@ -75,13 +75,16 @@ bool load_cfg(void) {
     f_in.close();
     if (verbose >= 0)
       OPTS.verbose = DBG_LVL_T(verbose);
-    // fileststem::path workaround
+    if (logstep > 0)
+      OPTS.logstep = logstep;
+    // fileststem::path adaptors
     if (!datdir.empty())
       OPTS.datdir = datdir;
     if (!locsfile.empty())
       OPTS.locsfile = locsfile;
     if (!kvdir.empty())
       OPTS.kvdir = kvdir;
+    // enum adaptor
     if (!kvngin.empty()) {
       auto kt = kvnames.find(kvngin);
       if (kt != kvnames.end())
@@ -90,8 +93,6 @@ bool load_cfg(void) {
         if (OPTS.verbose)
           return b_error("Unknow k-v type: " + kvngin);
     }
-    if (logstep > 0)
-      OPTS.logstep = logstep;
   }
   return true;
 }
@@ -105,13 +106,13 @@ bool        cli(int argc, char *argv[]) {
 
     while ((opt = getopt(argc, argv, "hf:n:d:l:k:e:t:s:cov::")) != -1) {  // FIXME: v?
       switch (opt) {
-        case 'f':   // FIXME: optarg < 0 | > 999999
+        case 'f':
           tmp = atoi(optarg);
           if (tmp < 0 or tmp > 700000)
             return b_error("Bad -f: " + string(optarg));
           OPTS.from = tmp;
           break;
-        case 'n':   // FIXME: optarg < 1 | > 999999
+        case 'n':
           tmp = atoi(optarg);
           if (tmp < 0 or tmp > 700000)
             return b_error("Bad -i: " + string(optarg));
@@ -160,7 +161,7 @@ bool        cli(int argc, char *argv[]) {
             return b_error("-v: Bad verbose level " + string(optarg));
           OPTS.verbose = DBG_LVL_T(tmp);
           break;
-        case 's':   // FIXME: optarg < 0 | > 999999
+        case 's':
           tmp = atoi(optarg);
           if (tmp < 1 or tmp > 700000)
             return b_error("Bad -s: " + string(optarg));
@@ -195,9 +196,9 @@ bool load_opts(int argc, char *argv[]) {
     }
     if (kv_mode()) {
       if (!filesystem::exists(OPTS.kvdir))
-        return b_error("k-v: '" + string(OPTS.kvdir) + "' not exists");
+        return b_error("kvdir: '" + string(OPTS.kvdir) + "' not exists");
       if (!filesystem::is_directory(OPTS.kvdir))
-        return b_error("k-v: '" + string(OPTS.kvdir) + "' is not dir");
+        return b_error("kvdir: '" + string(OPTS.kvdir) + "' is not dir");
     }
     return true;
   }

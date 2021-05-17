@@ -2,11 +2,11 @@
 
 Exports BTC blockchain into plain text data.
 
-## Explanation
+## Description
 
-Bce2 parses blockchain's data files (blkXXXX.dat) *directly* and exports them into plain text format.  
-Output data can be loaded into PostgreSQL further using [bcerq](https://github.com/tieugene/bcerq/).  
-Key feature is enumerating blockchain objects (blocks, transactions, addresses) using interim key-value database.
+Bce2 exports blockchain data into text ready for loading into SQL DB.  
+Main goal is translating blockchain hashes (transactions, addresses) into their order numers using intermediate key-value storage.  
+Output data can be loaded into PostgreSQL using [bcerq](https://github.com/tieugene/bcerq/).  
 
 _Note: see [python-based version](https://github.com/tieugene/bcepy) to compare_
 
