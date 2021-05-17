@@ -17,18 +17,19 @@ const std::string hash2hex(const uint256_t &src);                   // printers,
  */
 const std::string ripe2hex(const uint160_t &src);                   // ---
 /**
- * @brief Convert hash160 into address (BIP16)
+ * @brief Convert hash160 into Base58 address (BIP16)
  * @param src Data to convert
  * @param pfx Prefix (blockchain, 0=main)
- * @return Base58 address
+ * @return Base58 address (bytes)
  */
-const std::string ripe2addr(const u8_t *src, const u8_t pfx = 0);   // script
+const std::string ripe2addr(const u8_t *src, const u8_t pfx = 0);
 /**
  * @brief Convert W0KEYHASH into Bech32 string
  * @note BIP-173 (https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki)
  * @param src Data to convert (uint160?)
  * @return Base32 string
- * @todo src: uchar* => string_view | &hash160
+ * @todo src: uchar* => &hash160
+ * @note script
  */
 const std::string wpkh2addr(const u8_t *src);                    // script
 /**

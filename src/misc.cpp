@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Misc utilities
  * TODO: options:
  * - input bk no=>hash table
@@ -20,7 +20,7 @@
 using namespace std;
 
 /// Returns used memory in kilobytes
-long        get_statm(void) {
+long get_statm(void) {
     long    total = 0;  // rss, shared, text, lib, data, dt; man proc
 #if defined (__linux__)
     ifstream statm("/proc/self/statm");
@@ -38,8 +38,8 @@ long        get_statm(void) {
     return total;
 }
 
-long        memused(void) {
-    return get_statm();
+long memused(void) {
+  return get_statm();
 }
 
 string  ptr2hex(string_view data) {
@@ -53,12 +53,11 @@ string  ptr2hex(string_view data) {
     return s;
 }
 
-int hex2bytes(string_view s, u8_t *const dst) {
-  auto src_ptr = s.cbegin();
-  auto src_end = src_ptr + s.length();
-  auto *dst_ptr = dst;
+int hex2bytes(string_view src, u8_t *const dst) {
+  auto src_ptr = src.begin();
+  u8_t *dst_ptr;
 
-  for (; src_ptr < src_end; src_ptr += 2, dst_ptr++)
+  for (dst_ptr = dst; src_ptr < src.end(); src_ptr += 2, dst_ptr++)
     *dst_ptr = (hextoint(src_ptr[0]) << 4) | hextoint(src_ptr[1]);
   return dst_ptr - dst;
 }
