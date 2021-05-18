@@ -49,7 +49,7 @@ install -t %{buildroot}%{_mandir}/man5 -m 0644 -p doc/*.5
 %{_bindir}/%{name}
 %{_bindir}/btcbklocs
 %{_bindir}/btclocview
-%{_mandir}/man?/*.?
+%{_mandir}/man{1,5}/*
 
 
 %changelog
