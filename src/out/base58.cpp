@@ -17,7 +17,8 @@ std::string EncodeBase58(std::string_view data)
     // Skip & count leading zeroes.
     int zeroes = 0;
     int length = 0;
-    auto pbegin = data.begin(), pend = data.end();
+    u8_t *pbegin = (u8_t *) data.data();
+    u8_t *pend = pbegin + data.length();
     while (pbegin != pend && *pbegin == 0) {
         pbegin++;
         zeroes++;
