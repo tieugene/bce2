@@ -9,8 +9,8 @@
 
 using namespace std;
 
-KV_TK_DISK_T::KV_TK_DISK_T(const filesystem::path &s, uint64_t tune) {
-  if (!open(s, tune))
+KV_TK_DISK_T::KV_TK_DISK_T(const filesystem::path &dir, KVNAME_T name, uint64_t tune) {
+  if (!open(dir, name, tune))
     throw BCException("tkf: Cannot init DB");
 }
 
@@ -20,26 +20,26 @@ KV_TK_DISK_T::~KV_TK_DISK_T() {
   delete db;
 }
 
-bool KV_TK_DISK_T::open(const filesystem::path &s, uint64_t tune) {
-  dbpath = s;
+bool KV_TK_DISK_T::open(const filesystem::path &dir, KVNAME_T name, uint64_t tune) {
+  dbpath = dir / (kv_name[name] + ".tkh");
   auto bnum_need = 0;
   db = new tkrzw::HashDBM();
   tkrzw::HashDBM::TuningParameters tuning_params;
   tuning_params.offset_width = 5;
   if (tune) {
     if (tune > 30)
-      return b_error("tkf " + dbpath + ": Tuning parameter is too big: " + to_string(tune));
+      return b_error("tkf " + dbpath.string() + ": Tuning parameter is too big: " + to_string(tune));
     else {
       bnum_need = 1 << tune;
       tuning_params.num_buckets = bnum_need;
     }
   }
-  if (!db->OpenAdvanced(s.string() + ".tkh", true, tkrzw::File::OPEN_DEFAULT, tuning_params).IsOK())
-    return b_error("tkf " + dbpath + ": Cannot open db " + s.string());
+  if (!db->OpenAdvanced(dbpath, true, tkrzw::File::OPEN_DEFAULT, tuning_params).IsOK())
+    return b_error("tkf " + dbpath.string() + ": Cannot open DB");
   if (OPTS.verbose and bnum_need) { // chk tune
     auto bnum_found = db->CountBuckets();
     if (bnum_found < bnum_need)
-      v_error(dbpath + " buckets: found " + to_string(bnum_found) + " < " + to_string(bnum_need) + " required.");
+      v_error(dbpath.string() + " buckets: found " + to_string(bnum_found) + " < " + to_string(bnum_need) + " required.");
   }
   return true;
 }
@@ -47,9 +47,9 @@ bool KV_TK_DISK_T::open(const filesystem::path &s, uint64_t tune) {
 bool KV_TK_DISK_T::close(void) {
   bool retvalue = true;
   if (!db->Synchronize(true).IsOK())
-    retvalue = b_error("tkf " + dbpath + ": Cannot sync DB");
+    retvalue = b_error("tkf " + dbpath.string() + ": Cannot sync DB");
   if (!db->Close().IsOK())
-    retvalue = b_error("tkf " + dbpath + ": Cannot close DB");
+    retvalue = b_error("tkf " + dbpath.string() + ": Cannot close DB");
   return retvalue;
 }
 
@@ -71,7 +71,7 @@ uint32_t    KV_TK_DISK_T::get(string_view key) {
     if (!db->Get(key, &value).IsOK())    // FXIME: handle errors
         return NOT_FOUND_U32;
     if (value.length() != 4)
-      return u32_error(dbpath + ": Bad key len: " + to_string(value.length()));
+      return u32_error(dbpath.string() + ": Bad key len: " + to_string(value.length()));
     return *((uint32_t *) value.data());
 }
 
@@ -83,19 +83,19 @@ uint32_t    KV_TK_DISK_T::get_or_add(std::string_view key) {
     if (status == tkrzw::Status::DUPLICATION_ERROR)
       value = *((uint32_t *) old_value.data());
     else if (!status.IsOK())
-      return u32_error(dbpath + ": Something wrong with get_or_add");
+      return u32_error(dbpath.string() + ": Something wrong with get_or_add");
   }
   return value;
 }
 
 /// In-mem
-KV_TK_INMEM_T::KV_TK_INMEM_T(const char *s, uint64_t tune) {
-  if (!open(s, tune))
+KV_TK_INMEM_T::KV_TK_INMEM_T(KVNAME_T name, uint64_t tune) {
+  if (!open(name, tune))
     throw BCException("tkm " + dbname + ": Cannot init DB.");
 }
 
-bool    KV_TK_INMEM_T::open(const char *s, uint64_t tune) {
-  dbname = s;
+bool    KV_TK_INMEM_T::open(KVNAME_T name, uint64_t tune) {
+  dbname = kv_name[name];
   if (tune) {
     if (tune > 30)
       return b_error("tkm " + dbname + ": Tuning parameter is too big: " + to_string(tune));

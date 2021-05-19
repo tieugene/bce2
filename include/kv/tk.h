@@ -10,12 +10,12 @@
 
 class KV_TK_DISK_T : public KV_BASE_T {
 private:
-  std::string dbpath;
+  std::filesystem::path dbpath;
   tkrzw::HashDBM *db;
-  bool        open(const std::filesystem::path &, uint64_t = 0);
+  bool        open(const std::filesystem::path &, KVNAME_T, uint64_t = 0);
   bool        close(void);
 public:
-  KV_TK_DISK_T(const std::filesystem::path &, uint64_t = 0);
+  KV_TK_DISK_T(const std::filesystem::path &, KVNAME_T, uint64_t = 0);
   ~KV_TK_DISK_T();
   void        clear(void) { db->Clear(); }
   uint32_t    count(void);
@@ -28,9 +28,9 @@ class KV_TK_INMEM_T : public KV_BASE_T {
 private:
   std::string dbname;
   tkrzw::TinyDBM  *db = nullptr;
-  bool        open(const char *, uint64_t = 0);
+  bool        open(KVNAME_T, uint64_t = 0);
 public:
-  KV_TK_INMEM_T(const char *, uint64_t = 0);
+  KV_TK_INMEM_T(KVNAME_T, uint64_t = 0);
   ~KV_TK_INMEM_T() { delete db; }
   void        clear(void) { db->Clear(); }
   uint32_t    count(void) { return db->CountSimple(); }
