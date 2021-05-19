@@ -22,8 +22,11 @@ bool KV_BDB_T::open(const filesystem::path &dir, KVNAME_T name, uint64_t tune) {
     db = new Db(nullptr, 0);
   if (!db)
     return b_error("bdb " + dbpath.string() + ": Cannot open DB");
-  if (tune)
-      db->set_cachesize(tune, 0, 0);
+  if (tune) {
+    db->set_cachesize(tune, 0, 0);
+    // db->set_h_nelem(1<<30); // fixed file size
+    db->set_h_ffactor(name == KV_NAME_TX ? 92 : 123);
+  }
   if (db->open(nullptr, dbpath.c_str(), nullptr, DB_HASH, DB_CREATE, 0644))
     return b_error("bdb " + dbpath.string() + ": Cannot open DB");
   return true;
