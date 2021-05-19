@@ -38,6 +38,10 @@ k-v  | - | + | Full walk with log (count +uniq addresses)
 k-v  | + | - | Main job quietly
 k-v  | + | + | Main job with log
 
+Verbosity:
+- 1: stat counts - bks, txs, vins, vouts, addrs found, uniq addrs, RAM used, timer
+- 2: +misc summaries
+
 ## 2. Pre-run stage
 
 Direct processing blockchain requires to know block "locations" - what block in what blk*.dat at what position is stored.  

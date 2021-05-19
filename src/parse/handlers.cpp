@@ -176,7 +176,8 @@ bool    parse_script(void) {
     auto script_ok = script_decode(CUR_VOUT.script, CUR_VOUT.ssize);
     if (script_ok and CUR_ADDR.get_qty()) {
         if (kv_mode()) {
-            auto addr_tried = AddrDB->get_or_add(CUR_ADDR.get_view());
+            auto addr = CUR_ADDR.get_view();
+            auto addr_tried = AddrDB->get_or_add(addr);
             // TODO: check created > expected
             if (addr_tried == NOT_FOUND_U32)
               return b_error("Addr get_or_add error");
@@ -185,6 +186,7 @@ bool    parse_script(void) {
               if (OPTS.out)
                 out_addr();
               COUNT.addr++;
+              STAT.addr_lens[addr.length()]++;
             }
         } else if (OPTS.out)
           __prn_addr();

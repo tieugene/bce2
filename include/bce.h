@@ -51,6 +51,7 @@ struct  STAT_T {
     uint32_t    max_vouts = 0;
     uint32_t    addrs = 0;
     uint32_t    max_addrs = 0;
+    uint32_t    addr_lens[321] = {0}; ///< 0..MAX_ADDR_LEN
 };
 
 /// Per parent counters
