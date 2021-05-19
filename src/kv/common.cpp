@@ -25,28 +25,28 @@ bool    set_cache(void) {
         switch (OPTS.kvngin) {
 #ifdef USE_KC
           case KVTYPE_KCFILE:
-            TxDB = new KV_KC_DISK_T(OPTS.kvdir / "tx", OPTS.kvtune);
-            AddrDB = new KV_KC_DISK_T(OPTS.kvdir / "addr", OPTS.kvtune);
+            TxDB = new KV_KC_DISK_T(OPTS.kvdir, KV_NAME_TX, OPTS.kvtune);
+            AddrDB = new KV_KC_DISK_T(OPTS.kvdir, KV_NAME_ADDR, OPTS.kvtune);
             break;
           case KVTYPE_KCMEM:
-            TxDB = new KV_KC_INMEM_T("Tx", OPTS.kvtune);
-            AddrDB = new KV_KC_INMEM_T("Addr", OPTS.kvtune);
+            TxDB = new KV_KC_INMEM_T(KV_NAME_TX, OPTS.kvtune);
+            AddrDB = new KV_KC_INMEM_T(KV_NAME_ADDR, OPTS.kvtune);
             break;
 #endif
 #ifdef USE_TK
           case KVTYPE_TKFILE:
-            TxDB = new KV_TK_DISK_T(OPTS.kvdir / "tx", OPTS.kvtune);
-            AddrDB = new KV_TK_DISK_T(OPTS.kvdir / "addr", OPTS.kvtune);
+            TxDB = new KV_TK_DISK_T(OPTS.kvdir, KV_NAME_TX, OPTS.kvtune);
+            AddrDB = new KV_TK_DISK_T(OPTS.kvdir, KV_NAME_ADDR, OPTS.kvtune);
             break;
           case KVTYPE_TKMEM:
-            TxDB = new KV_TK_INMEM_T("Tx", OPTS.kvtune);
-            AddrDB = new KV_TK_INMEM_T("Addr", OPTS.kvtune);
+            TxDB = new KV_TK_INMEM_T(KV_NAME_TX, OPTS.kvtune);
+            AddrDB = new KV_TK_INMEM_T(KV_NAME_ADDR, OPTS.kvtune);
             break;
 #endif
 #ifdef USE_BDB
           case KVTYPE_BDB:
-            TxDB = new KV_BDB_T(OPTS.kvdir / "tx", OPTS.kvtune);
-            AddrDB = new KV_BDB_T(OPTS.kvdir / "addr", OPTS.kvtune);
+            TxDB = new KV_BDB_T(OPTS.kvdir, KV_NAME_TX, OPTS.kvtune);
+            AddrDB = new KV_BDB_T(OPTS.kvdir, KV_NAME_ADDR, OPTS.kvtune);
             break;
 #endif
           default:

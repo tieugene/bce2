@@ -5,9 +5,9 @@
 
 using namespace std;
 
-KV_BDB_T::KV_BDB_T(const filesystem::path &s, uint64_t tune) {
-  if (!open(s, tune))
-    throw BCException("bdb " + dbpath + ": Cannot init DB");
+KV_BDB_T::KV_BDB_T(const filesystem::path &dir, KVNAME_T name, uint64_t tune) {
+  if (!open(dir, name, tune))
+    throw BCException("bdb " + dbpath.string() + ": Cannot init DB");
 }
 
 KV_BDB_T::~KV_BDB_T() {
@@ -16,25 +16,28 @@ KV_BDB_T::~KV_BDB_T() {
   delete db;
 }
 
-bool KV_BDB_T::open(const filesystem::path &s, uint64_t tune) {
-  dbpath = s;
+bool KV_BDB_T::open(const filesystem::path &dir, KVNAME_T name, uint64_t tune) {
+  dbpath = dir / (kv_name[name] + ".bdh");
   if (!db)
     db = new Db(nullptr, 0);
   if (!db)
-    return b_error("bdb " + dbpath + ": Cannot open db " + s.string());
-  if (tune)
-      db->set_cachesize(tune, 0, 0);
-  if (db->open(nullptr, (s.string() + ".bdb").c_str(), nullptr, DB_HASH, DB_CREATE, 0644))
-    return b_error("bdb " + dbpath + ": Cannot open db " + s.string());
+    return b_error("bdb " + dbpath.string() + ": Cannot open DB");
+  if (tune) {
+    db->set_cachesize(tune, 0, 0);
+    // db->set_h_nelem(1<<30); // fixed file size
+    db->set_h_ffactor(name == KV_NAME_TX ? 92 : 123);
+  }
+  if (db->open(nullptr, dbpath.c_str(), nullptr, DB_HASH, DB_CREATE, 0644))
+    return b_error("bdb " + dbpath.string() + ": Cannot open DB");
   return true;
 }
 
 bool KV_BDB_T::close(void) {
   bool retvalue = true;
   if (db->sync(0))
-    retvalue = b_error("bdb " + dbpath + ": Cannot sync DB");
+    retvalue = b_error("bdb " + dbpath.string() + ": Cannot sync DB");
   if (db->close(0))
-    retvalue = b_error("bdb " + dbpath + ": Cannot close DB");
+    retvalue = b_error("bdb " + dbpath.string() + ": Cannot close DB");
   return retvalue;
 }
 
@@ -52,7 +55,7 @@ uint32_t KV_BDB_T::count(void) {
     if (!db->stat(nullptr, &stat, 0))
       reccount = stat->hash_ndata; // or hash_nkeys
     else
-      v_error(dbpath + ": Cannot get stat()");
+      v_error(dbpath.string() + ": Cannot get stat()");
     free(stat);
   }
   return reccount;
@@ -83,7 +86,7 @@ uint32_t    KV_BDB_T::get_or_add(std::string_view key) {
   if (v == NOT_FOUND_U32) {
     v = add(key);
     if (v == NOT_FOUND_U32)
-      return u32_error(dbpath + ": Can not get nor add key " + ptr2hex(key));
+      return u32_error(dbpath.string() + ": Can not get nor add key " + ptr2hex(key));
   }
   return v;
 }

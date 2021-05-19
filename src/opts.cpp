@@ -12,7 +12,7 @@
 
 using namespace std;
 
-const std::map<std::string, KVNGIN_T> kvnames = {
+const std::map<std::string, KVNGIN_T> kv_type_name = {
   {"none", KVTYPE_NONE}
 #ifdef USE_KC
   ,{"kcf", KVTYPE_KCFILE}
@@ -47,7 +47,7 @@ Options:\n\
 void __prn_opts(void) {
   cerr
     << "= Options: =" << endl
-    << "From:" << TAB << OPTS.from << endl
+    << "From:" << TAB << ((OPTS.from == MAX_UINT32) ? string("<not set") : to_string(OPTS.from)) << endl
     << "Num:" << TAB << OPTS.num << endl
     << "Dat dir:" << TAB << OPTS.datdir << endl
     << "Locs file:" << TAB << OPTS.locsfile << endl
@@ -86,8 +86,8 @@ bool load_cfg(void) {
       OPTS.kvdir = kvdir;
     // enum adaptor
     if (!kvngin.empty()) {
-      auto kt = kvnames.find(kvngin);
-      if (kt != kvnames.end())
+      auto kt = kv_type_name.find(kvngin);
+      if (kt != kv_type_name.end())
         OPTS.kvngin = kt->second;
       else
         if (OPTS.verbose)
@@ -101,7 +101,7 @@ bool load_cfg(void) {
 bool        cli(int argc, char *argv[]) {
     int opt, tmp;
     long tmp_l;
-    auto kt = kvnames.begin();
+    auto kt = kv_type_name.begin();
     bool direct = false;
 
     while ((opt = getopt(argc, argv, "hf:n:d:l:k:e:t:s:cov::")) != -1) {  // FIXME: v?
@@ -136,8 +136,8 @@ bool        cli(int argc, char *argv[]) {
           OPTS.kvdir = optarg;
           break;
         case 'e':
-          kt = kvnames.find(optarg);
-          if (kt == kvnames.end())
+          kt = kv_type_name.find(optarg);
+          if (kt == kv_type_name.end())
             return b_error("-e: unknown engine '" + string(optarg) + "'");
           OPTS.kvngin = kt->second;
           break;
