@@ -46,18 +46,18 @@ Options:\n\
 
 void __prn_opts(void) {
   cerr
-    << "Options:" << endl
-    << TAB << "From:" << TAB << OPTS.from << endl
-    << TAB << "Num:" << TAB << OPTS.num << endl
-    << TAB << "Dat dir:" << TAB << OPTS.datdir << endl
-    << TAB << "Locs file:" << TAB << OPTS.locsfile << endl
-    << TAB << "K-V dir:" << TAB << OPTS.kvdir << endl
-    << TAB << "K-V type:" << TAB << OPTS.kvngin << endl
-    << TAB << "K-V tune:" << TAB << OPTS.kvtune << endl
-    << TAB << "Cin:" << TAB << OPTS.fromcin << endl
-    << TAB << "Debug:" << TAB << OPTS.verbose << endl
-    << TAB << "Out:" << TAB << OPTS.out << endl
-    << TAB << "Log by:" << TAB << OPTS.logstep << endl
+    << "= Options: =" << endl
+    << "From:" << TAB << OPTS.from << endl
+    << "Num:" << TAB << OPTS.num << endl
+    << "Dat dir:" << TAB << OPTS.datdir << endl
+    << "Locs file:" << TAB << OPTS.locsfile << endl
+    << "K-V dir:" << TAB << OPTS.kvdir << endl
+    << "K-V type:" << TAB << OPTS.kvngin << endl
+    << "K-V tune:" << TAB << OPTS.kvtune << endl
+    << "Cin:" << TAB << OPTS.fromcin << endl
+    << "Debug:" << TAB << OPTS.verbose << endl
+    << "Out:" << TAB << OPTS.out << endl
+    << "Log by:" << TAB << OPTS.logstep << endl << endl
   ;
 }
 
