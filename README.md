@@ -13,7 +13,7 @@ _Note: see [python-based version](https://github.com/tieugene/bcepy) to compare_
 ## Documentation
 
 - [Installation](doc/Install.md)
-- [Usage](doc/Usage.md)
+- [Usage](doc/Usage.md) and companions ([locs-file](doc/MkLocs.md), [tuning](doc/Tuning.md))
 - [Output](doc/Output.md) format
 
 ## License
