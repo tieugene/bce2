@@ -30,7 +30,7 @@ target_link_libraries(${PROJECT_NAME} ${OPENSSL_CRYPTO_LIBRARY})
 # Define k-v backend
 
 ## Kyotocabinet
-option(USE_KC "Kyotocabinet" ON)
+option(USE_KC "Kyotocabinet" OFF)
 if (USE_KC)
   pkg_search_module(KC IMPORTED_TARGET kyotocabinet)
   if (KC_FOUND)

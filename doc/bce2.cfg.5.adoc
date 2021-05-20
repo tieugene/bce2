@@ -15,7 +15,8 @@ bce2.cfg - default settings for bce2.
 == Description
 
 Set default options for _bce2_. +
-CLI options oweverwirite them.
+Supported all options as CLI excepting *-f* and *-n* + 
+CLI options oweverwirite config ones.
 
 == Options
 
