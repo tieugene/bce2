@@ -12,7 +12,7 @@
 // https://github.com/bitcoin/bitcoin/blob/master/src/bech32.cpp
 
 #include <string>
-#include "encode.h"
+#include "out/encode.h"
 
 /// The Bech32 character set for encoding.
 const static char* CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";

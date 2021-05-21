@@ -5,8 +5,8 @@
 #include <filesystem>
 #include <stdio.h>
 
-#include "bkidx.h"
-#include "datfarm.h"
+#include "load/bkidx.h"
+#include "load/datfarm.h"
 #include "misc.h"
 
 using namespace std;

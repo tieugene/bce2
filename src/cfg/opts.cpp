@@ -8,7 +8,7 @@
 #include <unistd.h> // getopt()
 #include "bce.h"
 #include "misc.h"
-#include "config_file.h"  // https://github.com/fbarberm/SimpleConfigFile
+#include "cfg/config_file.h"  // https://github.com/fbarberm/SimpleConfigFile
 
 using namespace std;
 
