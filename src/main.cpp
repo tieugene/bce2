@@ -3,10 +3,10 @@
 */
 
 #include "bce.h"
-#include "bkidx.h"
+#include "load/bkidx.h"
 #include "misc.h"
-#include "handlers.h"
-#include "printers.h"
+#include "bk/handlers.h"
+#include "out/printers.h"
 
 // globals
 OPT_T       OPTS;

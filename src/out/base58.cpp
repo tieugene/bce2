@@ -8,7 +8,7 @@
 #include <string_view>
 #include <vector>
 #include <cassert>
-#include "encode.h"
+#include "out/encode.h"
 
 static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 

@@ -3,11 +3,11 @@
  */
 #include <cstring>
 //#include <stdio.h>  // printf
-#include "script.h"
 #include "bce.h"
-#include "handlers.h"
 #include "misc.h"
-#include "printers.h"
+#include "bk/script.h"
+#include "bk/handlers.h"
+#include "out/printers.h"
 
 using namespace std;
 

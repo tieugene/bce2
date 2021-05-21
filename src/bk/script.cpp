@@ -9,9 +9,9 @@
 #include <algorithm>
 #include "bce.h"
 #include "misc.h"
-#include "script.h"
-#include "opcode.h"
-#include "encode.h"
+#include "bk/script.h"
+#include "bk/opcode.h"
+#include "out/encode.h"
 
 using namespace std;
 

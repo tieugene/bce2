@@ -11,8 +11,8 @@
 //#include <filesystem>
 #include "bce.h"
 #include "misc.h"
-#include "script.h" // cur_addr only
-#include "fasthex.h"
+#include "bk/script.h" // cur_addr only
+#include "load/fasthex.h"
 #if defined(__APPLE__)
 #include <mach/mach.h>
 #endif
