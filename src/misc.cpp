@@ -12,7 +12,6 @@
 #include "bce.h"
 #include "misc.h"
 #include "bk/script.h" // cur_addr only
-#include "load/fasthex.h"
 #if defined(__APPLE__)
 #include <mach/mach.h>
 #endif
@@ -51,13 +50,4 @@ string  ptr2hex(string_view data) {
         s.push_back(hex_chars[(*cptr & 0x0F)]);
     }
     return s;
-}
-
-int hex2bytes(string_view src, u8_t *const dst) {
-  auto src_ptr = src.begin();
-  u8_t *dst_ptr;
-
-  for (dst_ptr = dst; src_ptr < src.end(); src_ptr += 2, dst_ptr++)
-    *dst_ptr = (hextoint(src_ptr[0]) << 4) | hextoint(src_ptr[1]);
-  return dst_ptr - dst;
 }

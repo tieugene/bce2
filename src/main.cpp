@@ -29,8 +29,8 @@ using namespace std;
 
 int     main(int argc, char *argv[]) {
   // TODO: local BUFFER = char *const ptr;
-  u8_t BUFFER[MAX_BK_SIZE];
-  bool (*bkloader)(u8_t *, const uint32_t) = &stdin_bk;
+  //u8_t BUFFER[MAX_BK_SIZE];
+  string_view (*bkloader)(const uint32_t) = &stdin_bk;
 
     // 1. prepare
     // 1.1. handle options
@@ -54,10 +54,14 @@ int     main(int argc, char *argv[]) {
       __prn_head();
     start_time = time(nullptr);
     // 2. main loop
-    for (COUNT.bk = OPTS.from; bkloader(BUFFER, COUNT.bk); COUNT.bk++) {
-      CUR_PTR.v_ptr = BUFFER;
+    for (COUNT.bk = OPTS.from; OPTS.num; COUNT.bk++) { // FIXME: cond
+      auto buffer = bkloader(COUNT.bk);
+      if (buffer.empty())
+        break;
+      CUR_PTR.v_ptr = buffer.begin();
       if (!parse_bk()) {
           //__prn_trace();
+          delete buffer.begin();
           v_error("Bk # " + to_string(COUNT.bk));
           break;
       }
@@ -66,6 +70,7 @@ int     main(int argc, char *argv[]) {
       if (OPTS.num)   // not 'untill the end'
         if (--OPTS.num == 0)
           break;
+      delete buffer.begin();
     }
     // 3. The end
     if (OPTS.verbose) {
