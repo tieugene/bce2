@@ -71,7 +71,7 @@ struct  BUSY_T {
 };
 
 /// Bk header (80 bytes)
-struct  BK_HEAD_T {
+struct  BK_HEADER_T {
     uint32_t    ver;    // real head start (80 bytes)
     uint256_t   p_hash;
     uint256_t   mroot;
@@ -81,14 +81,14 @@ struct  BK_HEAD_T {
 };
 
 /// Whole of bk data w/o txs
-struct  BK_T {
-    const BK_HEAD_T   *head_ptr;
+struct  BK_OLD_T {
+    const BK_HEADER_T   *head_ptr;
     uint32_t    txs;
     uint256_t   hash;
 };
 
 /// Tx variables w/o vins/vouts
-struct  TX_T {
+struct  TX_OLD_T {
     uint32_t    ver;        // FIXME: * (for hash)
     uint32_t    vins;
     uint32_t    vouts;
@@ -99,7 +99,7 @@ struct  TX_T {
 };
 
 /// Vin data
-struct  VIN_T {
+struct  VIN_OLD_T {
     const uint256_t   *txid;
     uint64_t    txno;       // ?
     uint32_t    vout;
@@ -109,26 +109,26 @@ struct  VIN_T {
 };
 
 /// Vout data
-struct  VOUT_T {
+struct  VOUT_OLD_T {
     uint64_t    satoshi;
     uint32_t    ssize;      // vint
     const u8_t *script;
 };
 
 extern OPT_T    OPTS;
-extern DBG_LVL_T DBG_LVL;
-extern COUNT_T  COUNT;
 extern STAT_T   STAT;
-extern LOCAL_T  LOCAL;
-extern BUSY_T   BUSY;
-extern BK_T     CUR_BK;
-extern TX_T     CUR_TX;
-extern VIN_T    CUR_VIN;
-extern VOUT_T   CUR_VOUT;
-extern UNIPTR_T CUR_PTR;
 extern KV_BASE_T     *TxDB, *AddrDB;
 extern time_t   start_time;
 extern long     start_mem;
+// depricated
+extern COUNT_T  COUNT;
+extern LOCAL_T  LOCAL;
+extern BUSY_T   BUSY;
+extern BK_OLD_T     CUR_BK;
+extern TX_OLD_T     CUR_TX;
+extern VIN_OLD_T    CUR_VIN;
+extern VOUT_OLD_T   CUR_VOUT;
+extern UNIPTR_T CUR_PTR;
 
 const std::string TAB = "\t";
 /// Coinbase vin source

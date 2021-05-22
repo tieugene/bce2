@@ -5,31 +5,27 @@
 #include "bce.h"
 #include "load/bkidx.h"
 #include "misc.h"
+#include "bk/bk.h"
 #include "bk/handlers.h"
 #include "out/printers.h"
 
 // globals
 OPT_T       OPTS;
-DBG_LVL_T   DBG_LVL;
 COUNT_T     COUNT;
 STAT_T      STAT;
 LOCAL_T     LOCAL;
 BUSY_T      BUSY;
-BK_T        CUR_BK;
-TX_T        CUR_TX;
-VIN_T       CUR_VIN;
-VOUT_T      CUR_VOUT;
+BK_OLD_T        CUR_BK;
+TX_OLD_T        CUR_TX;
+VIN_OLD_T       CUR_VIN;
+VOUT_OLD_T      CUR_VOUT;
 UNIPTR_T    CUR_PTR;
 long        start_mem;
 time_t      start_time;
-// consts
-//const uint32_t  BULK_SIZE = 1000;
 
 using namespace std;
 
 int     main(int argc, char *argv[]) {
-  // TODO: local BUFFER = char *const ptr;
-  //u8_t BUFFER[MAX_BK_SIZE];
   string_view (*bkloader)(const uint32_t) = &stdin_bk;
 
     // 1. prepare
@@ -58,19 +54,20 @@ int     main(int argc, char *argv[]) {
       auto buffer = bkloader(COUNT.bk);
       if (buffer.empty())
         break;
+      auto bk = BK_T(buffer, COUNT.bk);
       CUR_PTR.v_ptr = buffer.begin();
-      if (!parse_bk()) {
-          //__prn_trace();
-          delete buffer.begin();
+      //auto parsed_ok = parse_bk();
+      delete buffer.begin();
+      /*
+      if (!parsed_ok) {
           v_error("Bk # " + to_string(COUNT.bk));
           break;
-      }
+      }*/
       if ((OPTS.verbose) and (((COUNT.bk+1) % OPTS.logstep) == 0))
           __prn_interim();
       if (OPTS.num)   // not 'untill the end'
         if (--OPTS.num == 0)
           break;
-      delete buffer.begin();
     }
     // 3. The end
     if (OPTS.verbose) {
@@ -80,7 +77,5 @@ int     main(int argc, char *argv[]) {
         __prn_summary();
     }
     stop_cache();
-    //if (BUFFER)
-    //    delete BUFFER;
     return 0;
 }
