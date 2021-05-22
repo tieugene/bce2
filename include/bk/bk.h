@@ -1,7 +1,7 @@
 /**
  * Order:
  * - Create items ("fast walk")
- * - Parse (w/ hashes; maybe multithread)
+ * - Parse (w/ hashes (bk, tx); maybe multithread)
  * - Resolve from k-v [+ vvv]
  * - Save to k-v
  * - Print
@@ -27,7 +27,8 @@ private:
   uint64_t          tx_id;  // resolving
 public:
   VIN_T(UNIPTR_T &);
-  void resolve(void);   ///< Resolve tx from k-v
+  bool parse(void);
+  bool resolve(void);
 };
 
 class VOUT_T {
@@ -37,13 +38,13 @@ private:
   ADDR_BASE_T *addr = nullptr;
 public:
   VOUT_T(UNIPTR_T &);
-  void resolve(void);   ///< Resolve addr to k-v
+  bool parse(void);
+  bool resolve(void);
 };
 
 class WIT_T {
 public:
   WIT_T(UNIPTR_T &);
-  void resolve(void);   ///< Resolve tx from k-v
 };
 
 class TX_T {
@@ -51,21 +52,26 @@ private:
   std::string_view data;  // for hash calc
   uint32_t ver;
   // bool segwit;
-  std::vector<VIN_T> vin;
-  std::vector<VOUT_T> vout;
-  std::vector<WIT_T> wit;
+  std::vector<VIN_T> vins;
+  std::vector<VOUT_T> vouts;
+  std::vector<WIT_T> wits;
+  void hash(void);
 public:
   TX_T(UNIPTR_T &);
+  bool parse(void);
+  bool resolve(void);
 };
 
 class BK_T {
 private:
   uint32_t height;
   std::string_view data;
-  std::vector<TX_T> tx;
+  std::vector<TX_T> txs;
+  void mk_hash(void);
 public:
   BK_T(std::string_view, const uint32_t);
   bool parse(void);
+  bool resolve(void);
 };
 
 #endif // BK_H
