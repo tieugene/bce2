@@ -48,7 +48,8 @@ void TX_T::mk_hash(void) {  // const u8_t *tx_beg
 }
 
 bool TX_T::parse(void) {
-  mk_hash();  // TODO: on demand/mt
+  if (OPTS.out or kv_mode())
+    mk_hash();  // TODO: on demand/mt
   bool retvalue(true);
   // for (auto it_vin = vins.begin(); it_vin != vins.end(); it_vin++)
   //  revalue &= it_vin->parse();

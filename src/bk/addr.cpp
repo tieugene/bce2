@@ -101,7 +101,7 @@ const string ADDR_WSH_T::repr(void) {
   return wsh2addr(data);
 }
 
-bool uint160_gt(const uint160_t &l, const uint160_t &r)    // desc
+inline bool uint160_gt(const uint160_t &l, const uint160_t &r)    // desc
   { return memcmp(&l, &r, sizeof (uint160_t)) > 0; }
 
 inline void sort_multisig(vector<uint160_t> v) {
@@ -134,7 +134,13 @@ ADDR_MS_T::ADDR_MS_T(string_view script) {
 }
 
 const string ADDR_MS_T::repr(void) {
-  return string();
+  string retvalue;
+  for (auto v: data) {
+    if (!retvalue.empty())
+      retvalue += ",";
+    retvalue += ripe2addr(v);
+  }
+  return retvalue;
 }
 
 ADDR_BASE_T *addr_decode(string_view data) {  // sript, size

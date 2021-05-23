@@ -32,7 +32,8 @@ void BK_T::mk_hash(void) {
 
 bool BK_T::parse(void) {
   // TODO: ? apply header
-  mk_hash();  // TODO: on demand/mt
+  if (OPTS.out)
+    mk_hash();  // TODO: on demand/mt
   bool retvalue(true);
   for (auto it_tx = txs.begin(); it_tx != txs.end(); it_tx++) // TODO: m/t
     retvalue &= it_tx->parse();
