@@ -6,18 +6,6 @@
 #include "common.h"
 
 /**
- * @brief Convert hash256 into hex string
- * @param src Data to hex
- * @return Hex string
- */
-const std::string hash2hex(const uint256_t &src);                   // printers, handlers (err)
-/**
- * @brief Convert hash160 into hex string
- * @param src Data to hex
- * @return Hex string
- */
-const std::string ripe2hex(const uint160_t &src);                   // ---
-/**
  * @brief Convert hash160 into Base58 address (BIP16)
  * @param src Data to convert
  * @param pfx Prefix (blockchain, 0=main)

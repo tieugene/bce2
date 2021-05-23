@@ -4,33 +4,11 @@
 #include <vector>
 #include <openssl/sha.h>
 #include <openssl/ripemd.h>
-#include "uintxxx.h"
 #include "misc.h"
-#include "out/encode.h"
+#include "crypt/uintxxx.h"
+#include "crypt/encode.h"
 
 using namespace std;
-
-const string  hash2hex(const uint256_t &h) {
-  UNIPTR_T u(&h);
-  char tmp[65];
-  tmp[64] = '\0';
-  sprintf(tmp,
-#if defined(__APPLE__)
-    "%016llx%016llx%016llx%016llx",
-#else
-    "%016lx%016lx%016lx%016lx",
-#endif
-    u.u64_ptr[3], u.u64_ptr[2], u.u64_ptr[1], u.u64_ptr[0]);
-  return string(tmp);
-}
-
-const string  ripe2hex(const uint160_t &r) {
-  UNIPTR_T u(&r);
-  char tmp[41];
-  tmp[40] = '\0';
-  sprintf(tmp, "%08x%08x%08x%08x%08x", u.u32_ptr[4], u.u32_ptr[3], u.u32_ptr[2], u.u32_ptr[1], u.u32_ptr[0]);
-  return string(tmp);
-}
 
 const string  ripe2addr(const u8_t *src, const u8_t pfx) {
   // TODO: src (u8* => &u160)

@@ -32,7 +32,7 @@ class VOUT_T {
 private:
   uint32_t no, tx_no, bk_no;
   uint64_t  satoshi;
-  uint32_t addr_id;
+  uint32_t addr_id = MAX_UINT32;  // aka NOT_FOUND
   std::string_view script;
   ADDR_BASE_T *addr = nullptr;
 public:

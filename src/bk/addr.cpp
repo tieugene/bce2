@@ -9,7 +9,7 @@
 #include "bk/addr.h"
 #include "bk/opcode.h"
 //#include "bce.h"      // STAT, OPTS
-#include "uintxxx.h"    // hash160
+#include "crypt/uintxxx.h"    // hash160
 
 using namespace std;
 

@@ -11,7 +11,7 @@
 #include "misc.h"
 #include "bk/script.h"
 #include "bk/opcode.h"
-#include "out/encode.h"
+#include "crypt/encode.h"
 
 using namespace std;
 
