@@ -16,40 +16,40 @@
 
 class VIN_T {
 private:
-  uint32_t no;
+  uint32_t no, tx_no, bk_no;
   const uint256_t  *tx_hash;
   uint32_t          vout;
   std::string_view  script;
   uint32_t          seq;
   uint64_t          tx_id;  // resolving
 public:
-  VIN_T(UNIPTR_T &, const uint32_t);
+  VIN_T(UNIPTR_T &, const uint32_t, const uint32_t, const uint32_t);
   bool parse(void);
   bool resolve(void);
 };
 
 class VOUT_T {
 private:
-  uint32_t no;
+  uint32_t no, tx_no, bk_no;
   uint64_t  satoshi;
   std::string_view script;
   ADDR_BASE_T *addr = nullptr;
 public:
-  VOUT_T(UNIPTR_T &, const uint32_t);
+  VOUT_T(UNIPTR_T &, const uint32_t, const uint32_t, const uint32_t);
   bool parse(void);
   bool resolve(void);
 };
 
 class WIT_T {
 private:
-  uint32_t no;
+  uint32_t no, tx_no, bk_no;
 public:
-  WIT_T(UNIPTR_T &, const uint32_t);
+  WIT_T(UNIPTR_T &, const uint32_t, const uint32_t, const uint32_t);
 };
 
 class TX_T {
 private:
-  uint32_t no;
+  uint32_t no, bk_no;
   std::string_view data;  // for hash calc
   uint256_t hash;
   uint32_t ver;
@@ -60,7 +60,7 @@ private:
   std::vector<WIT_T> wits;
   void mk_hash(void);
 public:
-  TX_T(UNIPTR_T &, const uint32_t);
+  TX_T(UNIPTR_T &, const uint32_t, const uint32_t);
   bool parse(void);
   bool resolve(void);
 };
