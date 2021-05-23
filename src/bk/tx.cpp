@@ -51,18 +51,18 @@ bool TX_T::parse(void) {
   if (OPTS.out or kv_mode())
     mk_hash();  // TODO: on demand/mt
   bool retvalue(true);
-  // for (auto it_vin = vins.begin(); it_vin != vins.end(); it_vin++)
-  //  revalue &= it_vin->parse();
-  for (auto it_vout = vouts.begin(); it_vout != vouts.end(); it_vout++)
-    retvalue &= it_vout->parse();
+  // for (auto vin ; vins)
+  //  revalue &= vin.parse();
+  for (auto vout : vouts)
+    retvalue &= vout.parse();
   return retvalue;
 }
 
 bool TX_T::resolve(void) {
   bool retvalue(true);
-  for (auto it_vin = vins.begin(); it_vin != vins.end(); it_vin++)
-    retvalue &= it_vin->resolve();
-  for (auto it_vout = vouts.begin(); it_vout != vouts.end(); it_vout++)
-    retvalue &= it_vout->resolve();
+  for (auto vin : vins)
+    retvalue &= vin.resolve();
+  for (auto vout : vouts)
+    retvalue &= vout.resolve();
   return retvalue;
 }

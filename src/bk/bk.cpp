@@ -17,7 +17,9 @@ struct  BK_HEAD_T {
 
 BK_T::BK_T(string_view src, uint32_t bk_no) : height(bk_no), data(src) {
   UNIPTR_T uptr(data.cbegin());
-  uptr.take_u8_ptr(sizeof(BK_HEAD_T)); // skip header
+  //uptr.take_u8_ptr(sizeof(BK_HEAD_T)); // skip header
+  const BK_HEAD_T* head_ptr = static_cast<const BK_HEAD_T*> ((const void *) uptr.take_u8_ptr(sizeof (BK_HEAD_T)));
+  time = head_ptr->time;
   auto tx_count = uptr.take_varuint();
   if (!(bk_no == BK_GLITCH[0] or bk_no == BK_GLITCH[1]))  // skip glitch blocks
     for (uint32_t i = 0; i < tx_count; i++, COUNT.tx++)
@@ -35,14 +37,14 @@ bool BK_T::parse(void) {
   if (OPTS.out)
     mk_hash();  // TODO: on demand/mt
   bool retvalue(true);
-  for (auto it_tx = txs.begin(); it_tx != txs.end(); it_tx++) // TODO: m/t
-    retvalue &= it_tx->parse();
+  for (auto tx : txs) // TODO: m/t
+    retvalue &= tx.parse();
   return retvalue;
 }
 
 bool BK_T::resolve(void) {
   bool retvalue(true);
-  for (auto it_tx = txs.begin(); it_tx != txs.end(); it_tx++) // TODO: m/t
-    retvalue &= it_tx->resolve();
+  for (auto tx : txs) // TODO: m/t
+    retvalue &= tx.resolve();
   return retvalue;
 }

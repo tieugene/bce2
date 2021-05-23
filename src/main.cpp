@@ -56,6 +56,10 @@ int     main(int argc, char *argv[]) {
         break;
       auto bk = BK_T(buffer, COUNT.bk);
       bk.parse();
+      //bk.resolve();
+      //bk.save();
+      if (OPTS.out)
+        prn_bk(bk);
       //CUR_PTR.v_ptr = buffer.begin();
       //auto parsed_ok = parse_bk();
       delete buffer.begin();

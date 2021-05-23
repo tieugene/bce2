@@ -22,6 +22,8 @@ private:
   std::string_view  script;
   uint32_t          seq;
   uint32_t          tx_id;  // resolving
+  friend void out_vin(const VIN_T &);
+  friend void prn_vin(const VIN_T &);
 public:
   VIN_T(UNIPTR_T &, const uint32_t, const uint32_t, const uint32_t);
   bool parse(void);
@@ -35,6 +37,8 @@ private:
   uint32_t addr_id = MAX_UINT32;  // aka NOT_FOUND
   std::string_view script;
   ADDR_BASE_T *addr = nullptr;
+  friend void out_vout(const VOUT_T &);
+  friend void prn_vout(const VOUT_T &);
 public:
   VOUT_T(UNIPTR_T &, const uint32_t, const uint32_t, const uint32_t);
   bool parse(void);
@@ -60,6 +64,8 @@ private:
   std::vector<VOUT_T> vouts;
   std::vector<WIT_T> wits;
   void mk_hash(void);
+  friend void out_tx(const TX_T &);
+  friend void prn_tx(const TX_T &);
 public:
   TX_T(UNIPTR_T &, const uint32_t, const uint32_t);
   bool parse(void);
@@ -69,10 +75,13 @@ public:
 class BK_T {
 private:
   uint32_t height;
+  uint32_t time;
   uint256_t hash;
   std::string_view data;
   std::vector<TX_T> txs;
   void mk_hash(void);
+  friend void out_bk(const BK_T &);
+  friend void prn_bk(const BK_T &);
 public:
   // TODO: delete data in destructor
   BK_T(std::string_view, const uint32_t);
