@@ -52,13 +52,14 @@ public:
 class TX_T {
 private:
   std::string_view data;  // for hash calc
+  uint256_t hash;
   uint32_t ver;
   bool segwit;
+  uint32_t wit_offset; ///< cut off for hash calc
   std::vector<VIN_T> vins;
   std::vector<VOUT_T> vouts;
   std::vector<WIT_T> wits;
   void mk_hash(void);
-  uint32_t wit_offset; ///< cut off for hash calc
 public:
   TX_T(UNIPTR_T &);
   bool parse(void);
@@ -68,6 +69,7 @@ public:
 class BK_T {
 private:
   uint32_t height;
+  uint256_t hash;
   std::string_view data;
   std::vector<TX_T> txs;
   void mk_hash(void);

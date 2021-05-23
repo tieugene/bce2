@@ -27,13 +27,12 @@ BK_T::BK_T(string_view src, uint32_t bk_no) : height(bk_no), data(src) {
 }
 
 void BK_T::mk_hash(void) {
-  uint256_t self_hash;
-  hash256(data.begin(), sizeof(BK_HEADER_T), self_hash);
+  hash256(data.begin(), sizeof(BK_HEADER_T), hash);
 }
 
 bool BK_T::parse(void) {
-  // apply header
-  // [start] calc hash (on demand)
+  // TODO: ? apply header
+  mk_hash();  // TODO: on demand/mt
   bool retvalue(true);
   for (auto it_tx = txs.begin(); it_tx != txs.end(); it_tx++) // TODO: m/t
     retvalue &= it_tx->parse();

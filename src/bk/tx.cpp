@@ -34,21 +34,20 @@ TX_T::TX_T(UNIPTR_T &uptr) {
 }
 
 void TX_T::mk_hash(void) {  // const u8_t *tx_beg
-  uint256_t self_hash;
   if (!segwit)
-    hash256(data, self_hash);
+    hash256(data, hash);
   else {
     vector<char> hash_src(data.begin(), data.end());
     hash_src.erase(hash_src.begin() + wit_offset, hash_src.end() - 4);  // cut off wits
     auto cut_off = hash_src.begin() + sizeof(uint32_t);
     hash_src.erase(cut_off, cut_off + sizeof (uint16_t));               // ...and wit signature
     hash_src.shrink_to_fit();
-    hash256(string_view(hash_src.data(), hash_src.size()), self_hash);
+    hash256(string_view(hash_src.data(), hash_src.size()), hash);
   }
 }
 
 bool TX_T::parse(void) {
-  // [start] calc hash (on demand)
+  mk_hash();  // TODO: on demand/mt
   bool retvalue(true);
   // for (auto it_vin = vins.begin(); it_vin != vins.end(); it_vin++)
   //  revalue &= it_vin->parse();
@@ -60,8 +59,8 @@ bool TX_T::parse(void) {
 bool TX_T::resolve(void) {
   bool retvalue(true);
   for (auto it_vin = vins.begin(); it_vin != vins.end(); it_vin++)
-    retvalue &= it_vin->parse();
+    retvalue &= it_vin->resolve();
   for (auto it_vout = vouts.begin(); it_vout != vouts.end(); it_vout++)
-    retvalue &= it_vout->parse();
+    retvalue &= it_vout->resolve();
   return retvalue;
 }
