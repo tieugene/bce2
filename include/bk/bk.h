@@ -12,13 +12,7 @@
 #include <string_view>
 #include <vector>
 #include "common.h"
-
-class ADDR_BASE_T {
-public:
-  //ADDR_BASE_T(string_view) = 0;
-  virtual ~ADDR_BASE_T() {}
-  virtual const char *name(void) = 0;
-};
+#include "addr.h"
 
 class VIN_T {
 private:

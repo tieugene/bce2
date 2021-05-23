@@ -1,11 +1,14 @@
 #ifndef ADDR_H
 #define ADDR_H
 
-#include "bk/bk.h" // Addr_base_t
+#include <string_view>
 
-using namespace std;
-
-ADDR_BASE_T *addr_decode(string_view);
+class ADDR_BASE_T {
+public:
+  //ADDR_BASE_T(string_view) = 0;
+  virtual ~ADDR_BASE_T() {}
+  virtual const char *name(void) = 0;
+};
 
 class ADDR_NULL_T : public ADDR_BASE_T {
 public:
@@ -48,5 +51,7 @@ public:
   ADDR_MS_T(std::string_view);
   const char *name(void) { return "multisig"; }
 };
+
+ADDR_BASE_T *addr_decode(std::string_view);
 
 #endif // ADDR_H

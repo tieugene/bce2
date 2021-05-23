@@ -14,8 +14,33 @@ using namespace std;
 /// dummy
 void dump_script(const string s) { cerr << s << endl; }
 
+ADDR_PK_T::ADDR_PK_T(string_view script) {
+  ;
+}
+
+ADDR_PKH_T::ADDR_PKH_T(string_view script) {
+  ;
+}
+
+ADDR_SH_T::ADDR_SH_T(string_view script) {
+  ;
+}
+
+ADDR_WPKH_T::ADDR_WPKH_T(string_view script) {
+  ;
+}
+
+ADDR_WSH_T::ADDR_WSH_T(string_view script) {
+  ;
+}
+
+ADDR_MS_T::ADDR_MS_T(string_view script) {
+  ;
+}
+
+
 ADDR_BASE_T *addr_decode(string_view data) {  // sript, size
-  /// FIXME: empty script
+  // FIXME: empty script
   ADDR_BASE_T *retvalue = nullptr;
   u8_t opcode = data[0];
   if (opcode == OP_RETURN)
