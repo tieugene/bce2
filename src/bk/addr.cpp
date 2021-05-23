@@ -4,10 +4,12 @@
 
 #include <iostream>
 #include <string>
+#include <cstring>      // memcmp
+#include <algorithm>    // sort
 #include "bk/addr.h"
 #include "bk/opcode.h"
 //#include "bce.h"      // STAT, OPTS
-#include "uintxxx.h"  // hash160
+#include "uintxxx.h"    // hash160
 
 using namespace std;
 
@@ -99,8 +101,36 @@ const string ADDR_WSH_T::repr(void) {
   return wsh2addr(data);
 }
 
+bool uint160_gt(const uint160_t &l, const uint160_t &r)    // desc
+  { return memcmp(&l, &r, sizeof (uint160_t)) > 0; }
+
+inline void sort_multisig(vector<uint160_t> v) {
+  if (v.size() > 1)
+    sort(v.begin(), v.end(), uint160_gt);
+}
+
 ADDR_MS_T::ADDR_MS_T(string_view script) {
-  throw AddrException("P2MS not implemented");
+  u8_t *script_ptr = (u8_t *) script.data();
+  auto script_size = script.length();
+  auto keys_qty_ptr = script_ptr + script_size - 2;
+  auto keys_qty = *keys_qty_ptr - 0x50;
+  auto key_ptr = script_ptr + 1;                        // key len
+  if (u8_t(script_ptr[script_size-1]) == OP_CHKMULTISIG // 2nd signature
+      and script_ptr[0] <= *keys_qty_ptr                // required (== opcode) <= qty
+      and *keys_qty_ptr <= OP_16) {                     // max 16 keys
+    for (auto i = 0; i < keys_qty and key_ptr < keys_qty_ptr; i++, key_ptr += (key_ptr[0]+1)) {
+      if (
+          ((*key_ptr == 0x41) and check_PKu_pfx(key_ptr[1])) or
+          ((*key_ptr == 0x21) and check_PKc_pfx(key_ptr[1]))) {
+        uint160_t tmp;
+        hash160(key_ptr+1, key_ptr[0], tmp);
+        data.push_back(tmp);
+      } else
+        throw AddrException("Bad P2MS: key #" + to_string(i));
+    }
+  } else
+    throw AddrException("Bad P2MS");
+  sort_multisig(data);
 }
 
 const string ADDR_MS_T::repr(void) {

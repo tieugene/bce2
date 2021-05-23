@@ -79,6 +79,8 @@ public:
 };
 
 class ADDR_MS_T : public ADDR_BASE_T {
+private:
+  std::vector<uint160_t> data;
 public:
   ADDR_MS_T(std::string_view);
   const char *name(void) { return "multisig"; }
