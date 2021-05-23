@@ -11,6 +11,10 @@
 
 using namespace std;
 
+const string ADDR_NULL_T::repr(void) {
+  return string();
+}
+
 /// check PK (uncompressed) prefix
 inline bool check_PKu_pfx(const u8_t pfx) {
   /*
@@ -47,6 +51,10 @@ ADDR_PK_T::ADDR_PK_T(string_view script) {
   }
 }
 
+const string ADDR_PK_T::repr(void) {
+  return ripe2addr(data);
+}
+
 ADDR_PKH_T::ADDR_PKH_T(string_view script) {
   if (script.length() == 25 and       // was >= dirty hack for 71036.?.? and w/ OP_NOP @ end
       u8_t(script[1]) == OP_HASH160 and
@@ -58,6 +66,10 @@ ADDR_PKH_T::ADDR_PKH_T(string_view script) {
     throw AddrException("Bad P2PKH");
 }
 
+const string ADDR_PKH_T::repr(void) {
+  return ripe2addr(data);
+}
+
 ADDR_SH_T::ADDR_SH_T(string_view script) {
   if (script.length() == 23 and
       script[1] == 20 and
@@ -67,16 +79,32 @@ ADDR_SH_T::ADDR_SH_T(string_view script) {
     throw AddrException("P2SH not implemented");
 }
 
+const string ADDR_SH_T::repr(void) {
+  return ripe2addr(data, 5);
+}
+
 ADDR_WPKH_T::ADDR_WPKH_T(string_view script) {
   memcpy(&data, script.data() + 2, sizeof (data));
+}
+
+const string ADDR_WPKH_T::repr(void) {
+  return wpkh2addr(data);
 }
 
 ADDR_WSH_T::ADDR_WSH_T(string_view script) {
   memcpy(&data, script.data() + 2, sizeof (data));
 }
 
+const string ADDR_WSH_T::repr(void) {
+  return wsh2addr(data);
+}
+
 ADDR_MS_T::ADDR_MS_T(string_view script) {
   throw AddrException("P2MS not implemented");
+}
+
+const string ADDR_MS_T::repr(void) {
+  return string();
 }
 
 ADDR_BASE_T *addr_decode(string_view data) {  // sript, size

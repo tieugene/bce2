@@ -24,6 +24,8 @@ const std::string ripe2hex(const uint160_t &src);                   // ---
  * @return Base58 address (bytes)
  */
 const std::string ripe2addr(const u8_t *src, const u8_t pfx = 0);
+inline const std::string ripe2addr(const uint160_t &src, const u8_t pfx = 0)
+  { return ripe2addr((u8_t *) &src, pfx); }
 /**
  * @brief Convert W0KEYHASH into Bech32 string
  * @note BIP-173 (https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki)
@@ -33,6 +35,8 @@ const std::string ripe2addr(const u8_t *src, const u8_t pfx = 0);
  * @note script
  */
 const std::string wpkh2addr(const u8_t *src);                    // script
+inline const std::string wpkh2addr(const uint160_t &src)
+  { return wpkh2addr((u8_t *) &src); }
 /**
  * @brief Convert W0SCRIPTHASH into Bech32 string
  * @param src Data to convert (uint256?)
@@ -40,6 +44,8 @@ const std::string wpkh2addr(const u8_t *src);                    // script
  * @todo src: uchar* => string_view | &hash160
  */
 const std::string wsh2addr(const u8_t *src);                     // script
+inline const std::string wsh2addr(const uint256_t &src)
+  { return wsh2addr((u8_t *) &src); }
 /**
  * @brief Double SHA256 given pubkey
  * @param src Data to hash
