@@ -13,6 +13,7 @@ VOUT_T::VOUT_T(UNIPTR_T &uptr) {
 }
 
 bool VOUT_T::parse(void) {
+  // TODO: create address
   return true;
 }
 

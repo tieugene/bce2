@@ -2,6 +2,7 @@
 #define UINTXXX_H
 
 #include <string>
+#include <vector>
 #include "common.h"
 
 /**
@@ -45,7 +46,9 @@ const std::string wsh2addr(const u8_t *src);                     // script
  * @param size Data length
  * @todo string_view src
  */
-void  hash256(const void *src, const uint32_t size, uint256_t &);   // handlers
+void  hash256(const void *src, const uint32_t size, uint256_t &);
+inline void  hash256(std::string_view src, uint256_t &dst) { hash256(src.begin(), src.length(), dst); }
+// inline void  hash256(std::vector<char> &src, uint256_t &dst) { hash256(src.begin(), src.size(), dst); }
 /**
  * @brief Hash address (SHA256 | RIPE160)
  * @param src Hashed data

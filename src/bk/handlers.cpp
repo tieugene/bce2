@@ -76,7 +76,6 @@ bool    hash_tx(const u8_t *tx_beg) {
     return true;
 }
 
-
 bool    parse_tx(void) { // TODO: hash
     BUSY.tx = true;
     auto tx_beg = CUR_PTR.u8_ptr;

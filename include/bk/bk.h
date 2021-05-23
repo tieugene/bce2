@@ -15,7 +15,9 @@
 
 class ADDR_BASE_T {
 public:
-  ADDR_BASE_T();
+  //ADDR_BASE_T(string_view) = 0;
+  virtual ~ADDR_BASE_T() {}
+  virtual const char *name(void) = 0;
 };
 
 class VIN_T {
@@ -51,11 +53,12 @@ class TX_T {
 private:
   std::string_view data;  // for hash calc
   uint32_t ver;
-  // bool segwit;
+  bool segwit;
   std::vector<VIN_T> vins;
   std::vector<VOUT_T> vouts;
   std::vector<WIT_T> wits;
-  void hash(void);
+  void mk_hash(void);
+  uint32_t wit_offset; ///< cut off for hash calc
 public:
   TX_T(UNIPTR_T &);
   bool parse(void);
@@ -69,6 +72,7 @@ private:
   std::vector<TX_T> txs;
   void mk_hash(void);
 public:
+  // TODO: delete data in destructor
   BK_T(std::string_view, const uint32_t);
   bool parse(void);
   bool resolve(void);
