@@ -57,5 +57,7 @@ inline void  hash256(std::string_view src, uint256_t &dst) { hash256(src.begin()
  * @todo string_view src
  */
 void  hash160(const void *src, const uint32_t size, u8_t *dst);  // script
+inline void  hash160(const void *src, const uint32_t size, uint160_t &dst)
+  { hash160(src, size, (u8_t *) &dst); }
 
 #endif // UINTXXX_H

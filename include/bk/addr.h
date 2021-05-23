@@ -2,6 +2,14 @@
 #define ADDR_H
 
 #include <string_view>
+#include <stdexcept>
+#include "common.h"
+
+class AddrException : public std::runtime_error {
+public:
+  AddrException(const std::string &msg) : std::runtime_error(msg) {}
+  AddrException(const char *msg) : std::runtime_error(msg) {}
+};
 
 class ADDR_BASE_T {
 public:
@@ -17,30 +25,40 @@ public:
 };
 
 class ADDR_PK_T : public ADDR_BASE_T {
+private:
+  uint160_t data;
 public:
   ADDR_PK_T(std::string_view);
   const char *name(void) { return "pubkey"; }
 };
 
 class ADDR_PKH_T : public ADDR_BASE_T {
+private:
+  uint160_t data;
 public:
   ADDR_PKH_T(std::string_view);
   const char *name(void) { return "pubkeyhash"; }
 };
 
 class ADDR_SH_T : public ADDR_BASE_T {
+private:
+  uint160_t data;
 public:
   ADDR_SH_T(std::string_view);
   const char *name(void) { return "scripthash"; }
 };
 
 class ADDR_WPKH_T : public ADDR_BASE_T {
+private:
+  uint160_t data;
 public:
   ADDR_WPKH_T(std::string_view);
   const char *name(void) { return "witness_v0_keyhash"; }
 };
 
 class ADDR_WSH_T : public ADDR_BASE_T {
+private:
+  uint256_t data;
 public:
   ADDR_WSH_T(std::string_view);
   const char *name(void) { return "witness_v0_scripthash"; }
