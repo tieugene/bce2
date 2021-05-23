@@ -53,21 +53,26 @@ ADDR_PKH_T::ADDR_PKH_T(string_view script) {
       u8_t(script[2]) == 20 and
       u8_t(script[23]) == OP_EQUALVERIFY and
       u8_t(script[24]) == OP_CHECKSIG)
-    memcpy(&data, script.data() + 3, sizeof (uint160_t));
+    memcpy(&data, script.data() + 3, sizeof (data));
   else
     throw AddrException("Bad P2PKH");
 }
 
 ADDR_SH_T::ADDR_SH_T(string_view script) {
-  throw AddrException("P2SH not implemented");
+  if (script.length() == 23 and
+      script[1] == 20 and
+      u8_t(script[22]) == OP_EQUAL)
+    memcpy(&data, script.data() + 2, sizeof (data));
+  else
+    throw AddrException("P2SH not implemented");
 }
 
 ADDR_WPKH_T::ADDR_WPKH_T(string_view script) {
-  throw AddrException("P2WPKH not implemented");
+  memcpy(&data, script.data() + 2, sizeof (data));
 }
 
 ADDR_WSH_T::ADDR_WSH_T(string_view script) {
-  throw AddrException("P2WSH not implemented");
+  memcpy(&data, script.data() + 2, sizeof (data));
 }
 
 ADDR_MS_T::ADDR_MS_T(string_view script) {
@@ -112,7 +117,7 @@ ADDR_BASE_T *addr_decode(string_view data) {  // sript, size
       break;
     default:
       if (opcode <= 0xB9) // x. last defined opcode
-        throw AddrException("Not impl-d");
+        ; // throw AddrException("Not impl-d");
       else
         throw AddrException("Invalid");
   }
