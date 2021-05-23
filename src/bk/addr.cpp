@@ -13,8 +13,19 @@
 
 using namespace std;
 
+/// Address prefix for K-V storage
+enum    KEY_TYPE_T {
+    KEY_0,  // PK, PKH
+    KEY_S,  // SH
+    KEY_W   // WPKH
+};
+
 const string ADDR_NULL_T::repr(void) {
   return string();
+}
+
+const string_view ADDR_NULL_T::as_key(void) {
+  return string_view();
 }
 
 /// check PK (uncompressed) prefix
@@ -51,10 +62,16 @@ ADDR_PK_T::ADDR_PK_T(string_view script) {
     else
       throw AddrException("Bad P2PKu");
   }
+  key.front() = KEY_0;
+  memcpy(key.data() + 1, data.data(), sizeof (data));
 }
 
 const string ADDR_PK_T::repr(void) {
   return ripe2addr(data);
+}
+
+const string_view ADDR_PK_T::as_key(void) {
+  return string_view((const char *) key.data(), sizeof(key));
 }
 
 ADDR_PKH_T::ADDR_PKH_T(string_view script) {
@@ -66,10 +83,16 @@ ADDR_PKH_T::ADDR_PKH_T(string_view script) {
     memcpy(&data, script.data() + 3, sizeof (data));
   else
     throw AddrException("Bad P2PKH");
+  key.front() = KEY_0;
+  memcpy(key.data() + 1, data.data(), sizeof (data));
 }
 
 const string ADDR_PKH_T::repr(void) {
   return ripe2addr(data);
+}
+
+const string_view ADDR_PKH_T::as_key(void) {
+  return string_view((const char *) key.data(), sizeof(key));
 }
 
 ADDR_SH_T::ADDR_SH_T(string_view script) {
@@ -79,18 +102,30 @@ ADDR_SH_T::ADDR_SH_T(string_view script) {
     memcpy(&data, script.data() + 2, sizeof (data));
   else
     throw AddrException("P2SH not implemented");
+  key.front() = KEY_S;
+  memcpy(key.data() + 1, data.data(), sizeof (data));
 }
 
 const string ADDR_SH_T::repr(void) {
   return ripe2addr(data, 5);
 }
 
+const string_view ADDR_SH_T::as_key(void) {
+  return string_view((const char *) key.data(), sizeof(key));
+}
+
 ADDR_WPKH_T::ADDR_WPKH_T(string_view script) {
   memcpy(&data, script.data() + 2, sizeof (data));
+  key.front() = KEY_W;
+  memcpy(key.data() + 1, data.data(), sizeof (data));
 }
 
 const string ADDR_WPKH_T::repr(void) {
   return wpkh2addr(data);
+}
+
+const string_view ADDR_WPKH_T::as_key(void) {
+  return string_view((const char *) key.data(), sizeof(key));
 }
 
 ADDR_WSH_T::ADDR_WSH_T(string_view script) {
@@ -99,6 +134,10 @@ ADDR_WSH_T::ADDR_WSH_T(string_view script) {
 
 const string ADDR_WSH_T::repr(void) {
   return wsh2addr(data);
+}
+
+const string_view ADDR_WSH_T::as_key(void) {
+  return string_view((const char *) data.data(), sizeof(data));
 }
 
 inline bool uint160_gt(const uint160_t &l, const uint160_t &r)    // desc
@@ -130,7 +169,12 @@ ADDR_MS_T::ADDR_MS_T(string_view script) {
     }
   } else
     throw AddrException("Bad P2MS");
-  sort_multisig(data);
+  if (data.size() > 1)
+    sort_multisig(data);
+  else {
+    key1.front() = KEY_0;
+    memcpy(key1.data() + 1, data.data(), sizeof (uint160_t));
+  }
 }
 
 const string ADDR_MS_T::repr(void) {
@@ -141,6 +185,13 @@ const string ADDR_MS_T::repr(void) {
     retvalue += ripe2addr(v);
   }
   return retvalue;
+}
+
+const string_view ADDR_MS_T::as_key(void) {
+  if (data.size() > 1)
+    return string_view((const char *) data.data(), sizeof(data));
+  else
+    return string_view((const char *) key1.data(), sizeof(key1));
 }
 
 ADDR_BASE_T *addr_decode(string_view data) {  // sript, size
