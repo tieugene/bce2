@@ -21,7 +21,7 @@ BK_T::BK_T(string_view src, uint32_t bk_no) : height(bk_no), data(src) {
   auto tx_count = uptr.take_varuint();
   if (!(bk_no == BK_GLITCH[0] or bk_no == BK_GLITCH[1]))  // skip glitch blocks
     for (uint32_t i = 0; i < tx_count; i++, COUNT.tx++)
-      txs.push_back(TX_T(uptr));
+      txs.push_back(TX_T(uptr, i));
   // Counters
   STAT.max_txs = max(STAT.max_txs, tx_count);
 }

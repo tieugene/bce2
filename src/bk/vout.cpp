@@ -5,7 +5,7 @@
 using namespace std;
 
 // == VOUT ==
-VOUT_T::VOUT_T(UNIPTR_T &uptr) {
+VOUT_T::VOUT_T(UNIPTR_T &uptr, const uint32_t vout_no) : no(vout_no) {
   satoshi = uptr.take_64();
   auto s_size = uptr.take_varuint();
   auto s_body = uptr.take_ch_ptr(s_size);

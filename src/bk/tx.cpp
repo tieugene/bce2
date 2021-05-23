@@ -5,7 +5,7 @@
 
 using namespace std;
 
-TX_T::TX_T(UNIPTR_T &uptr) {
+TX_T::TX_T(UNIPTR_T &uptr, const uint32_t tx_no) : no(tx_no) {
   auto tx_beg = uptr.ch_ptr;
   ver = uptr.take_32();
   segwit = (*uptr.u16_ptr == 0x0100);
@@ -16,14 +16,14 @@ TX_T::TX_T(UNIPTR_T &uptr) {
   if (vin_count == 0)
     throw BCException("Vins == 0");
   for (uint32_t i = 0; i < vin_count; i++)
-    vins.push_back(VIN_T(uptr));
+    vins.push_back(VIN_T(uptr, i));
   auto vout_count = uptr.take_varuint();  // vouts
   for (uint32_t i = 0; i < vout_count; i++)
-    vouts.push_back(VOUT_T(uptr));
+    vouts.push_back(VOUT_T(uptr, i));
   wit_offset = uptr.ch_ptr - tx_beg;
   if (segwit)                             // wits
       for (uint32_t i = 0; i < vin_count; i++)
-          wits.push_back(WIT_T(uptr));
+          wits.push_back(WIT_T(uptr, i));
   uptr.take_32();                         // skip locktime
   data = string_view(tx_beg, uptr.ch_ptr - tx_beg);
   // Counters
