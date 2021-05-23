@@ -22,8 +22,8 @@ bool VIN_T::parse(void) {
 
 bool VIN_T::resolve(void) {
   if (vout != COINBASE_vout) {
-    auto txno = TxDB->get(u256string_view(*tx_hash));
-    if (txno == NOT_FOUND_U32)
+    tx_id = TxDB->get(u256string_view(*tx_hash));
+    if (tx_id == NOT_FOUND_U32)
       return b_error("txid " + hash2hex(*tx_hash) + " not found.");
   }
   return true;

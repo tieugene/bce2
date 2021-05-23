@@ -26,5 +26,10 @@ bool VOUT_T::parse(void) {
 }
 
 bool VOUT_T::resolve(void) {
-  return true;
+  if (addr) {
+    auto k = addr->as_key();
+    if (!k.empty())
+      addr_id = AddrDB->get(k);
+  }
+  return true;  // FIXME: addr_id != NOT_FOUND
 }

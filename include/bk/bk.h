@@ -21,7 +21,7 @@ private:
   uint32_t          vout;
   std::string_view  script;
   uint32_t          seq;
-  uint64_t          tx_id;  // resolving
+  uint32_t          tx_id;  // resolving
 public:
   VIN_T(UNIPTR_T &, const uint32_t, const uint32_t, const uint32_t);
   bool parse(void);
@@ -32,6 +32,7 @@ class VOUT_T {
 private:
   uint32_t no, tx_no, bk_no;
   uint64_t  satoshi;
+  uint32_t addr_id;
   std::string_view script;
   ADDR_BASE_T *addr = nullptr;
 public:
