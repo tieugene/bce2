@@ -11,6 +11,8 @@
 
 using namespace std;
 
+const std::string TAB = "\t";
+
 // Uncomment to use bce2 as addresses generator only
 // #define DBG
 

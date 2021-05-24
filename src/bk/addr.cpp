@@ -189,7 +189,7 @@ const string ADDR_MS_T::repr(void) {
 
 const string_view ADDR_MS_T::as_key(void) {
   if (data.size() > 1)
-    return string_view((const char *) data.data(), sizeof(data));
+    return string_view((const char *) data.data(), data.size() * sizeof (uint160_t));
   else
     return string_view((const char *) key1.data(), sizeof(key1));
 }
@@ -203,11 +203,9 @@ ADDR_BASE_T *addr_decode(string_view data) {  // sript, size
   if (data.length() < 22)             // P2WPKH is smallest script
     return nullptr;
   switch (opcode) {
-    case 0x41:
-      retvalue = new ADDR_PK_T(data); // uncompressed
-      break;
-    case 0x21:
-      retvalue = new ADDR_PK_T(data); // compressed
+    case 0x41: // uncompressed
+    case 0x21: // compressed
+      retvalue = new ADDR_PK_T(data);
       break;
     case OP_DUP:
       retvalue = new ADDR_PKH_T(data);

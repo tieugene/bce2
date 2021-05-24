@@ -17,11 +17,11 @@
 class VIN_T {
 private:
   uint32_t no, tx_no, bk_no;
-  const uint256_t  *tx_hash;
-  uint32_t          vout;
+  const uint256_t  *tx_hash = nullptr;
+  uint32_t          vout = 0;
   std::string_view  script;
-  uint32_t          seq;
-  uint32_t          tx_id;  // resolving
+  uint32_t          seq = 0;
+  uint32_t          tx_id = MAX_UINT32;  // resolving
   friend void out_vin(const VIN_T &);
   friend void prn_vin(const VIN_T &);
 public:
@@ -33,7 +33,7 @@ public:
 class VOUT_T {
 private:
   uint32_t no, tx_no, bk_no;
-  uint64_t  satoshi;
+  uint64_t  satoshi = 0;
   uint32_t addr_id = MAX_UINT32;  // aka NOT_FOUND
   std::string_view script;
   ADDR_BASE_T *addr = nullptr;
@@ -59,10 +59,10 @@ class TX_T {
 private:
   uint32_t no, bk_no;
   std::string_view data;  // for hash calc
-  uint256_t hash;
-  uint32_t ver;
-  bool segwit;
-  uint32_t wit_offset; ///< cut off for hash calc
+  uint256_t hash = {0};
+  uint32_t ver = 0;
+  bool segwit = false;
+  uint32_t wit_offset = 0; ///< cut off for hash calc
   std::vector<VIN_T*> vins;
   std::vector<VOUT_T*> vouts;
   std::vector<WIT_T*> wits;
@@ -79,8 +79,8 @@ public:
 class BK_T {
 private:
   uint32_t height;
-  uint32_t time;
-  uint256_t hash;
+  uint32_t time = 0;
+  uint256_t hash = {0};
   std::string_view data;
   std::vector<TX_T*> txs;
   void mk_hash(void);

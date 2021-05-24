@@ -130,7 +130,6 @@ extern VIN_OLD_T    CUR_VIN;
 extern VOUT_OLD_T   CUR_VOUT;
 extern UNIPTR_T CUR_PTR;
 
-const std::string TAB = "\t";
 /// Coinbase vin source
 const uint32_t COINBASE_vout = 0xFFFFFFFF;
 

@@ -26,6 +26,7 @@ const std::map<std::string, KVNGIN_T> kv_type_name = {
   ,{"bdb", KVTYPE_BDB}
 #endif
 };
+const std::string TAB = "\t";
 const string cfg_file_name = ".bce2.cfg";
 const string  help_txt = "\
 Usage: [options]\n\

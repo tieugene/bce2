@@ -28,8 +28,6 @@ size_t  load_fileoffsets(const filesystem::path &fn) {
     return u32_error("Wrong file size (<0 or != 8x or >8MB (1M bks)): " + fn.string() + "=" + to_string(data_size), 0);
   auto blocks = size_t(data_size >> 3);
   FOFF = new FOFF_T[blocks];
-  if (!FOFF)
-    return u32_error("Can't allocate mem for file-offset list.", 0);
   file.seekg (0, ios::beg);
   auto tmp = reinterpret_cast<char *>(FOFF);
   file.read (tmp, data_size);
@@ -57,8 +55,6 @@ string_view load_bk(const uint32_t bk_no) {
   if (size > MAX_BK_SIZE)
     return sv_error("Bk #" + to_string(bk_no) + ": Block too big: " + to_string(size));
   char *buffer = new char[size];
-  if (!buffer)
-    return sv_error("Bk #" + to_string(bk_no) + ": Cannot allocate buffer.");
   if (!datfarm->read(fileno, offset, size, buffer)) {
     delete []buffer;
     return sv_error("Bk #" + to_string(bk_no) + ": Cannot read block itself.");
@@ -98,8 +94,6 @@ string_view stdin_bk(const uint32_t bk_no) {
       return sv_error("Bk #" + to_string(bk_no) + ": Hex-line has odd symbols: " + to_string(line_len));
     auto buffer_len = line_len / 2;
     char *buffer = new char[buffer_len];
-    if (!buffer)
-      return sv_error("Bk #" + to_string(bk_no) + ": Cannot allocate buffer.");
     auto done = hex2bytes(string_view(line, line_len), buffer);
     if (done != buffer_len) {
       delete []buffer;
