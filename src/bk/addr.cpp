@@ -101,7 +101,7 @@ ADDR_SH_T::ADDR_SH_T(string_view script) {
       u8_t(script[22]) == OP_EQUAL)
     memcpy(&data, script.data() + 2, sizeof (data));
   else
-    throw AddrException("P2SH not implemented");
+    throw AddrException("Bad P2SH");
   key.front() = KEY_S;
   memcpy(key.data() + 1, data.data(), sizeof (data));
 }

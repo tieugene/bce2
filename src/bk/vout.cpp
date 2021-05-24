@@ -24,7 +24,8 @@ bool VOUT_T::parse(void) {
   try {
     addr = addr_decode(script);
   } catch (const AddrException &e) {
-    cerr << to_string(bk_no) << "/" << to_string(tx_no) << "/" << to_string(no) << ": " << e.what() << endl;
+    if (OPTS.verbose > DBG_MIN)  // FIXME: DBG_MAX
+      cerr << "Vout " << to_string(bk_no) << "/" << to_string(tx_no) << "/" << to_string(no) << ": " << e.what() << endl;
   }
   if (addr)
     STAT.addrs++;
@@ -44,7 +45,7 @@ const string VOUT_T::addr_type(void) {
   if (addr)
     return addr->name();
   else
-    return "unknow";
+    return "nonstandard";
 }
 
 const string VOUT_T::addr_repr(void) {
