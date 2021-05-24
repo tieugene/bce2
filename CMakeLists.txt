@@ -90,6 +90,13 @@ else ()
     target_link_libraries(btcbklocs leveldb)
 endif ()
 
+# for debug
+option(ADDR_ONLY "Addr only" OFF)
+if (ADDR_ONLY)
+  add_definitions(-DADDR_ONLY)
+endif()
+message(STATUS "Addr only: ${ADDR_ONLY}")
+
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 install(TARGETS btcbklocs RUNTIME DESTINATION bin)
 install(TARGETS btclocview RUNTIME DESTINATION bin)

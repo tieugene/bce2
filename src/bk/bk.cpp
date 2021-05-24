@@ -23,9 +23,17 @@ BK_T::BK_T(string_view src, uint32_t bk_no) : height(bk_no), data(src) {
   auto tx_count = uptr.take_varuint();
   if (!(bk_no == BK_GLITCH[0] or bk_no == BK_GLITCH[1]))  // skip glitch blocks
     for (uint32_t i = 0; i < tx_count; i++, COUNT.tx++)
-      txs.push_back(TX_T(uptr, i, bk_no));
+      txs.push_back(new TX_T(uptr, i, bk_no));
   // Counters
   STAT.max_txs = max(STAT.max_txs, tx_count);
+  // cerr << "+BK " << to_string(height) << endl;
+}
+
+BK_T::~BK_T() {
+  for (auto tx: txs)
+    delete tx;
+  delete data.data();
+  // cerr << "-BK " << to_string(height) << endl;
 }
 
 void BK_T::mk_hash(void) {
@@ -38,13 +46,13 @@ bool BK_T::parse(void) {
     mk_hash();  // TODO: on demand/mt
   bool retvalue(true);
   for (auto tx : txs) // TODO: m/t
-    retvalue &= tx.parse();
+    retvalue &= tx->parse();
   return retvalue;
 }
 
 bool BK_T::resolve(void) {
   bool retvalue(true);
   for (auto tx : txs) // TODO: m/t
-    retvalue &= tx.resolve();
+    retvalue &= tx->resolve();
   return retvalue;
 }

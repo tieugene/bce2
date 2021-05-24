@@ -17,14 +17,14 @@ TX_T::TX_T(UNIPTR_T &uptr, const uint32_t no, const uint32_t bk_no)
   if (vin_count == 0)
     throw BCException("Vins == 0");
   for (uint32_t i = 0; i < vin_count; i++)
-    vins.push_back(VIN_T(uptr, i, no, bk_no));
+    vins.push_back(new VIN_T(uptr, i, no, bk_no));
   auto vout_count = uptr.take_varuint();  // vouts
   for (uint32_t i = 0; i < vout_count; i++)
-    vouts.push_back(VOUT_T(uptr, i, no, bk_no));
+    vouts.push_back(new VOUT_T(uptr, i, no, bk_no));
   wit_offset = uptr.ch_ptr - tx_beg;
   if (segwit)                             // wits
       for (uint32_t i = 0; i < vin_count; i++)
-          wits.push_back(WIT_T(uptr, i, no, bk_no));
+          wits.push_back(new WIT_T(uptr, i, no, bk_no));
   uptr.take_32();                         // skip locktime
   data = string_view(tx_beg, uptr.ch_ptr - tx_beg);
   // Counters
@@ -32,6 +32,17 @@ TX_T::TX_T(UNIPTR_T &uptr, const uint32_t no, const uint32_t bk_no)
   STAT.vouts += vout_count;
   STAT.max_vins = max(STAT.max_vins, vin_count);
   STAT.max_vouts = max(STAT.max_vouts, vout_count);
+  // cerr << "+TX " << to_string(no) << endl;
+}
+
+TX_T::~TX_T() {
+  for (auto vin: vins)
+    delete vin;
+  for (auto vout: vouts)
+    delete vout;
+  for (auto wit: wits)
+    delete wit;
+  // cerr << "-TX " << to_string(no) << endl;
 }
 
 void TX_T::mk_hash(void) {  // const u8_t *tx_beg
@@ -54,15 +65,15 @@ bool TX_T::parse(void) {
   // for (auto vin ; vins)
   //  revalue &= vin.parse();
   for (auto vout : vouts)
-    retvalue &= vout.parse();
+    retvalue &= vout->parse();
   return retvalue;
 }
 
 bool TX_T::resolve(void) {
   bool retvalue(true);
   for (auto vin : vins)
-    retvalue &= vin.resolve();
+    retvalue &= vin->resolve();
   for (auto vout : vouts)
-    retvalue &= vout.resolve();
+    retvalue &= vout->resolve();
   return retvalue;
 }

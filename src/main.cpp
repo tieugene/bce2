@@ -60,9 +60,9 @@ int     main(int argc, char *argv[]) {
       //bk.save();
       if (OPTS.out)
         prn_bk(bk);
+      //delete bk;
       //CUR_PTR.v_ptr = buffer.begin();
       //auto parsed_ok = parse_bk();
-      delete buffer.begin();
       /*
       if (!parsed_ok) {
           v_error("Bk # " + to_string(COUNT.bk));

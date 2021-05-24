@@ -38,11 +38,14 @@ private:
   std::string_view script;
   ADDR_BASE_T *addr = nullptr;
   friend void out_vout(const VOUT_T &);
-  friend void prn_vout(const VOUT_T &);
+  friend void prn_vout(VOUT_T &);
 public:
   VOUT_T(UNIPTR_T &, const uint32_t, const uint32_t, const uint32_t);
+  ~VOUT_T();
   bool parse(void);
   bool resolve(void);
+  const std::string addr_type(void);
+  const std::string addr_repr(void);
 };
 
 class WIT_T {
@@ -60,14 +63,15 @@ private:
   uint32_t ver;
   bool segwit;
   uint32_t wit_offset; ///< cut off for hash calc
-  std::vector<VIN_T> vins;
-  std::vector<VOUT_T> vouts;
-  std::vector<WIT_T> wits;
+  std::vector<VIN_T*> vins;
+  std::vector<VOUT_T*> vouts;
+  std::vector<WIT_T*> wits;
   void mk_hash(void);
   friend void out_tx(const TX_T &);
   friend void prn_tx(const TX_T &);
 public:
   TX_T(UNIPTR_T &, const uint32_t, const uint32_t);
+  ~TX_T();
   bool parse(void);
   bool resolve(void);
 };
@@ -78,13 +82,14 @@ private:
   uint32_t time;
   uint256_t hash;
   std::string_view data;
-  std::vector<TX_T> txs;
+  std::vector<TX_T*> txs;
   void mk_hash(void);
   friend void out_bk(const BK_T &);
   friend void prn_bk(const BK_T &);
 public:
   // TODO: delete data in destructor
   BK_T(std::string_view, const uint32_t);
+  ~BK_T();
   bool parse(void);
   bool resolve(void);
 };
