@@ -42,7 +42,8 @@ Options:\n\
 -t n      - k-v tuning (depends on engine)\n\
 -o        - output results\n\
 -s n      - logging step (default=1)\n\
--v[n]     - verbosity (0..3, to stderr)\
+-v[n]     - verbosity (0..3, to stderr)\n\
+-m        - multithreading on\n\
 ";
 
 void __prn_opts(void) {
@@ -52,13 +53,14 @@ void __prn_opts(void) {
     << "Num:" << TAB << OPTS.num << endl
     << "Dat dir:" << TAB << OPTS.datdir << endl
     << "Locs file:" << TAB << OPTS.locsfile << endl
+    << "Cin:" << TAB << OPTS.fromcin << endl
     << "K-V dir:" << TAB << OPTS.kvdir << endl
     << "K-V type:" << TAB << OPTS.kvngin << endl
     << "K-V tune:" << TAB << OPTS.kvtune << endl
-    << "Cin:" << TAB << OPTS.fromcin << endl
-    << "Debug:" << TAB << OPTS.verbose << endl
     << "Out:" << TAB << OPTS.out << endl
     << "Log by:" << TAB << OPTS.logstep << endl << endl
+    << "Debug:" << TAB << OPTS.verbose << endl
+    << "M/t:" << TAB << OPTS.mt << endl
   ;
 }
 
@@ -71,8 +73,8 @@ bool load_cfg(void) {
     unsigned long logstep = 0;
     CFG::ReadFile(
           f_in,
-          vector<string>{"datdir", "locsfile", "kvdir", "kvtype", "tune", "verbose", "out", "stdin", "logby"},
-          datdir, locsfile, kvdir, kvngin, OPTS.kvtune, verbose, OPTS.out, OPTS.fromcin, logstep);
+          vector<string>{"datdir", "locsfile", "kvdir", "kvtype", "tune", "verbose", "out", "stdin", "mt", "logby"},
+          datdir, locsfile, kvdir, kvngin, OPTS.kvtune, verbose, OPTS.out, OPTS.fromcin, OPTS.mt, logstep);
     f_in.close();
     if (verbose >= 0)
       OPTS.verbose = DBG_LVL_T(verbose);
@@ -105,7 +107,7 @@ bool        cli(int argc, char *argv[]) {
     auto kt = kv_type_name.begin();
     bool direct = false;
 
-    while ((opt = getopt(argc, argv, "hf:n:d:l:k:e:t:s:cov::")) != -1) {  // FIXME: v?
+    while ((opt = getopt(argc, argv, "hf:n:d:l:k:e:t:s:comv::")) != -1) {  // FIXME: v?
       switch (opt) {
         case 'f':
           tmp = atoi(optarg);
@@ -155,6 +157,9 @@ bool        cli(int argc, char *argv[]) {
           break;
         case 'o':
           OPTS.out = true;
+          break;
+        case 'm':
+          OPTS.mt = true;
           break;
         case 'v':   // FIXME: optarg = 0..5
           tmp = atoi(optarg);

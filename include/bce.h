@@ -33,6 +33,7 @@ struct  OPT_T {
     bool        out = false;          // produce output
     DBG_LVL_T   verbose = DBG_NONE;   // verbosity
     uint64_t    logstep = 1;          // logging step
+    bool        mt = false;           // multithreading
 };
 
 /// Through counters

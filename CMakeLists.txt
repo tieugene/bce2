@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
+include("cmake/PVS-Studio.cmake")
+
 project(bce2 LANGUAGES CXX)
 project(bce2 VERSION 0.1.0)
 
