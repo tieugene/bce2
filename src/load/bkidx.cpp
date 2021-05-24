@@ -2,6 +2,7 @@
  * locs- and *.dat files handler
  */
 #include <iostream>
+#include <cstring> // strlen
 #include <filesystem>
 #include <stdio.h>
 
@@ -106,5 +107,5 @@ string_view stdin_bk(const uint32_t bk_no) {
     }
     return string_view(buffer, buffer_len);
   } else
-    return string_view(nullptr);
+    return string_view();
 }
