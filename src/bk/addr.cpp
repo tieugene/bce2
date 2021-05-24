@@ -231,10 +231,13 @@ ADDR_BASE_T *addr_decode(string_view data) {  // sript, size
       retvalue = new ADDR_MS_T(data);
       break;
     default:
+      ;
+      /*
       if (opcode <= 0xB9) // x. last defined opcode
-        ; // throw AddrException("Not impl-d");
+        throw AddrException("Not impl-d");
       else
         throw AddrException("Invalid");
+      */
   }
   return retvalue;
 }

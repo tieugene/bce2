@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(bce2 LANGUAGES CXX)
-project(bce2 VERSION 0.0.5)
+project(bce2 VERSION 0.1.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,11 +15,17 @@ aux_source_directory(src/kv SRC_LIST)
 aux_source_directory(src/load SRC_LIST)
 aux_source_directory(src/out SRC_LIST)
 add_executable(${PROJECT_NAME} ${SRC_LIST})
-add_executable(btcbklocs tools/btcbklocs.cpp)
-add_executable(btclocview tools/btclocview.cpp)
 # add_executable(test_cin tools/test_cin.cpp)
 
 find_package(PkgConfig REQUIRED)
+
+# for debug
+option(ADDR_ONLY "Addr only" OFF)
+if (ADDR_ONLY)
+  add_definitions(-DADDR_ONLY)
+endif()
+message(STATUS "Addr only: ${ADDR_ONLY}")
+
 ## openssl
 if (APPLE)
     # brew hack
@@ -79,25 +85,25 @@ if (USE_BDB)
 endif ()
 message(STATUS "BDB: ${USE_BDB}")
 
-# for btcbklocs
-## leveldb
-if (APPLE)
-    # brew hack
-    include_directories(/usr/local/opt/leveldb/include/)
-    target_link_libraries(btcbklocs /usr/local/opt/leveldb/lib/libleveldb.dylib)
-else ()
-    find_package(leveldb CONFIG REQUIRED)
-    target_link_libraries(btcbklocs leveldb)
+install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+
+# ====
+option(BUILD_TOOLS "Tools" OFF)
+if (BUILD_TOOLS)
+  add_executable(btcbklocs tools/btcbklocs.cpp)
+  add_executable(btclocview tools/btclocview.cpp)
+  # for btcbklocs
+  ## leveldb
+  if (APPLE)
+      # brew hack
+      include_directories(/usr/local/opt/leveldb/include/)
+      target_link_libraries(btcbklocs /usr/local/opt/leveldb/lib/libleveldb.dylib)
+  else ()
+      find_package(leveldb CONFIG REQUIRED)
+      target_link_libraries(btcbklocs leveldb)
+  endif ()
+  install(TARGETS btcbklocs RUNTIME DESTINATION bin)
+  install(TARGETS btclocview RUNTIME DESTINATION bin)
 endif ()
 
-# for debug
-option(ADDR_ONLY "Addr only" OFF)
-if (ADDR_ONLY)
-  add_definitions(-DADDR_ONLY)
-endif()
-message(STATUS "Addr only: ${ADDR_ONLY}")
-
-install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
-install(TARGETS btcbklocs RUNTIME DESTINATION bin)
-install(TARGETS btclocview RUNTIME DESTINATION bin)
 # install(TARGETS test_cin RUNTIME DESTINATION bin)
