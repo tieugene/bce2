@@ -28,7 +28,7 @@ const std::map<std::string, KVNGIN_T> kv_type_name = {
 };
 const string cfg_file_name = ".bce2.cfg";
 const string  help_txt = "\
-Usage: [options] (- | <dat_dir> <locs_file>)\n\
+Usage: [options]\n\
 Options:\n\
 -h        - this help\n\
 -f n      - block starts from (default=0)\n\
@@ -168,6 +168,9 @@ bool        cli(int argc, char *argv[]) {
           OPTS.logstep = tmp;
           break;
         case 'h':
+          cout << help_txt << endl;
+          return false;
+          break;
         case '?':   // can handle optopt
           return b_error(help_txt);
       }
