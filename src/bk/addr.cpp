@@ -195,7 +195,8 @@ const string_view ADDR_MS_T::as_key(void) {
 }
 
 ADDR_BASE_T *addr_decode(string_view data) {  // sript, size
-  // FIXME: empty script
+  if (data.length() == 0)
+    return nullptr;
   ADDR_BASE_T *retvalue = nullptr;
   u8_t opcode = data[0];
   if (opcode == OP_RETURN)
