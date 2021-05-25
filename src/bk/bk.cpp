@@ -32,7 +32,7 @@ BK_T::BK_T(string_view src, uint32_t bk_no) : height(bk_no), data(src) {
 BK_T::~BK_T() {
   for (auto tx: txs)
     delete tx;
-  delete data.data(); // PVS warning
+  delete []data.data(); // PVS warning
   // cerr << "-BK " << to_string(height) << endl;
 }
 
