@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
 
-include("cmake/PVS-Studio.cmake")
-
 project(bce2 LANGUAGES CXX)
 project(bce2 VERSION 0.1.0)
 
@@ -17,7 +15,6 @@ aux_source_directory(src/kv SRC_LIST)
 aux_source_directory(src/load SRC_LIST)
 aux_source_directory(src/out SRC_LIST)
 add_executable(${PROJECT_NAME} ${SRC_LIST})
-# add_executable(test_cin tools/test_cin.cpp)
 
 find_package(PkgConfig REQUIRED)
 
@@ -37,8 +34,7 @@ find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} ${OPENSSL_CRYPTO_LIBRARY})
 
-# Define k-v backend
-
+# K-V backend
 ## Kyotocabinet
 option(USE_KC "Kyotocabinet" OFF)
 if (USE_KC)
@@ -108,4 +104,16 @@ if (BUILD_TOOLS)
   install(TARGETS btclocview RUNTIME DESTINATION bin)
 endif ()
 
+# ==== PVS-Studio
+option(USE_PVS "PVS-Studio" OFF)
+if (USE_PVS)
+  # not helps with QtCreator
+  include("cmake/PVS-Studio.cmake")
+  pvs_studio_add_target(TARGET ${PROJECT_NAME}.analyze ALL
+                        ANALYZE ${PROJECT_NAME}
+                        MODE GA:1,2 OP)
+endif()
+message(STATUS "PVS-Studio: ${USE_PVS}")
+
+# add_executable(test_cin tools/test_cin.cpp)
 # install(TARGETS test_cin RUNTIME DESTINATION bin)

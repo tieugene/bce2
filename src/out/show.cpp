@@ -5,56 +5,36 @@
 using namespace std;
 
 void prn_bk(const BK_T &bk) {
+  // TODO: ISO datime put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS")
 #ifndef ADDR_ONLY
-  cout
-      << "Bk: " << bk.height
-      << ", time: " << bk.time
-      << ", hash: " << hash2hex(bk.hash)
-      << ", txs: " << bk.txs.size()
-      << endl;
-      // << " (" << put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS") << ")"
+  printf("B: %u, Time: %u, Txs: %lu, Hash: %s\n",
+    bk.height, bk.time, bk.txs.size(), hash2hex(bk.hash).c_str());
 #endif
-  for (auto tx : bk.txs) // TODO: m/t
+  for (auto tx : bk.txs)
     prn_tx(*tx);
 }
 
 void prn_tx(const TX_T &tx) {
+  // TODO: through no (COUNT.tx/tx.id)
 #ifndef ADDR_ONLY
-  cout
-      << "  Tx: " << tx.no
-      << " (" << COUNT.tx << ")"
-      << ", hash: " << hash2hex(tx.hash)
-      << ", ins: "  << tx.vins.size()
-      << ", outs: " << tx.vouts.size()
-      << endl;
+  printf(" T: %u (%u), Ins: %lu, Outs: %lu, Hash: %s\n",
+    tx.no, COUNT.tx, tx.vins.size(), tx.vouts.size(), hash2hex(tx.hash).c_str());
   for (auto vin : tx.vins)
-    prn_vin(vin);
+    prn_vin(*vin);
 #endif
   for (auto vout : tx.vouts)
     prn_vout(*vout);
 }
 
 void prn_vin(const VIN_T &vin) {
-#ifndef ADDR_ONLY
-  cout << "    Vin: " << vin.no
-      << ", src: ";
-  if (vout == 0xFFFFFFFF)
-      cout << "<coinbase>";
-  else
-      cout << "(Tx: " << tx_no << ", vout: " << vout << ")";
-  cout
-      << ", ssize: " << script.length()
-      << endl;
-#endif
+  // TODO: if vin.vout == 0xFFFFFFFF ? <coinbase> : tx+no.vout
+  printf("  <: %u, Src: %s, s_size: %lu\n", vin.no, "TODO", vin.script.length());
 }
 
-void prn_vout(VOUT_T &vout) {
+void prn_vout(const VOUT_T &vout) {
 #ifndef ADDR_ONLY
-  cout
-      << "    Vout: " << vout
-      << ", $: " << satoshi
-      << ", ssize: " << scipt.lengths()
-      << endl;
+  // TODO: address
+  printf("  >: %u, $: %llu, s_size: %lu\n", vout.no, vout.satoshi, vout.script.length());
 #else
   auto a = vout.addr_repr();
   if (!a.empty())

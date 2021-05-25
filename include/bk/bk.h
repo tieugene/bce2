@@ -38,7 +38,7 @@ private:
   std::string_view script;
   ADDR_BASE_T *addr = nullptr;
   friend void out_vout(const VOUT_T &);
-  friend void prn_vout(VOUT_T &);
+  friend void prn_vout(const VOUT_T &);
 public:
   VOUT_T(UNIPTR_T &, const uint32_t, const uint32_t, const uint32_t);
   ~VOUT_T();
@@ -57,6 +57,7 @@ public:
 
 class TX_T {
 private:
+  uint32_t id = 0;  // TODO: save()
   uint32_t no, bk_no;
   std::string_view data;  // for hash calc
   uint256_t hash = {0};
