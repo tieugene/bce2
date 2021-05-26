@@ -54,12 +54,19 @@ string_view load_bk(const uint32_t bk_no) {
     return sv_error("Bk #" + to_string(bk_no) + ": Can't read bk size.");
   if (size > MAX_BK_SIZE)
     return sv_error("Bk #" + to_string(bk_no) + ": Block too big: " + to_string(size));
+  // simple
   char *buffer = new char[size];
   if (!datfarm->read(fileno, offset, size, buffer)) {
     delete []buffer;
     return sv_error("Bk #" + to_string(bk_no) + ": Cannot read block itself.");
   }
   return string_view(buffer, size);
+  /* uniq
+  unique_ptr<char[]> buffer = make_unique<char[]>(size);
+  if (!datfarm->read(fileno, offset, size, buffer.get()))
+    return sv_error("Bk #" + to_string(bk_no) + ": Cannot read block itself.");
+  return string_view(buffer, size); // x
+  */
 }
 
 /**

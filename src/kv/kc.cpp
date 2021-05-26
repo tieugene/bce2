@@ -65,7 +65,7 @@ uint32_t KV_KC_DISK_T::count(void) {
     return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
 }
 
-uint32_t KV_KC_DISK_T::add(string_view key) {
+uint32_t KV_KC_DISK_T::add(const string_view &key) {
     //auto value = map.emplace(key, value);   // FIXME: emplace() w/ checking retvalue
     auto value = count();
     if (value != NOT_FOUND_U32)
@@ -74,7 +74,7 @@ uint32_t KV_KC_DISK_T::add(string_view key) {
     return value;
 }
 
-uint32_t KV_KC_DISK_T::get(string_view key) {
+uint32_t KV_KC_DISK_T::get(const string_view &key) {
     uint32_t value;
     auto result = db->get(key.data(), key.length(), (char *)&value, sizeof(uint32_t));
     if (result != sizeof(uint32_t))
@@ -82,7 +82,7 @@ uint32_t KV_KC_DISK_T::get(string_view key) {
     return value;
 }
 
-uint32_t KV_KC_DISK_T::get_or_add(std::string_view key) {
+uint32_t KV_KC_DISK_T::get_or_add(const std::string_view &key) {
   auto v = get(key);
   if (v == NOT_FOUND_U32) {
     v = add(key);
@@ -113,7 +113,7 @@ bool KV_KC_INMEM_T::open(KVNAME_T name, u_int64_t tune) {
   return true;
 }
 
-uint32_t KV_KC_INMEM_T::add(string_view key) {
+uint32_t KV_KC_INMEM_T::add(const string_view &key) {
     auto value = count();
     if (value != NOT_FOUND_U32)
         if (!db->add(key.data(), key.length(), (const char *)&value, sizeof(uint32_t)))
@@ -121,7 +121,7 @@ uint32_t KV_KC_INMEM_T::add(string_view key) {
     return value;
 }
 
-uint32_t    KV_KC_INMEM_T::get(string_view key) {
+uint32_t    KV_KC_INMEM_T::get(const string_view &key) {
     uint32_t value;
     auto result = db->get(key.data(), key.length(), (char *)&value, sizeof(uint32_t));
     if (result != sizeof(uint32_t))
@@ -129,7 +129,7 @@ uint32_t    KV_KC_INMEM_T::get(string_view key) {
     return value;
 }
 
-uint32_t    KV_KC_INMEM_T::get_or_add(string_view key) {
+uint32_t    KV_KC_INMEM_T::get_or_add(const string_view &key) {
   auto v = get(key);
   if (v == NOT_FOUND_U32) {
     v = add(key);
