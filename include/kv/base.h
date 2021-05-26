@@ -15,13 +15,14 @@ public:
     /**
      * @brief Add new key
      * @param key Key to add
-     * @return Value of new key added or NOT_FOUND_U32
+     * @return Value of new key added or NOT_FOUND_U32 on error
      */
     virtual uint32_t    add(const std::string_view &key) = 0;
     /**
      * @brief Get key value
      * @param key Key to find
      * @return Key value or NOT_FOUND_U32
+     * @throw On any error excepting not found
      */
     virtual uint32_t    get(const std::string_view &key) = 0;
     /**
