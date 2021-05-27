@@ -45,6 +45,17 @@ bool VOUT_T::resolve(void) {
   return retvalue;
 }
 
+bool VOUT_T::save(void) {
+  bool retvalue(true);
+  if (addr and addr->is_full() and addr_id == MAX_UINT32) {
+    addr_id = AddrDB->add(addr->as_key());
+    retvalue = (addr_id != MAX_UINT32);
+    if (retvalue)
+      COUNT.addr++;
+  }
+  return retvalue;
+}
+
 const string VOUT_T::addr_type(void) {
   if (addr)
     return addr->name();

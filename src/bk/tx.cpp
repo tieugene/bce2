@@ -77,3 +77,11 @@ bool TX_T::resolve(void) {
     retvalue &= vout->resolve();
   return retvalue;
 }
+
+bool TX_T::save(void) {
+  bool retvalue = ((id = TxDB->add(u256string_view(hash))) != MAX_UINT32);
+  if (retvalue)
+    for (auto vout : vouts)
+      retvalue &= vout->save();
+  return retvalue;
+}

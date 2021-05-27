@@ -52,7 +52,14 @@ bool BK_T::parse(void) {
 
 bool BK_T::resolve(void) {
   bool retvalue(true);
-  for (auto tx : txs) // TODO: m/t
+  for (auto tx : txs)
     retvalue &= tx->resolve();
+  return retvalue;
+}
+
+bool BK_T::save(void) {
+  bool retvalue(true);
+  for (auto tx : txs)
+    retvalue &= tx->save(); // FIXME: break and rollback
   return retvalue;
 }

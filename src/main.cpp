@@ -58,9 +58,10 @@ int     main(int argc, char *argv[]) {
       if (!bk.parse())                  // 3. parse
         break;
       if (kv_mode()) {
-        if (!bk.resolve())                // 4. resolve
+        if (!bk.resolve())              // 4. resolve
           break;
-        //bk.save();                      // 5. save
+        if (!bk.save())                 // 5. save
+          break;
         if (OPTS.out)
           out_bk(bk);
       } else {

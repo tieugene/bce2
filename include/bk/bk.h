@@ -44,6 +44,7 @@ public:
   ~VOUT_T();
   bool parse(void);
   bool resolve(void);
+  bool save(void);
   const std::string addr_type(void);
   const std::string addr_repr(void);
 };
@@ -75,6 +76,7 @@ public:
   ~TX_T();
   bool parse(void);
   bool resolve(void);
+  bool save(void);
 };
 
 class BK_T {
@@ -93,6 +95,7 @@ public:
   ~BK_T();
   bool parse(void);
   bool resolve(void);
+  bool save(void);
 };
 
 #endif // BK_H
