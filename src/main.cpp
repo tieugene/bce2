@@ -57,11 +57,16 @@ int     main(int argc, char *argv[]) {
       auto bk = BK_T(buffer, COUNT.bk); // 2. create objects
       if (!bk.parse())                  // 3. parse
         break;
-      if (!bk.resolve())                // 4. resolve
-        break;
-      //bk.save();                      // 5. save
-      if (OPTS.out)                     // 6. out/print
-        prn_bk(bk);
+      if (kv_mode()) {
+        if (!bk.resolve())                // 4. resolve
+          break;
+        //bk.save();                      // 5. save
+        if (OPTS.out)
+          out_bk(bk);
+      } else {
+        if (OPTS.out)
+          prn_bk(bk);
+      }
       //CUR_PTR.v_ptr = buffer.begin();
       //auto parsed_ok = parse_bk();
       /*

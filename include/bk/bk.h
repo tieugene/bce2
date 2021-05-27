@@ -57,7 +57,7 @@ public:
 
 class TX_T {
 private:
-  uint32_t id = 0;  // TODO: save()
+  uint32_t id = MAX_UINT32;  // TODO: save()
   uint32_t no, bk_no;
   std::string_view data;  // for hash calc
   uint256_t hash = {0};

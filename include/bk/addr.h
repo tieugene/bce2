@@ -18,6 +18,7 @@ public:
   //ADDR_BASE_T(string_view) = 0;
   virtual ~ADDR_BASE_T() {}
   virtual bool is_full(void) = 0;       // FIXME: class [const] attribute
+  virtual u8_t qty(void) = 0;
   virtual const char *name(void) = 0;   // FIXME: class [const] attribute
   virtual const std::string repr(void) = 0;
   virtual const std::string_view as_key(void) = 0;
@@ -27,6 +28,7 @@ class ADDR_NULL_T : public ADDR_BASE_T {
 public:
   ADDR_NULL_T(void) {}
   bool is_full(void) { return false; }
+  u8_t qty(void) { return 0; }
   const char *name(void) { return "nulldata"; }
   const std::string repr(void);
   const std::string_view as_key(void);
@@ -39,6 +41,7 @@ private:
 public:
   ADDR_PK_T(std::string_view);
   bool is_full(void) { return true; }
+  u8_t qty(void) { return 1; }
   const char *name(void) { return "pubkey"; }
   const std::string repr(void);
   const std::string_view as_key(void);
@@ -51,6 +54,7 @@ private:
 public:
   ADDR_PKH_T(std::string_view);
   bool is_full(void) { return true; }
+  u8_t qty(void) { return 1; }
   const char *name(void) { return "pubkeyhash"; }
   const std::string repr(void);
   const std::string_view as_key(void);
@@ -63,6 +67,7 @@ private:
 public:
   ADDR_SH_T(std::string_view);
   bool is_full(void) { return true; }
+  u8_t qty(void) { return 1; }
   const char *name(void) { return "scripthash"; }
   const std::string repr(void);
   const std::string_view as_key(void);
@@ -75,6 +80,7 @@ private:
 public:
   ADDR_WPKH_T(std::string_view);
   bool is_full(void) { return true; }
+  u8_t qty(void) { return 1; }
   const char *name(void) { return "witness_v0_keyhash"; }
   const std::string repr(void);
   const std::string_view as_key(void);
@@ -86,6 +92,7 @@ private:
 public:
   ADDR_WSH_T(std::string_view);
   bool is_full(void) { return true; }
+  u8_t qty(void) { return 1; }
   const char *name(void) { return "witness_v0_scripthash"; }
   const std::string repr(void);
   const std::string_view as_key();
@@ -98,6 +105,7 @@ private:
 public:
   ADDR_MS_T(std::string_view);
   bool is_full(void) { return true; }
+  u8_t qty(void) { return data.size(); }
   const char *name(void) { return "multisig"; }
   const std::string repr(void);
   const std::string_view as_key(void);

@@ -7,7 +7,7 @@ using namespace std;
 void prn_bk(const BK_T &bk) {
   // TODO: ISO datime put_time(gmtime(&t), "%Y-%m-%d %OH:%OM:%OS")
 #ifndef ADDR_ONLY
-  printf("B: %u, Time: %u, Txs: %lu, Hash: %s\n",
+  printf("B: # %u, Time: %u, Txs: %lu, Hash: %s\n",
     bk.height, bk.time, bk.txs.size(), hash2hex(bk.hash).c_str());
 #endif
   for (auto tx : bk.txs)
@@ -17,8 +17,8 @@ void prn_bk(const BK_T &bk) {
 void prn_tx(const TX_T &tx) {
   // TODO: through no (COUNT.tx/tx.id)
 #ifndef ADDR_ONLY
-  printf(" T: %u (%u), Ins: %lu, Outs: %lu, Hash: %s\n",
-    tx.no, COUNT.tx, tx.vins.size(), tx.vouts.size(), hash2hex(tx.hash).c_str());
+  printf(" T: # %u, Ins: %lu, Outs: %lu, SegWit: %d, Hash: %s\n",
+    tx.no, tx.vins.size(), tx.vouts.size(), tx.segwit, hash2hex(tx.hash).c_str());
   for (auto vin : tx.vins)
     prn_vin(*vin);
 #endif
@@ -29,19 +29,21 @@ void prn_tx(const TX_T &tx) {
 void prn_vin(const VIN_T &vin) {
   // TODO: if vin.vout == 0xFFFFFFFF ? <coinbase> : tx+no.vout
   if (vin.vout == COINBASE_vout)
-    printf("  <: %u, Src: <coinbase>\n", vin.no);
+    printf("  <: # %u, Src: <coinbase>\n", vin.no);
   else {
     if (vin.tx_id == MAX_UINT32)
-      printf("  <: %u, Src: tx %s, vout %u\n", vin.no, hash2hex(*vin.tx_hash).c_str(), vin.vout);
+      printf("  <: # %u, Src: tx %s, vout %u\n", vin.no, hash2hex(*vin.tx_hash).c_str(), vin.vout);
     else
-      printf("  <: %u, Src: tx %u, vout %u\n", vin.no, vin.tx_id, vin.vout);
+      printf("  <: # %u, Src: tx %u, vout %u\n", vin.no, vin.tx_id, vin.vout);
   }
 }
 
 void prn_vout(const VOUT_T &vout) {
 #ifndef ADDR_ONLY
-  // TODO: address
-  printf("  >: %u, $: %llu, s_size: %lu\n", vout.no, vout.satoshi, vout.script.length());
+  if (vout.addr->is_full())
+    printf("  >: %u, $: %llu, Addr: %s\n", vout.no, vout.satoshi, vout.addr->repr().c_str());
+  else
+    printf("  >: %u, $: %llu, s_size: %lu\n", vout.no, vout.satoshi, vout.script.length());
 #else
   auto a = vout.addr_repr();
   if (!a.empty())
