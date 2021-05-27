@@ -10,10 +10,18 @@ void out_bk(const BK_T &bk) {
 }
 
 void out_tx(const TX_T &tx) {
+  // FIXME: through tx counter
+  printf("t\t%u\t%u\t%s\n", tx.no, tx.bk_no, hash2hex(tx.hash).c_str());
 }
 
 void out_vin(const VIN_T &vin) {
+  if (vin.vout != COINBASE_vout)  // skip coinbase
+    printf("i\t%u\t%u\t%u\n", vin.tx_id, vin.vout, vin.tx_no);
 }
 
 void out_vout(const VOUT_T &vout) {
+  if (vout.addr->is_full())
+    printf("o\t%u\t%u\t%" PRIu64 "\t%u\n", vout.tx_no, vout.no, vout.satoshi, vout.addr_id);
+  else
+    printf("o\t%u\t%u\t%" PRIu64 "\t\\N\n", vout.tx_no, vout.no, vout.satoshi);
 }

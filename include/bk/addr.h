@@ -17,7 +17,8 @@ class ADDR_BASE_T {
 public:
   //ADDR_BASE_T(string_view) = 0;
   virtual ~ADDR_BASE_T() {}
-  virtual const char *name(void) = 0;
+  virtual bool is_full(void) = 0;       // FIXME: class [const] attribute
+  virtual const char *name(void) = 0;   // FIXME: class [const] attribute
   virtual const std::string repr(void) = 0;
   virtual const std::string_view as_key(void) = 0;
 };
@@ -25,6 +26,7 @@ public:
 class ADDR_NULL_T : public ADDR_BASE_T {
 public:
   ADDR_NULL_T(void) {}
+  bool is_full(void) { return false; }
   const char *name(void) { return "nulldata"; }
   const std::string repr(void);
   const std::string_view as_key(void);
@@ -36,6 +38,7 @@ private:
   short_key key;
 public:
   ADDR_PK_T(std::string_view);
+  bool is_full(void) { return true; }
   const char *name(void) { return "pubkey"; }
   const std::string repr(void);
   const std::string_view as_key(void);
@@ -47,6 +50,7 @@ private:
   short_key key;
 public:
   ADDR_PKH_T(std::string_view);
+  bool is_full(void) { return true; }
   const char *name(void) { return "pubkeyhash"; }
   const std::string repr(void);
   const std::string_view as_key(void);
@@ -58,6 +62,7 @@ private:
   short_key key;
 public:
   ADDR_SH_T(std::string_view);
+  bool is_full(void) { return true; }
   const char *name(void) { return "scripthash"; }
   const std::string repr(void);
   const std::string_view as_key(void);
@@ -69,6 +74,7 @@ private:
   short_key key;
 public:
   ADDR_WPKH_T(std::string_view);
+  bool is_full(void) { return true; }
   const char *name(void) { return "witness_v0_keyhash"; }
   const std::string repr(void);
   const std::string_view as_key(void);
@@ -79,6 +85,7 @@ private:
   uint256_t data;
 public:
   ADDR_WSH_T(std::string_view);
+  bool is_full(void) { return true; }
   const char *name(void) { return "witness_v0_scripthash"; }
   const std::string repr(void);
   const std::string_view as_key();
@@ -90,6 +97,7 @@ private:
   short_key key1;
 public:
   ADDR_MS_T(std::string_view);
+  bool is_full(void) { return true; }
   const char *name(void) { return "multisig"; }
   const std::string repr(void);
   const std::string_view as_key(void);

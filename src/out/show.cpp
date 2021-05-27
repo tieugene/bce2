@@ -28,7 +28,14 @@ void prn_tx(const TX_T &tx) {
 
 void prn_vin(const VIN_T &vin) {
   // TODO: if vin.vout == 0xFFFFFFFF ? <coinbase> : tx+no.vout
-  printf("  <: %u, Src: %s, s_size: %lu\n", vin.no, "TODO", vin.script.length());
+  if (vin.vout == COINBASE_vout)
+    printf("  <: %u, Src: <coinbase>\n", vin.no);
+  else {
+    if (vin.tx_id == MAX_UINT32)
+      printf("  <: %u, Src: tx %s, vout %u\n", vin.no, hash2hex(*vin.tx_hash).c_str(), vin.vout);
+    else
+      printf("  <: %u, Src: tx %u, vout %u\n", vin.no, vin.tx_id, vin.vout);
+  }
 }
 
 void prn_vout(const VOUT_T &vout) {

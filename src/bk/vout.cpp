@@ -34,12 +34,15 @@ bool VOUT_T::parse(void) {
 }
 
 bool VOUT_T::resolve(void) {
-  if (addr) {
-    auto k = addr->as_key();
-    if (!k.empty())
-      addr_id = AddrDB->get(k);
+  bool retvalue(true);
+  if (addr and addr->is_full()) {
+    try {
+      addr_id = AddrDB->get(addr->as_key());
+    } catch (BCException &e) {
+      retvalue = false;
+    }
   }
-  return true;  // FIXME: addr_id != NOT_FOUND
+  return retvalue;
 }
 
 const string VOUT_T::addr_type(void) {
@@ -50,7 +53,7 @@ const string VOUT_T::addr_type(void) {
 }
 
 const string VOUT_T::addr_repr(void) {
-  if (addr)
+  if (addr and addr->is_full())
     return addr->repr();
   else
     return string();

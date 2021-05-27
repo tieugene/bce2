@@ -51,16 +51,17 @@ int     main(int argc, char *argv[]) {
     start_time = time(nullptr);
     // 2. main loop
     for (COUNT.bk = OPTS.from; OPTS.num; COUNT.bk++) { // FIXME: cond
-      auto buffer = bkloader(COUNT.bk);
+      auto buffer = bkloader(COUNT.bk); // 1. load
       if (buffer.empty())
         break;
-      auto bk = BK_T(buffer, COUNT.bk);
-      bk.parse();
-      //bk.resolve();
-      //bk.save();
-      if (OPTS.out)
+      auto bk = BK_T(buffer, COUNT.bk); // 2. create objects
+      if (!bk.parse())                  // 3. parse
+        break;
+      if (!bk.resolve())                // 4. resolve
+        break;
+      //bk.save();                      // 5. save
+      if (OPTS.out)                     // 6. out/print
         prn_bk(bk);
-      //delete bk;
       //CUR_PTR.v_ptr = buffer.begin();
       //auto parsed_ok = parse_bk();
       /*
@@ -68,7 +69,7 @@ int     main(int argc, char *argv[]) {
           v_error("Bk # " + to_string(COUNT.bk));
           break;
       }*/
-      if ((OPTS.verbose) and (((COUNT.bk+1) % OPTS.logstep) == 0))
+      if ((OPTS.verbose) and (((COUNT.bk+1) % OPTS.logstep) == 0))  // 7. log
           __prn_interim();
       if (OPTS.num)   // not 'untill the end'
         if (--OPTS.num == 0)
