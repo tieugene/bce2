@@ -13,7 +13,7 @@ void out_bk(const BK_T &bk) {
 
 void out_tx(const TX_T &tx) {
   // FIXME: through tx counter
-  printf("t\t%u\t%u\t%s\n", tx.id, tx.bk_no, hash2hex(tx.hash).c_str());
+  printf("t\t%u\t%u\t%s\n", tx.id, tx.bk->get_id(), hash2hex(tx.hash).c_str());
   for (auto vin : tx.vins)
     out_vin(*vin);
   for (auto vout : tx.vouts)
@@ -22,13 +22,13 @@ void out_tx(const TX_T &tx) {
 
 void out_vin(const VIN_T &vin) {
   if (vin.vout != COINBASE_vout)  // skip coinbase
-    printf("i\t%u\t%u\t%u\n", vin.tx_id, vin.vout, vin.tx_no);  // FIXME: parent tx id
+    printf("i\t%u\t%u\t%u\n", vin.tx_id, vin.vout, vin.tx->get_id());
 }
 
 void out_vout(const VOUT_T &vout) {
   if (vout.addr->is_full()) {
     printf("a\t%u\t%s\t%u\n", vout.addr_id, vout.addr->repr().c_str(), vout.addr->qty());
-    printf("o\t%u\t%u\t%" PRIu64 "\t%u\n", vout.tx_no, vout.no, vout.satoshi, vout.addr_id);
+    printf("o\t%u\t%u\t%" PRIu64 "\t%u\n", vout.tx->get_id(), vout.no, vout.satoshi, vout.addr_id);
   } else
-    printf("o\t%u\t%u\t%" PRIu64 "\t\\N\n", vout.tx_no, vout.no, vout.satoshi);
+    printf("o\t%u\t%u\t%" PRIu64 "\t\\N\n", vout.tx->get_id(), vout.no, vout.satoshi);
 }

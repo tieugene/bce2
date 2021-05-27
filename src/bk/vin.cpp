@@ -5,8 +5,8 @@
 using namespace std;
 
 // == VIN ==
-VIN_T::VIN_T(UNIPTR_T &uptr, const uint32_t no, const uint32_t tx_no, const uint32_t bk_no)
-  : no(no), tx_no(tx_no), bk_no(bk_no) {
+VIN_T::VIN_T(UNIPTR_T &uptr, const uint32_t no, TX_T * const tx)
+    : tx(tx), no(no) {
   tx_hash = uptr.take_256_ptr();
   vout = uptr.take_32();
   auto s_size = uptr.take_varuint();

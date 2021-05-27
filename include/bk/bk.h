@@ -14,71 +14,7 @@
 #include "common.h"
 #include "addr.h"
 
-class VIN_T {
-private:
-  uint32_t no, tx_no, bk_no;
-  const uint256_t  *tx_hash = nullptr;
-  uint32_t          vout = 0;
-  std::string_view  script;
-  uint32_t          seq = 0;
-  uint32_t          tx_id = MAX_UINT32;  // resolving
-  friend void out_vin(const VIN_T &);
-  friend void prn_vin(const VIN_T &);
-public:
-  VIN_T(UNIPTR_T &, const uint32_t, const uint32_t, const uint32_t);
-  bool parse(void);
-  bool resolve(void);
-};
-
-class VOUT_T {
-private:
-  uint32_t no, tx_no, bk_no;
-  uint64_t  satoshi = 0;
-  uint32_t addr_id = MAX_UINT32;  // aka NOT_FOUND
-  std::string_view script;
-  ADDR_BASE_T *addr = nullptr;
-  friend void out_vout(const VOUT_T &);
-  friend void prn_vout(const VOUT_T &);
-public:
-  VOUT_T(UNIPTR_T &, const uint32_t, const uint32_t, const uint32_t);
-  ~VOUT_T();
-  bool parse(void);
-  bool resolve(void);
-  bool save(void);
-  const std::string addr_type(void);
-  const std::string addr_repr(void);
-};
-
-class WIT_T {
-private:
-  uint32_t no, tx_no, bk_no;
-public:
-  WIT_T(UNIPTR_T &, const uint32_t, const uint32_t, const uint32_t);
-};
-
-class TX_T {
-private:
-  uint32_t id = MAX_UINT32;  // TODO: save()
-  uint32_t no, bk_no;
-  std::string_view data;  // for hash calc
-  uint256_t hash = {0};
-  uint32_t ver = 0;
-  bool segwit = false;
-  uint32_t wit_offset = 0; ///< cut off for hash calc
-  std::vector<VIN_T*> vins;
-  std::vector<VOUT_T*> vouts;
-  std::vector<WIT_T*> wits;
-  void mk_hash(void);
-  friend void out_tx(const TX_T &);
-  friend void prn_tx(const TX_T &);
-public:
-  TX_T(UNIPTR_T &, const uint32_t, const uint32_t);
-  ~TX_T();
-  bool parse(void);
-  bool resolve(void);
-  bool save(void);
-};
-
+class TX_T;
 class BK_T {
 private:
   uint32_t height;
@@ -96,6 +32,82 @@ public:
   bool parse(void);
   bool resolve(void);
   bool save(void);
+  inline uint32_t get_id(void) { return height; };
+};
+
+class VIN_T;
+class VOUT_T;
+class WIT_T;
+class TX_T {
+private:
+  BK_T * const bk = nullptr;
+  uint32_t no;
+  uint32_t id = MAX_UINT32;
+  std::string_view data;  // for hash calc
+  uint256_t hash = {0};
+  uint32_t ver = 0;
+  bool segwit = false;
+  uint32_t wit_offset = 0; ///< cut off for hash calc
+  std::vector<VIN_T*> vins;
+  std::vector<VOUT_T*> vouts;
+  std::vector<WIT_T*> wits;
+  void mk_hash(void);
+  friend void out_tx(const TX_T &);
+  friend void prn_tx(const TX_T &);
+public:
+  TX_T(UNIPTR_T &, const uint32_t, BK_T * const);
+  ~TX_T();
+  bool parse(void);
+  bool resolve(void);
+  bool save(void);
+  inline uint32_t get_no(void) { return no; };
+  inline uint32_t get_id(void) { return id; };
+  inline BK_T * get_bk(void) { return bk; }
+};
+
+class VIN_T {
+private:
+  TX_T * const tx = nullptr;
+  uint32_t no;
+  const uint256_t  *tx_hash = nullptr;
+  uint32_t          vout = 0;
+  std::string_view  script;
+  uint32_t          seq = 0;
+  uint32_t          tx_id = MAX_UINT32;  // resolving
+  friend void out_vin(const VIN_T &);
+  friend void prn_vin(const VIN_T &);
+public:
+  VIN_T(UNIPTR_T &, const uint32_t, TX_T * const);
+  bool parse(void);
+  bool resolve(void);
+};
+
+class VOUT_T {
+private:
+  TX_T * const tx = nullptr;
+  uint32_t no;
+  uint32_t addr_id = MAX_UINT32;  // aka NOT_FOUND
+  uint64_t  satoshi = 0;
+  std::string_view script;
+  ADDR_BASE_T *addr = nullptr;
+  friend void out_vout(const VOUT_T &);
+  friend void prn_vout(const VOUT_T &);
+public:
+  VOUT_T(UNIPTR_T &, const uint32_t, TX_T * const);
+  ~VOUT_T();
+  bool parse(void);
+  bool resolve(void);
+  bool save(void);
+  const std::string addr_type(void);
+  const std::string addr_repr(void);
+};
+
+class WIT_T {
+private:
+  TX_T * const tx = nullptr;
+  uint32_t no;
+public:
+  WIT_T(UNIPTR_T &, const uint32_t, TX_T * const);
 };
 
 #endif // BK_H

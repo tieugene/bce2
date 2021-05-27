@@ -5,8 +5,8 @@
 using namespace std;
 
 // == VOUT ==
-VOUT_T::VOUT_T(UNIPTR_T &uptr, const uint32_t no, const uint32_t tx_no, const uint32_t bk_no)
-  : no(no), tx_no(tx_no), bk_no(bk_no), addr(nullptr) {
+VOUT_T::VOUT_T(UNIPTR_T &uptr, const uint32_t no, TX_T * const tx)
+    : tx(tx), no(no), addr(nullptr) {
   satoshi = uptr.take_64();
   auto s_size = uptr.take_varuint();
   auto s_body = uptr.take_ch_ptr(s_size);
@@ -25,7 +25,7 @@ bool VOUT_T::parse(void) {
       addr = addr_decode(script);
     } catch (const AddrException &e) {
       if (OPTS.verbose > DBG_MIN)  // FIXME: DBG_MAX
-        cerr << "Vout " << to_string(bk_no) << "/" << to_string(tx_no) << "/" << to_string(no) << ": " << e.what() << endl;
+        cerr << "Vout " << to_string(tx->get_bk()->get_id()) << "/" << to_string(tx->get_no()) << "/" << to_string(no) << ": " << e.what() << endl;
     }
   }
   if (addr)
