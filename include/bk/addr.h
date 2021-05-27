@@ -1,3 +1,4 @@
+// TODO: as_json, as_key, qty, is_full - inherited
 #ifndef ADDR_H
 #define ADDR_H
 
@@ -20,8 +21,9 @@ public:
   virtual bool is_full(void) = 0;       // FIXME: class [const] attribute
   virtual u8_t qty(void) = 0;
   virtual const char *name(void) = 0;   // FIXME: class [const] attribute
-  virtual const std::string repr(void) = 0;
   virtual const std::string_view as_key(void) = 0;
+  virtual const std::string repr(void) = 0;
+  virtual const std::string as_json(void) = 0;
 };
 
 class ADDR_NULL_T : public ADDR_BASE_T {
@@ -31,6 +33,7 @@ public:
   u8_t qty(void) { return 0; }
   const char *name(void) { return "nulldata"; }
   const std::string repr(void);
+  const std::string as_json(void);
   const std::string_view as_key(void);
 };
 
@@ -44,6 +47,7 @@ public:
   u8_t qty(void) { return 1; }
   const char *name(void) { return "pubkey"; }
   const std::string repr(void);
+  const std::string as_json(void);
   const std::string_view as_key(void);
 };
 
@@ -57,6 +61,7 @@ public:
   u8_t qty(void) { return 1; }
   const char *name(void) { return "pubkeyhash"; }
   const std::string repr(void);
+  const std::string as_json(void);
   const std::string_view as_key(void);
 };
 
@@ -70,6 +75,7 @@ public:
   u8_t qty(void) { return 1; }
   const char *name(void) { return "scripthash"; }
   const std::string repr(void);
+  const std::string as_json(void);
   const std::string_view as_key(void);
 };
 
@@ -83,6 +89,7 @@ public:
   u8_t qty(void) { return 1; }
   const char *name(void) { return "witness_v0_keyhash"; }
   const std::string repr(void);
+  const std::string as_json(void);
   const std::string_view as_key(void);
 };
 
@@ -95,6 +102,7 @@ public:
   u8_t qty(void) { return 1; }
   const char *name(void) { return "witness_v0_scripthash"; }
   const std::string repr(void);
+  const std::string as_json(void);
   const std::string_view as_key();
 };
 
@@ -108,6 +116,7 @@ public:
   u8_t qty(void) { return data.size(); }
   const char *name(void) { return "multisig"; }
   const std::string repr(void);
+  const std::string as_json(void);
   const std::string_view as_key(void);
 };
 
