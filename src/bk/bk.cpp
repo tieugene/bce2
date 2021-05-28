@@ -41,18 +41,23 @@ void BK_T::mk_hash(void) {
 }
 
 bool BK_T::parse(void) {
-  // TODO: ? apply header
   if (OPTS.out)
-    mk_hash();  // TODO: on demand/mt
+    mk_hash();
   bool retvalue(true);
-  for (auto tx : txs) // TODO: m/t
+  for (auto tx : txs) {
     retvalue &= tx->parse();
+    if (!retvalue)
+      return b_error("Bk # " + to_string(height) + " parse error");
+  }
   return retvalue;
 }
 
 bool BK_T::resolve(void) {  // FIXME: rollback
   bool retvalue(true);
-  for (auto tx : txs)
+  for (auto tx : txs) {
     retvalue &= tx->resolve();
+    if (!retvalue)
+      return b_error("Bk # " + to_string(height) + " resolve error");
+  }
   return retvalue;
 }

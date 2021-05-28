@@ -90,6 +90,7 @@ private:
   ADDR_BASE_T *addr = nullptr;
   friend void out_vout(const VOUT_T &);
   friend void prn_vout(const VOUT_T &);
+  friend void out_addr(const VOUT_T &);
 public:
   VOUT_T(UNIPTR_T &, const uint32_t, TX_T * const);
   ~VOUT_T();

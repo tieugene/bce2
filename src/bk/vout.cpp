@@ -36,10 +36,11 @@ bool VOUT_T::parse(void) {
 bool VOUT_T::resolve(void) {
   bool retvalue(true);
   if (addr and addr->is_full()) {
-    addr_id = AddrDB->get_or_add(addr->as_key());
-    retvalue = (addr_id != MAX_UINT32);
+    retvalue = ((addr_id = AddrDB->get_or_add(addr->as_key())) != MAX_UINT32);
     if (retvalue)
       COUNT.addr++;
+    else
+      v_error("Vout # " + to_string(no) + " resolve error: not found nor added");
   }
   return retvalue;
 }

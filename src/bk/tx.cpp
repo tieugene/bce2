@@ -71,13 +71,15 @@ bool TX_T::parse(void) {
 
 bool TX_T::resolve(void) {
   bool retvalue = ((id = TxDB->add(u256string_view(hash))) != MAX_UINT32);
-  if (retvalue) {
+  if (retvalue)
     for (auto vin : vins)
       if (!(retvalue &= vin->resolve()))
-        return retvalue;
+        break;
+  if (retvalue)
     for (auto vout : vouts)
       if (!(retvalue &= vout->resolve()))
         break;
-  }
+  if (!retvalue)
+    v_error("Tx # " + to_string(no) + " resolve error");
   return retvalue;
 }

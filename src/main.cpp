@@ -7,7 +7,7 @@
 #include "misc.h"
 #include "bk/bk.h"
 #include "bk/handlers.h"
-#include "out/printers.h"
+#include "out/log.h"
 
 // globals
 OPT_T       OPTS;
@@ -47,7 +47,7 @@ int     main(int argc, char *argv[]) {
         return u32_error("Set_cache oops.", 3);
     // 1.4. last prestart
     if (OPTS.verbose > DBG_MIN)
-      __prn_head();
+      log_head();
     start_time = time(nullptr);
     // 2. main loop
     for (COUNT.bk = OPTS.from; OPTS.num; COUNT.bk++) { // FIXME: cond
@@ -74,16 +74,16 @@ int     main(int argc, char *argv[]) {
           break;
       }*/
       if ((OPTS.verbose) and (((COUNT.bk+1) % OPTS.logstep) == 0))  // 7. log
-          __prn_interim();
+          log_interim();
       if (OPTS.num)   // not 'untill the end'
         if (--OPTS.num == 0)
           break;
     }
     // 3. The end
     if (OPTS.verbose > DBG_MIN) {
-      __prn_tail();
-      __prn_interim();
-      __prn_summary();
+      log_tail();
+      log_interim();
+      log_summary();
     }
     stop_cache();
     return 0;

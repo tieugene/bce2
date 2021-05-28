@@ -27,12 +27,16 @@ void out_vin(const VIN_T &vin) {
 
 void out_vout(const VOUT_T &vout) {
   if (vout.addr->is_full()) {
-    static uint32_t printed_addrs = 0;  ///< sequential counter (FIXME: фуфель, работает только с 0)
-    if ((vout.addr_id+1) >= printed_addrs) {
-      printf("a\t%u\t%s\t%u\n", vout.addr_id, vout.addr->as_json().c_str(), vout.addr->qty());
-      printed_addrs++;
-    }
+    out_addr(vout);
     printf("o\t%u\t%u\t%" PRIu64 "\t%u\n", vout.tx->get_id(), vout.no, vout.satoshi, vout.addr_id);
   } else
     printf("o\t%u\t%u\t%" PRIu64 "\t\\N\n", vout.tx->get_id(), vout.no, vout.satoshi);
+}
+
+void out_addr(const VOUT_T &vout) {
+  static uint32_t printed_addrs = 0;  ///< sequential counter (FIXME: фуфель, работает только с 0)
+  if ((vout.addr_id+1) >= printed_addrs) {
+    printf("a\t%u\t%s\t%u\n", vout.addr_id, vout.addr->as_json().c_str(), vout.addr->qty());
+    printed_addrs++;
+  }
 }
