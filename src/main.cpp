@@ -3,34 +3,30 @@
 */
 
 #include "bce.h"
-#include "bkidx.h"
+#include "load/bkidx.h"
 #include "misc.h"
-#include "handlers.h"
-#include "printers.h"
+#include "bk/bk.h"
+#include "bk/handlers.h"
+#include "out/log.h"
 
 // globals
 OPT_T       OPTS;
-DBG_LVL_T   DBG_LVL;
 COUNT_T     COUNT;
 STAT_T      STAT;
 LOCAL_T     LOCAL;
 BUSY_T      BUSY;
-BK_T        CUR_BK;
-TX_T        CUR_TX;
-VIN_T       CUR_VIN;
-VOUT_T      CUR_VOUT;
+BK_OLD_T        CUR_BK;
+TX_OLD_T        CUR_TX;
+VIN_OLD_T       CUR_VIN;
+VOUT_OLD_T      CUR_VOUT;
 UNIPTR_T    CUR_PTR;
 long        start_mem;
 time_t      start_time;
-// consts
-//const uint32_t  BULK_SIZE = 1000;
 
 using namespace std;
 
 int     main(int argc, char *argv[]) {
-  // TODO: local BUFFER = char *const ptr;
-  u8_t BUFFER[MAX_BK_SIZE];
-  bool (*bkloader)(u8_t *, const uint32_t) = &stdin_bk;
+  string_view (*bkloader)(const uint32_t) = &stdin_bk;
 
     // 1. prepare
     // 1.1. handle options
@@ -50,32 +46,40 @@ int     main(int argc, char *argv[]) {
     if (!set_cache())
         return u32_error("Set_cache oops.", 3);
     // 1.4. last prestart
-    if (OPTS.verbose)
-      __prn_head();
+    if (OPTS.verbose > DBG_MIN) {
+      log_opts();
+      log_head();
+    }
     start_time = time(nullptr);
     // 2. main loop
-    for (COUNT.bk = OPTS.from; bkloader(BUFFER, COUNT.bk); COUNT.bk++) {
-      CUR_PTR.v_ptr = BUFFER;
-      if (!parse_bk()) {
-          //__prn_trace();
-          v_error("Bk # " + to_string(COUNT.bk));
+    for (COUNT.bk = OPTS.from; OPTS.num; COUNT.bk++) { // FIXME: cond
+      auto buffer = bkloader(COUNT.bk); // 1. load
+      if (buffer.empty())
+        break;
+      auto bk = BK_T(buffer, COUNT.bk); // 2. create objects
+      if (!bk.parse())                  // 3. parse
+        break;
+      if (kv_mode()) {
+        if (!bk.resolve())              // 4. resolve
           break;
+        if (OPTS.out)                   // 5. out
+          out_bk(bk);
+      } else {
+        if (OPTS.out)
+          prn_bk(bk);
       }
-      if ((OPTS.verbose) and (((COUNT.bk+1) % OPTS.logstep) == 0))
-          __prn_interim();
+      if ((OPTS.verbose) and (((COUNT.bk+1) % OPTS.logstep) == 0))  // 7. log
+          log_interim();
       if (OPTS.num)   // not 'untill the end'
         if (--OPTS.num == 0)
           break;
     }
     // 3. The end
-    if (OPTS.verbose) {
-      __prn_tail();
-      __prn_interim();
-      if (OPTS.verbose > DBG_MIN)
-        __prn_summary();
+    if (OPTS.verbose > DBG_MIN) {
+      log_tail();
+      log_interim();
+      log_summary();
     }
     stop_cache();
-    //if (BUFFER)
-    //    delete BUFFER;
     return 0;
 }

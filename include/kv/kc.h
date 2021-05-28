@@ -19,9 +19,9 @@ public:
   ~KV_KC_DISK_T();
   void        clear(void) { db->clear(); }
   uint32_t    count(void);
-  uint32_t    add(std::string_view key);
-  uint32_t    get(std::string_view key);
-  uint32_t    get_or_add(std::string_view key);
+  uint32_t    add(const std::string_view &key);
+  uint32_t    get(const std::string_view &key);
+  uint32_t    get_or_add(const std::string_view &key);
 };
 
 class KV_KC_INMEM_T : public KV_BASE_T {
@@ -34,9 +34,9 @@ public:
   ~KV_KC_INMEM_T() { delete db; }
   void        clear(void) { db->clear(); }
   uint32_t    count(void) { return db->count(); }
-  uint32_t    add(std::string_view key);
-  uint32_t    get(std::string_view key);
-  uint32_t    get_or_add(std::string_view key);
+  uint32_t    add(const std::string_view &key);
+  uint32_t    get(const std::string_view &key);
+  uint32_t    get_or_add(const std::string_view &key);
 };
 
 #endif // USE_KC

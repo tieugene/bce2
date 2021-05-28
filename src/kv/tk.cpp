@@ -34,8 +34,9 @@ bool KV_TK_DISK_T::open(const filesystem::path &dir, KVNAME_T name, uint64_t tun
       tuning_params.num_buckets = bnum_need;
     }
   }
-  if (!db->OpenAdvanced(dbpath, true, tkrzw::File::OPEN_DEFAULT, tuning_params).IsOK())
-    return b_error("tkf " + dbpath.string() + ": Cannot open DB");
+  auto s = db->OpenAdvanced(dbpath, true, tkrzw::File::OPEN_DEFAULT, tuning_params);
+  if (!s.IsOK())
+    return b_error("tkf " + dbpath.string() + ": Cannot open DB - " + s.GetMessage());
   if (OPTS.verbose and bnum_need) { // chk tune
     auto bnum_found = db->CountBuckets();
     if (bnum_found < bnum_need)
@@ -46,44 +47,56 @@ bool KV_TK_DISK_T::open(const filesystem::path &dir, KVNAME_T name, uint64_t tun
 
 bool KV_TK_DISK_T::close(void) {
   bool retvalue = true;
-  if (!db->Synchronize(true).IsOK())
-    retvalue = b_error("tkf " + dbpath.string() + ": Cannot sync DB");
-  if (!db->Close().IsOK())
-    retvalue = b_error("tkf " + dbpath.string() + ": Cannot close DB");
+  auto s = db->Synchronize(true);
+  if (!s.IsOK())
+    retvalue = b_error("tkf " + dbpath.string() + ": Cannot sync DB - " + s.GetMessage());
+  s = db->Close();
+  if (!s.IsOK())
+    retvalue = b_error("tkf " + dbpath.string() + ": Cannot close DB - " + s.GetMessage());
   return retvalue;
 }
 
 uint32_t    KV_TK_DISK_T::count(void) {
-    auto retvalue = db->CountSimple();
-    return (retvalue < 0) ? NOT_FOUND_U32 : uint32_t(retvalue);
+  int64_t counter;
+  auto s = db->Count(&counter);
+  if (s.IsOK())
+    return counter; // FIXME: chk > uin32
+  return u32_error("tkf " + dbpath.string() + ": Cannot count DB - " + s.GetMessage());
 }
 
-uint32_t    KV_TK_DISK_T::add(string_view key) {
-    uint32_t value = count();
-    if (value != NOT_FOUND_U32)
-        if (!db->Set(key, string_view((const char *)&value, sizeof(uint32_t))).IsOK())
-            value = NOT_FOUND_U32;
-    return value;
+uint32_t    KV_TK_DISK_T::add(const string_view &key) {
+  uint32_t value = count();
+  if (value != NOT_FOUND_U32) {
+    auto s = db->Set(key, string_view((const char *)&value, sizeof(value)));
+    if (!s.IsOK())
+      value = u32_error("tkf " + dbpath.string() + ": Cannot add to DB - " + s.GetMessage());
+  }
+  return value;
 }
 
-uint32_t    KV_TK_DISK_T::get(string_view key) {
+uint32_t    KV_TK_DISK_T::get(const string_view &key) {
     string value;
-    if (!db->Get(key, &value).IsOK())    // FXIME: handle errors
-        return NOT_FOUND_U32;
-    if (value.length() != 4)
-      return u32_error(dbpath.string() + ": Bad key len: " + to_string(value.length()));
-    return *((uint32_t *) value.data());
+    auto s = db->Get(key, &value);
+    if (s == tkrzw::Status::NOT_FOUND_ERROR)
+      return NOT_FOUND_U32;
+    else if (s.IsOK()) {   // FIXME: handle errors
+      if (value.length() == 4)
+        return *((uint32_t *) value.data());
+      else
+        throw BCException("tkf " + dbpath.string() + ": Bad key len: " + to_string(value.length()));
+    } else
+      throw BCException("tkf " + dbpath.string() + ": Cannot get from DB - " + s.GetMessage());
 }
 
-uint32_t    KV_TK_DISK_T::get_or_add(std::string_view key) {
+uint32_t    KV_TK_DISK_T::get_or_add(const std::string_view &key) {
   string old_value;
   uint32_t value = count();
   if (value != NOT_FOUND_U32) {
-    auto status = db->Set(key, string_view((const char *)&value, sizeof(uint32_t)), false, &old_value);
-    if (status == tkrzw::Status::DUPLICATION_ERROR)
+    auto s = db->Set(key, string_view((const char *)&value, sizeof(uint32_t)), false, &old_value);
+    if (s == tkrzw::Status::DUPLICATION_ERROR)
       value = *((uint32_t *) old_value.data());
-    else if (!status.IsOK())
-      return u32_error(dbpath.string() + ": Something wrong with get_or_add");
+    else if (!s.IsOK())
+      return u32_error("tkf " + dbpath.string() + ": Can not get nor add record - " + s.GetMessage());
   }
   return value;
 }
@@ -106,32 +119,39 @@ bool    KV_TK_INMEM_T::open(KVNAME_T name, uint64_t tune) {
   return (db);
 }
 
-uint32_t    KV_TK_INMEM_T::add(string_view key) {
-    uint32_t value = count();
-    if (value != NOT_FOUND_U32)
-        if (!db->Set(key, string_view((const char *)&value, sizeof(uint32_t))).IsOK())
-            value = NOT_FOUND_U32;
-    return value;
+uint32_t    KV_TK_INMEM_T::add(const string_view &key) {
+  uint32_t value = count();
+  if (value != NOT_FOUND_U32) {
+    auto s = db->Set(key, string_view((const char *)&value, sizeof(value)));
+    if (!s.IsOK())
+      value = u32_error("tkm " + dbname + ": Cannot add to DB - " + s.GetMessage());
+  }
+  return value;
 }
 
-uint32_t    KV_TK_INMEM_T::get(string_view key) {
-    string value;
-    if (!db->Get(key, &value).IsOK())    // FXIME: handle errors
-        return NOT_FOUND_U32;
-    if (value.length() != 4)
-      return u32_error(dbname + ": Bad key len: " + to_string(value.length()));
-    return *((uint32_t *) value.data());
+uint32_t    KV_TK_INMEM_T::get(const string_view &key) {
+  string value;
+  auto s = db->Get(key, &value);
+  if (s == tkrzw::Status::NOT_FOUND_ERROR)
+    return NOT_FOUND_U32;
+  else if (s.IsOK()) {   // FIXME: handle errors
+    if (value.length() == 4)
+      return *((uint32_t *) value.data());
+    else
+      throw BCException("tkm " + dbname + ": Bad key len: " + to_string(value.length()));
+  } else
+    throw BCException("tkm " + dbname + ": Cannot get from DB - " + s.GetMessage());
 }
 
-uint32_t    KV_TK_INMEM_T::get_or_add(std::string_view key) {
+uint32_t    KV_TK_INMEM_T::get_or_add(const std::string_view &key) {
   string old_value;
   uint32_t value = count();
   if (value != NOT_FOUND_U32) {
-    auto status = db->Set(key, string_view((const char *)&value, sizeof(uint32_t)), false, &old_value);
-    if (status == tkrzw::Status::DUPLICATION_ERROR)
+    auto s = db->Set(key, string_view((const char *)&value, sizeof(uint32_t)), false, &old_value);
+    if (s == tkrzw::Status::DUPLICATION_ERROR)
       value = *((uint32_t *) old_value.data());
-    else if (!status.IsOK())
-      return u32_error(dbname + ": Something wrong with get_or_add");
+    else if (!s.IsOK())
+      return u32_error("tkm " + dbname + ": Can not get nor add record - " + s.GetMessage());
   }
   return value;
 }

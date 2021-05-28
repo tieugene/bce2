@@ -6,10 +6,12 @@
 #include <time.h>
 #include "bce.h"
 #include "misc.h"
-#include "printers.h"
-#include "script.h"
+#include "out/printers.h"
+#include "bk/script.h"
 
 using namespace std;
+
+const std::string TAB = "\t";
 
 // Uncomment to use bce2 as addresses generator only
 // #define DBG

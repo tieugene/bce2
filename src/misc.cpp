@@ -11,8 +11,7 @@
 //#include <filesystem>
 #include "bce.h"
 #include "misc.h"
-#include "script.h" // cur_addr only
-#include "fasthex.h"
+#include "bk/script.h" // cur_addr only
 #if defined(__APPLE__)
 #include <mach/mach.h>
 #endif
@@ -53,11 +52,24 @@ string  ptr2hex(string_view data) {
     return s;
 }
 
-int hex2bytes(string_view src, u8_t *const dst) {
-  auto src_ptr = src.begin();
-  u8_t *dst_ptr;
+const string  hash2hex(const uint256_t &h) {
+  UNIPTR_T u(&h);
+  char tmp[65];
+  tmp[64] = '\0';
+  sprintf(tmp,
+#if defined(__APPLE__)
+    "%016llx%016llx%016llx%016llx",
+#else
+    "%016lx%016lx%016lx%016lx",
+#endif
+    u.u64_ptr[3], u.u64_ptr[2], u.u64_ptr[1], u.u64_ptr[0]);
+  return string(tmp);
+}
 
-  for (dst_ptr = dst; src_ptr < src.end(); src_ptr += 2, dst_ptr++)
-    *dst_ptr = (hextoint(src_ptr[0]) << 4) | hextoint(src_ptr[1]);
-  return dst_ptr - dst;
+const string  ripe2hex(const uint160_t &r) {
+  UNIPTR_T u(&r);
+  char tmp[41];
+  tmp[40] = '\0';
+  sprintf(tmp, "%08x%08x%08x%08x%08x", u.u32_ptr[4], u.u32_ptr[3], u.u32_ptr[2], u.u32_ptr[1], u.u32_ptr[0]);
+  return string(tmp);
 }

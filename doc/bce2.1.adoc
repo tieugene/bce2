@@ -45,6 +45,8 @@ Intermediate data is storing in key-value DB.
   Logging step, blocks (default=1)
 *-v* _n_::
   Verbosity (0..3, default=0, to stderr)
+*-m*::
+  Multithreading on
 
 === Key-value engines:
 

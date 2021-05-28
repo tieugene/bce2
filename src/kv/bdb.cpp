@@ -61,7 +61,7 @@ uint32_t KV_BDB_T::count(void) {
   return reccount;
 }
 
-uint32_t    KV_BDB_T::add(string_view key) {
+uint32_t    KV_BDB_T::add(const string_view &key) {
   uint32_t value = count();
   if (value != NOT_FOUND_U32) {
     Dbt k((void *) key.begin(), key.length()), v((void *) &value, sizeof(uint32_t));
@@ -73,7 +73,7 @@ uint32_t    KV_BDB_T::add(string_view key) {
   return value;
 }
 
-uint32_t    KV_BDB_T::get(string_view key) {
+uint32_t    KV_BDB_T::get(const string_view &key) {
   Dbt k((void *) key.begin(), key.length()), val;
   if (!db->get(nullptr, &k, &val, 0))
     return *((uint32_t *) val.get_data());
@@ -81,7 +81,7 @@ uint32_t    KV_BDB_T::get(string_view key) {
     return NOT_FOUND_U32;
 }
 
-uint32_t    KV_BDB_T::get_or_add(std::string_view key) {
+uint32_t    KV_BDB_T::get_or_add(const std::string_view &key) {
   auto v = get(key);
   if (v == NOT_FOUND_U32) {
     v = add(key);

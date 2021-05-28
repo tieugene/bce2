@@ -1,6 +1,6 @@
 Name:		bce2
-Version:	0.0.5
-Release:	1%{?dist}
+Version:	0.1.0
+Release:	0.1%{?dist}
 License:	GPLv3
 Summary:	BTC blockchain export
 URL:		https://github.com/tieugene/bce2
@@ -30,7 +30,7 @@ BitCoin Export 2 is tool to export BTC blockchain into SQL loadable files.
 
 
 %build
-%{cmake} -DUSE_KC=ON -DUSE_BDB=ON
+%{cmake}
 %{cmake_build}
 make -C doc
 
@@ -53,16 +53,19 @@ install -t %{buildroot}%{_mandir}/man5 -m 0644 -p doc/*.5
 
 
 %changelog
+* Mon May 28 2021 TI_Eugene <ti.eugene@gmail.com> 0.1.0-0.1
+- Version bump, pre.1 (bk classed, chk addr)
+
 * Fri May 28 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.5-1
 - Version bump
 - hex input speedup
 - multiengine k-v
 
 * Tue May 11 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.4-1
-- Version bump
+- Version bump (hex speedup, tkrzw)
 
 * Thu May 06 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.3-1
-- Version bump
+- Version bump (hex)
 
 * Sat Feb 20 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.2-1
 - Version bump

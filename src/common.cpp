@@ -7,6 +7,12 @@ const u8_t *UNIPTR_T::take_u8_ptr(uint32_t const size) {
     return retvalue;
 }
 
+const char *UNIPTR_T::take_ch_ptr(uint32_t const size) {
+    auto retvalue = ch_ptr;
+    ch_ptr += size;
+    return retvalue;
+}
+
 ///<read 1..4-byte int and forward;
 uint32_t    UNIPTR_T::take_varuint(void) {
     auto retvalue = static_cast<uint32_t>(*u8_ptr++);

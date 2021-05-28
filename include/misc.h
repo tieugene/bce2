@@ -10,11 +10,16 @@ long        memused(void);
 /// Convert bytes into hex string
 std::string ptr2hex(std::string_view data);
 /**
- * @brief Convert hex-string into bytes
- * @param src String to convert
- * @param dst Buffer for result
- * @return Bytes converted
+ * @brief Convert hash256 into hex string
+ * @param src Data to hex
+ * @return Hex string
  */
-int         hex2bytes(std::string_view src, u8_t *const dst);
+const std::string hash2hex(const uint256_t &src);                   // printers, handlers (err)
+/**
+ * @brief Convert hash160 into hex string
+ * @param src Data to hex
+ * @return Hex string
+ */
+const std::string ripe2hex(const uint160_t &src);                   // ---
 
 #endif // MISC_H
