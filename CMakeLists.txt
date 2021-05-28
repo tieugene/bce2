@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(bce2 LANGUAGES CXX)
-project(bce2 VERSION 0.0.5)
+project(bce2 VERSION 0.1.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -10,15 +10,21 @@ include_directories(include)
 aux_source_directory(src SRC_LIST)
 aux_source_directory(src/bk SRC_LIST)
 aux_source_directory(src/cfg SRC_LIST)
+aux_source_directory(src/crypt SRC_LIST)
 aux_source_directory(src/kv SRC_LIST)
 aux_source_directory(src/load SRC_LIST)
 aux_source_directory(src/out SRC_LIST)
 add_executable(${PROJECT_NAME} ${SRC_LIST})
-add_executable(btcbklocs tools/btcbklocs.cpp)
-add_executable(btclocview tools/btclocview.cpp)
-# add_executable(test_cin tools/test_cin.cpp)
 
 find_package(PkgConfig REQUIRED)
+
+# for debug
+option(ADDR_ONLY "Addr only" OFF)
+if (ADDR_ONLY)
+  add_definitions(-DADDR_ONLY)
+endif()
+message(STATUS "Addr only: ${ADDR_ONLY}")
+
 ## openssl
 if (APPLE)
     # brew hack
@@ -28,8 +34,7 @@ find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} ${OPENSSL_CRYPTO_LIBRARY})
 
-# Define k-v backend
-
+# K-V backend
 ## Kyotocabinet
 option(USE_KC "Kyotocabinet" OFF)
 if (USE_KC)
@@ -78,18 +83,37 @@ if (USE_BDB)
 endif ()
 message(STATUS "BDB: ${USE_BDB}")
 
-# for btcbklocs
-## leveldb
-if (APPLE)
-    # brew hack
-    include_directories(/usr/local/opt/leveldb/include/)
-    target_link_libraries(btcbklocs /usr/local/opt/leveldb/lib/libleveldb.dylib)
-else ()
-    find_package(leveldb CONFIG REQUIRED)
-    target_link_libraries(btcbklocs leveldb)
+install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+
+# ====
+option(BUILD_TOOLS "Tools" OFF)
+if (BUILD_TOOLS)
+  add_executable(btcbklocs tools/btcbklocs.cpp)
+  add_executable(btclocview tools/btclocview.cpp)
+  # for btcbklocs
+  ## leveldb
+  if (APPLE)
+      # brew hack
+      include_directories(/usr/local/opt/leveldb/include/)
+      target_link_libraries(btcbklocs /usr/local/opt/leveldb/lib/libleveldb.dylib)
+  else ()
+      find_package(leveldb CONFIG REQUIRED)
+      target_link_libraries(btcbklocs leveldb)
+  endif ()
+  install(TARGETS btcbklocs RUNTIME DESTINATION bin)
+  install(TARGETS btclocview RUNTIME DESTINATION bin)
 endif ()
 
-install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
-install(TARGETS btcbklocs RUNTIME DESTINATION bin)
-install(TARGETS btclocview RUNTIME DESTINATION bin)
+# ==== PVS-Studio
+option(USE_PVS "PVS-Studio" OFF)
+if (USE_PVS)
+  # not helps with QtCreator
+  include("cmake/PVS-Studio.cmake")
+  pvs_studio_add_target(TARGET ${PROJECT_NAME}.analyze ALL
+                        ANALYZE ${PROJECT_NAME}
+                        MODE GA:1,2 OP)
+endif()
+message(STATUS "PVS-Studio: ${USE_PVS}")
+
+# add_executable(test_cin tools/test_cin.cpp)
 # install(TARGETS test_cin RUNTIME DESTINATION bin)

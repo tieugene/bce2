@@ -11,7 +11,7 @@
 #include "misc.h"
 #include "bk/script.h"
 #include "bk/opcode.h"
-#include "out/encode.h"
+#include "crypt/encode.h"
 
 using namespace std;
 
@@ -149,9 +149,8 @@ inline bool chk_PKu_pfx(const u8_t pfx) {
     return (pfx & 0xFC) == 0x04 and pfx != 0x05;
 }
 
-/// check PK (compressed) prefix
+/// check PK (compressed) prefix (must be 2..3)
 inline bool chk_PKc_pfx(const u8_t pfx) {
-    // prefix byte == 2..3
     return (pfx & 0xFE) == 0x02;
 }
 

@@ -26,9 +26,10 @@ const std::map<std::string, KVNGIN_T> kv_type_name = {
   ,{"bdb", KVTYPE_BDB}
 #endif
 };
+const std::string TAB = "\t";
 const string cfg_file_name = ".bce2.cfg";
 const string  help_txt = "\
-Usage: [options] (- | <dat_dir> <locs_file>)\n\
+Usage: [options]\n\
 Options:\n\
 -h        - this help\n\
 -f n      - block starts from (default=0)\n\
@@ -41,25 +42,9 @@ Options:\n\
 -t n      - k-v tuning (depends on engine)\n\
 -o        - output results\n\
 -s n      - logging step (default=1)\n\
--v[n]     - verbosity (0..3, to stderr)\
+-v[n]     - verbosity (0..3, to stderr)\n\
+-m        - multithreading on\n\
 ";
-
-void __prn_opts(void) {
-  cerr
-    << "= Options: =" << endl
-    << "From:" << TAB << ((OPTS.from == MAX_UINT32) ? string("<not set") : to_string(OPTS.from)) << endl
-    << "Num:" << TAB << OPTS.num << endl
-    << "Dat dir:" << TAB << OPTS.datdir << endl
-    << "Locs file:" << TAB << OPTS.locsfile << endl
-    << "K-V dir:" << TAB << OPTS.kvdir << endl
-    << "K-V type:" << TAB << OPTS.kvngin << endl
-    << "K-V tune:" << TAB << OPTS.kvtune << endl
-    << "Cin:" << TAB << OPTS.fromcin << endl
-    << "Debug:" << TAB << OPTS.verbose << endl
-    << "Out:" << TAB << OPTS.out << endl
-    << "Log by:" << TAB << OPTS.logstep << endl << endl
-  ;
-}
 
 /// Load options from config
 bool load_cfg(void) {
@@ -70,8 +55,8 @@ bool load_cfg(void) {
     unsigned long logstep = 0;
     CFG::ReadFile(
           f_in,
-          vector<string>{"datdir", "locsfile", "kvdir", "kvtype", "tune", "verbose", "out", "stdin", "logby"},
-          datdir, locsfile, kvdir, kvngin, OPTS.kvtune, verbose, OPTS.out, OPTS.fromcin, logstep);
+          vector<string>{"datdir", "locsfile", "kvdir", "kvtype", "tune", "verbose", "out", "stdin", "mt", "logby"},
+          datdir, locsfile, kvdir, kvngin, OPTS.kvtune, verbose, OPTS.out, OPTS.fromcin, OPTS.mt, logstep);
     f_in.close();
     if (verbose >= 0)
       OPTS.verbose = DBG_LVL_T(verbose);
@@ -104,7 +89,7 @@ bool        cli(int argc, char *argv[]) {
     auto kt = kv_type_name.begin();
     bool direct = false;
 
-    while ((opt = getopt(argc, argv, "hf:n:d:l:k:e:t:s:cov::")) != -1) {  // FIXME: v?
+    while ((opt = getopt(argc, argv, "hf:n:d:l:k:e:t:s:comv::")) != -1) {  // FIXME: v?
       switch (opt) {
         case 'f':
           tmp = atoi(optarg);
@@ -155,6 +140,9 @@ bool        cli(int argc, char *argv[]) {
         case 'o':
           OPTS.out = true;
           break;
+        case 'm':
+          OPTS.mt = true;
+          break;
         case 'v':   // FIXME: optarg = 0..5
           tmp = atoi(optarg);
           if (tmp < 0 or tmp > DBG_MAX)
@@ -163,18 +151,19 @@ bool        cli(int argc, char *argv[]) {
           break;
         case 's':
           tmp = atoi(optarg);
-          if (tmp < 1 or tmp > 700000)
+          if (tmp < 1 or tmp > 100000)
             return b_error("Bad -s: " + string(optarg));
           OPTS.logstep = tmp;
           break;
         case 'h':
+          cout << help_txt << endl;
+          return false;
+          break;
         case '?':   // can handle optopt
           return b_error(help_txt);
       }
     }
     // opterr - always 1; optind - 1-st unhandled is argv[optarg] (if argc > optind), so argc_last = argc - optind;
-    if (OPTS.verbose > 1)   // TODO: up v-level
-        __prn_opts();
     return true;
 }
 

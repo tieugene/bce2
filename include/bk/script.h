@@ -6,7 +6,7 @@
 #include <vector>
 #include <array>
 #include <string_view>
-#include "uintxxx.h"
+#include "crypt/uintxxx.h"
 
 /// Address[es] representation for printout (base58, bech32 etc)
 typedef std::vector<std::string> string_list;

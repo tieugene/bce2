@@ -22,11 +22,11 @@ bool    parse_script(void);
 
 bool    parse_bk(void) {
     BUSY.bk = true;
-    CUR_BK.head_ptr = static_cast<const BK_HEAD_T*> ((const void *) CUR_PTR.take_u8_ptr(sizeof (BK_HEAD_T)));
+    CUR_BK.head_ptr = static_cast<const BK_HEADER_T*> ((const void *) CUR_PTR.take_u8_ptr(sizeof (BK_HEADER_T)));
     CUR_BK.txs = CUR_PTR.take_varuint();
     if (OPTS.out) // on demand
     {
-        hash256(CUR_BK.head_ptr, sizeof(BK_HEAD_T), CUR_BK.hash);
+        hash256(CUR_BK.head_ptr, sizeof(BK_HEADER_T), CUR_BK.hash);
         if (kv_mode())
             out_bk();
         else
@@ -75,7 +75,6 @@ bool    hash_tx(const u8_t *tx_beg) {
     CUR_PTR.v_ptr = backup_ptr;    // after vins
     return true;
 }
-
 
 bool    parse_tx(void) { // TODO: hash
     BUSY.tx = true;

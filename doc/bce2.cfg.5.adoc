@@ -38,6 +38,8 @@ CLI options oweverwirite config ones.
   Logging step  (*-s* in CLI)
 *verbose =* _num_::
   Verbosity (== *-v* in CLI)
+*mt =* _False|True_::
+  Multithreading  (== *m* in CLI)
 
 == See Also
 

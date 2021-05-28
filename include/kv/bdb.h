@@ -20,9 +20,9 @@ public:
   ~KV_BDB_T();
   void      clear(void);
   uint32_t  count(void);
-  uint32_t  add(std::string_view key);
-  uint32_t  get(std::string_view key);
-  uint32_t  get_or_add(std::string_view key);
+  uint32_t  add(const std::string_view &key);
+  uint32_t  get(const std::string_view &key);
+  uint32_t  get_or_add(const std::string_view &key);
 };
 
 #endif // USE _BDB
