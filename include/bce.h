@@ -36,13 +36,6 @@ struct  OPT_T {
   bool        mt = false;           // multithreading
 };
 
-/// Through counters
-struct  COUNT_T {
-  uint32_t    bk = 0;
-  uint32_t    tx = 0;     // session if no k-v
-  uint32_t    addr = 0;   // unique addrs
-};
-
 /// Session counters
 struct  STAT_T {
   uint32_t    vins = 0;
@@ -55,20 +48,11 @@ struct  STAT_T {
   uint32_t    addr_lens[321] = {0}; ///< 0..MAX_ADDR_LEN
 };
 
-/// Per parent counters
-struct  LOCAL_T {
-    uint32_t    tx = 0;
-    uint32_t    vin = 0;
-    uint32_t    vout = 0;
-    uint32_t    wit = 0;
-};
-
-/// 'Item is processing' flag (for trace)
-struct  BUSY_T {
-    bool    bk = false;
-    bool    tx = false;
-    bool    vin = false;
-    bool    vout = false;
+/// Through counters
+struct  COUNT_T {
+  uint32_t    bk = 0;
+  uint32_t    tx = 0;     // session if no k-v
+  uint32_t    addr = 0;   // unique addrs
 };
 
 /// Bk header (80 bytes)
@@ -81,54 +65,13 @@ struct  BK_HEADER_T {
     uint32_t    nonce;  // real head end
 };
 
-/// Whole of bk data w/o txs
-struct  BK_OLD_T {
-    const BK_HEADER_T   *head_ptr;
-    uint32_t    txs;
-    uint256_t   hash;
-};
-
-/// Tx variables w/o vins/vouts
-struct  TX_OLD_T {
-    uint32_t    ver;        // FIXME: * (for hash)
-    uint32_t    vins;
-    uint32_t    vouts;
-    //uint32_t    wits;
-    uint32_t    locktime;   // FIXME: * (for hash)
-    uint256_t   hash;
-    bool        segwit;
-};
-
-/// Vin data
-struct  VIN_OLD_T {
-    const uint256_t   *txid;
-    uint64_t    txno;       // ?
-    uint32_t    vout;
-    uint32_t    ssize;      // vint
-    const u8_t *script;
-    uint32_t    seq;
-};
-
-/// Vout data
-struct  VOUT_OLD_T {
-    uint64_t    satoshi;
-    uint32_t    ssize;      // vint
-    const u8_t *script;
-};
-
 extern OPT_T    OPTS;
 extern STAT_T   STAT;
+extern COUNT_T  COUNT;
 extern KV_BASE_T     *TxDB, *AddrDB;
 extern time_t   start_time;
 extern long     start_mem;
 // depricated
-extern COUNT_T  COUNT;
-extern LOCAL_T  LOCAL;
-extern BUSY_T   BUSY;
-extern BK_OLD_T     CUR_BK;
-extern TX_OLD_T     CUR_TX;
-extern VIN_OLD_T    CUR_VIN;
-extern VOUT_OLD_T   CUR_VOUT;
 extern UNIPTR_T CUR_PTR;
 
 /// Coinbase vin source
