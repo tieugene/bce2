@@ -36,19 +36,7 @@ bool VOUT_T::parse(void) {
 bool VOUT_T::resolve(void) {
   bool retvalue(true);
   if (addr and addr->is_full()) {
-    try {
-      addr_id = AddrDB->get(addr->as_key());
-    } catch (BCException &e) {
-      retvalue = false;
-    }
-  }
-  return retvalue;
-}
-
-bool VOUT_T::save(void) {
-  bool retvalue(true);
-  if (addr and addr->is_full() and addr_id == MAX_UINT32) {
-    addr_id = AddrDB->add(addr->as_key());
+    addr_id = AddrDB->get_or_add(addr->as_key());
     retvalue = (addr_id != MAX_UINT32);
     if (retvalue)
       COUNT.addr++;

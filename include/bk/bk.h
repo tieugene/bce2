@@ -31,7 +31,6 @@ public:
   ~BK_T();
   bool parse(void);
   bool resolve(void);
-  bool save(void);
   inline uint32_t get_id(void) { return height; };
 };
 
@@ -59,7 +58,6 @@ public:
   ~TX_T();
   bool parse(void);
   bool resolve(void);
-  bool save(void);
   inline uint32_t get_no(void) { return no; };
   inline uint32_t get_id(void) { return id; };
   inline BK_T * get_bk(void) { return bk; }
@@ -97,7 +95,6 @@ public:
   ~VOUT_T();
   bool parse(void);
   bool resolve(void);
-  bool save(void);
   const std::string addr_type(void);
   const std::string addr_repr(void);
 };

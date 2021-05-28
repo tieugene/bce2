@@ -46,7 +46,7 @@ int     main(int argc, char *argv[]) {
     if (!set_cache())
         return u32_error("Set_cache oops.", 3);
     // 1.4. last prestart
-    if (OPTS.verbose)
+    if (OPTS.verbose > DBG_MIN)
       __prn_head();
     start_time = time(nullptr);
     // 2. main loop
@@ -60,9 +60,7 @@ int     main(int argc, char *argv[]) {
       if (kv_mode()) {
         if (!bk.resolve())              // 4. resolve
           break;
-        if (!bk.save())                 // 5. save
-          break;
-        if (OPTS.out)
+        if (OPTS.out)                   // 5. out
           out_bk(bk);
       } else {
         if (OPTS.out)
@@ -82,11 +80,10 @@ int     main(int argc, char *argv[]) {
           break;
     }
     // 3. The end
-    if (OPTS.verbose) {
+    if (OPTS.verbose > DBG_MIN) {
       __prn_tail();
       __prn_interim();
-      if (OPTS.verbose > DBG_MIN)
-        __prn_summary();
+      __prn_summary();
     }
     stop_cache();
     return 0;

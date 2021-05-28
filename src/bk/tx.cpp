@@ -70,18 +70,14 @@ bool TX_T::parse(void) {
 }
 
 bool TX_T::resolve(void) {
-  bool retvalue(true);
-  for (auto vin : vins)
-    retvalue &= vin->resolve();
-  for (auto vout : vouts)
-    retvalue &= vout->resolve();
-  return retvalue;
-}
-
-bool TX_T::save(void) {
   bool retvalue = ((id = TxDB->add(u256string_view(hash))) != MAX_UINT32);
-  if (retvalue)
+  if (retvalue) {
+    for (auto vin : vins)
+      if (!(retvalue &= vin->resolve()))
+        return retvalue;
     for (auto vout : vouts)
-      retvalue &= vout->save();
+      if (!(retvalue &= vout->resolve()))
+        break;
+  }
   return retvalue;
 }
