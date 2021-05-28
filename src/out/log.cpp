@@ -5,6 +5,8 @@
 
 using namespace std;
 
+time_t     start_time;
+long       start_mem;
 const std::string TAB = "\t";
 
 void log_opts(void) {
