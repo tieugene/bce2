@@ -1,6 +1,6 @@
 Name:		bce2
 Version:	0.0.5
-Release:	0%{?dist}
+Release:	1%{?dist}
 License:	GPLv3
 Summary:	BTC blockchain export
 URL:		https://github.com/tieugene/bce2
@@ -53,8 +53,10 @@ install -t %{buildroot}%{_mandir}/man5 -m 0644 -p doc/*.5
 
 
 %changelog
-* Tue May 18 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.5-1
+* Fri May 28 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.5-1
 - Version bump
+- hex input speedup
+- multiengine k-v
 
 * Tue May 11 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.4-1
 - Version bump
