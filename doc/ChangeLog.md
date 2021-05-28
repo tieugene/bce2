@@ -1,6 +1,6 @@
 # Changelog
 
-0.0.5:
+0.0.5 *2021-05-28*:
 
 - Lite code refactoring
 - Dox: code documenting, man-pages
