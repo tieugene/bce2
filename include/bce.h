@@ -14,45 +14,45 @@
 
 /// Verbose level
 enum    DBG_LVL_T {
-    DBG_NONE,
-    DBG_MIN,
-    DBG_MID,
-    DBG_MAX
+  DBG_NONE,
+  DBG_MIN,
+  DBG_MID,
+  DBG_MAX
 };
 
 /// Config/CLI options
 struct  OPT_T {
-    std::filesystem::path  datdir;    // blk*.dat folder path
-    std::filesystem::path  locsfile;  // locs-file path
-    std::filesystem::path  kvdir;     // file-based k-v dir path
-    KVNGIN_T    kvngin = KVTYPE_NONE; // k-v engine
-    uint64_t    kvtune = 0;           // k-v tuning
-    uint32_t    from = MAX_UINT32;    // bk start from
-    uint32_t    num = 1;              // bks to process
-    bool        fromcin = false;      // input from stdin
-    bool        out = false;          // produce output
-    DBG_LVL_T   verbose = DBG_NONE;   // verbosity
-    uint64_t    logstep = 1;          // logging step
-    bool        mt = false;           // multithreading
+  std::filesystem::path  datdir;    // blk*.dat folder path
+  std::filesystem::path  locsfile;  // locs-file path
+  std::filesystem::path  kvdir;     // file-based k-v dir path
+  KVNGIN_T    kvngin = KVTYPE_NONE; // k-v engine
+  DBG_LVL_T   verbose = DBG_NONE;   // verbosity
+  uint64_t    kvtune = 0;           // k-v tuning
+  uint32_t    from = MAX_UINT32;    // bk start from
+  uint32_t    num = 1;              // bks to process
+  uint32_t    logstep = 1;          // logging step
+  bool        fromcin = false;      // input from stdin
+  bool        out = false;          // produce output
+  bool        mt = false;           // multithreading
 };
 
 /// Through counters
 struct  COUNT_T {
-    uint32_t    bk = 0;
-    uint32_t    tx = 0;     // session if no cache
-    uint32_t    addr = 0;
+  uint32_t    bk = 0;
+  uint32_t    tx = 0;     // session if no k-v
+  uint32_t    addr = 0;   // unique addrs
 };
 
 /// Session counters
 struct  STAT_T {
-    uint32_t    max_txs = 0;
-    uint32_t    vins = 0;
-    uint32_t    max_vins = 0;
-    uint32_t    vouts = 0;
-    uint32_t    max_vouts = 0;
-    uint32_t    addrs = 0;
-    uint32_t    max_addrs = 0;
-    uint32_t    addr_lens[321] = {0}; ///< 0..MAX_ADDR_LEN
+  uint32_t    vins = 0;
+  uint32_t    vouts = 0;
+  uint32_t    addrs = 0;
+  uint32_t    max_txs = 0;
+  uint32_t    max_vins = 0;
+  uint32_t    max_vouts = 0;
+  uint32_t    max_addrs = 0;
+  uint32_t    addr_lens[321] = {0}; ///< 0..MAX_ADDR_LEN
 };
 
 /// Per parent counters

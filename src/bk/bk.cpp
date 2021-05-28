@@ -22,7 +22,7 @@ BK_T::BK_T(string_view src, uint32_t bk_no) : height(bk_no), data(src) {
   time = head_ptr->time;
   auto tx_count = uptr.take_varuint();
   if (!(bk_no == BK_GLITCH[0] or bk_no == BK_GLITCH[1]))  // skip glitch blocks
-    for (uint32_t i = 0; i < tx_count; i++, COUNT.tx++)
+    for (uint32_t i = 0; i < tx_count; i++)
       txs.push_back(new TX_T(uptr, i, this));
   // Counters
   STAT.max_txs = max(STAT.max_txs, tx_count);
@@ -43,13 +43,10 @@ void BK_T::mk_hash(void) {
 bool BK_T::parse(void) {
   if (OPTS.out)
     mk_hash();
-  bool retvalue(true);
-  for (auto tx : txs) {
-    retvalue &= tx->parse();
-    if (!retvalue)
+  for (auto tx : txs)
+    if (!tx->parse())
       return b_error("Bk # " + to_string(height) + " parse error");
-  }
-  return retvalue;
+  return true;
 }
 
 bool BK_T::resolve(void) {  // FIXME: rollback

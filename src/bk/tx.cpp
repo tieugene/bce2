@@ -66,11 +66,15 @@ bool TX_T::parse(void) {
   //  revalue &= vin.parse();
   for (auto vout : vouts)
     retvalue &= vout->parse();
+  if (retvalue and !kv_mode())
+    COUNT.tx++;   // session counter
   return retvalue;
 }
 
 bool TX_T::resolve(void) {
   bool retvalue = ((id = TxDB->add(u256string_view(hash))) != MAX_UINT32);
+  if (id != COUNT.tx)
+    retvalue = b_error("new tx has # " + to_string(id) + " instead of expecting " + to_string(COUNT.tx));
   if (retvalue)
     for (auto vin : vins)
       if (!(retvalue &= vin->resolve()))
@@ -79,7 +83,9 @@ bool TX_T::resolve(void) {
     for (auto vout : vouts)
       if (!(retvalue &= vout->resolve()))
         break;
-  if (!retvalue)
+  if (retvalue)
+    COUNT.tx++;
+  else
     v_error("Tx # " + to_string(no) + " resolve error");
   return retvalue;
 }
