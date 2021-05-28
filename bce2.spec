@@ -53,11 +53,13 @@ install -t %{buildroot}%{_mandir}/man5 -m 0644 -p doc/*.5
 
 
 %changelog
-* Mon May 24 2021 TI_Eugene <ti.eugene@gmail.com> 0.1.0-0.1
+* Mon May 28 2021 TI_Eugene <ti.eugene@gmail.com> 0.1.0-0.1
 - Version bump, pre.1 (bk classed, chk addr)
 
-* Tue May 18 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.5-1
-- Version bump (+bdb, polish)
+* Fri May 28 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.5-1
+- Version bump
+- hex input speedup
+- multiengine k-v
 
 * Tue May 11 2021 TI_Eugene <ti.eugene@gmail.com> 0.0.4-1
 - Version bump (hex speedup, tkrzw)
