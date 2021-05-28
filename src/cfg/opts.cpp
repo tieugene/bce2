@@ -151,7 +151,7 @@ bool        cli(int argc, char *argv[]) {
           break;
         case 's':
           tmp = atoi(optarg);
-          if (tmp < 1 or tmp > 700000)
+          if (tmp < 1 or tmp > 100000)
             return b_error("Bad -s: " + string(optarg));
           OPTS.logstep = tmp;
           break;
