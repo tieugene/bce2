@@ -73,7 +73,7 @@ bool TX_T::parse(void) {
 
 bool TX_T::resolve(void) {
   bool retvalue = ((id = TxDB->add(u256string_view(hash))) != MAX_UINT32);
-  if (id != COUNT.tx)
+  if (retvalue and (id != COUNT.tx))
     retvalue = b_error("new tx has # " + to_string(id) + " instead of expecting " + to_string(COUNT.tx));
   if (retvalue)
     for (auto vin : vins)

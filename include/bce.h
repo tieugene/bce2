@@ -47,7 +47,7 @@ struct  COUNT_T {
 struct  STAT_T {
   uint32_t    vins = 0;
   uint32_t    vouts = 0;
-  uint32_t    addrs = 0;
+  uint32_t    addrs = 0;  // all recognized incl nulldata
   uint32_t    max_txs = 0;
   uint32_t    max_vins = 0;
   uint32_t    max_vouts = 0;

@@ -37,11 +37,18 @@ bool VOUT_T::resolve(void) {
   bool retvalue(true);
   if (addr and addr->is_full()) {
     retvalue = ((addr_id = AddrDB->get_or_add(addr->as_key())) != MAX_UINT32);
-    if (retvalue)
-      COUNT.addr++;
-    else
-      v_error("Vout # " + to_string(no) + " resolve error: not found nor added");
+    if (retvalue) {
+      if (addr_id >= COUNT.addr) {  // new
+        if (addr_id != COUNT.addr)
+          retvalue = b_error("new addr has # " + to_string(addr_id) + " instead of expecting " + to_string(COUNT.addr));
+        else
+          COUNT.addr++;
+      }
+    } else
+      retvalue = b_error("Vout # " + to_string(no) + " not found nor added");
   }
+  if (!retvalue)
+    v_error("Vout # " + to_string(no) + " resolve error");
   return retvalue;
 }
 
