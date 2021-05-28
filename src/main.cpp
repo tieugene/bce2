@@ -46,8 +46,10 @@ int     main(int argc, char *argv[]) {
     if (!set_cache())
         return u32_error("Set_cache oops.", 3);
     // 1.4. last prestart
-    if (OPTS.verbose > DBG_MIN)
+    if (OPTS.verbose > DBG_MIN) {
+      log_opts();
       log_head();
+    }
     start_time = time(nullptr);
     // 2. main loop
     for (COUNT.bk = OPTS.from; OPTS.num; COUNT.bk++) { // FIXME: cond
@@ -66,13 +68,6 @@ int     main(int argc, char *argv[]) {
         if (OPTS.out)
           prn_bk(bk);
       }
-      //CUR_PTR.v_ptr = buffer.begin();
-      //auto parsed_ok = parse_bk();
-      /*
-      if (!parsed_ok) {
-          v_error("Bk # " + to_string(COUNT.bk));
-          break;
-      }*/
       if ((OPTS.verbose) and (((COUNT.bk+1) % OPTS.logstep) == 0))  // 7. log
           log_interim();
       if (OPTS.num)   // not 'untill the end'

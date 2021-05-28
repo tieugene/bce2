@@ -7,13 +7,32 @@ using namespace std;
 
 const std::string TAB = "\t";
 
+void log_opts(void) {
+  cerr
+      << "= Options: =" << endl
+      << "From:" << TAB << ((OPTS.from == MAX_UINT32) ? string("<not set>") : to_string(OPTS.from)) << endl
+      << "Num:" << TAB << OPTS.num << endl
+      << "Dat dir:" << TAB << OPTS.datdir << endl
+      << "Locs file:" << TAB << OPTS.locsfile << endl
+      << "Cin:" << TAB << OPTS.fromcin << endl
+      << "K-V dir:" << TAB << OPTS.kvdir << endl
+      << "K-V type:" << TAB << OPTS.kvngin << endl
+      << "K-V tune:" << TAB << OPTS.kvtune << endl
+      << "Out:" << TAB << OPTS.out << endl
+      << "Log by:" << TAB << OPTS.logstep << endl
+      << "Debug:" << TAB << OPTS.verbose << endl
+      << "M/t:" << TAB << OPTS.mt << endl
+      << endl;
+      ;
+}
+
 void    log_head(void) {
   cerr << "Bk\tTx\tVins\tVouts\tAddrs\tUAddrs\tMem,M\tTime\n";
   log_tail();
 }
 
 void    log_tail(void) {
-  cerr << "---\t-------\t-------\t-------\t-------\t-------\t-------\t-----\n";
+  cerr << "------\t-------\t-------\t-------\t-------\t-------\t-------\t-----\n";
 }
 
 void    log_interim(void) {

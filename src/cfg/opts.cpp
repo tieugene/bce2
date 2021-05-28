@@ -46,24 +46,6 @@ Options:\n\
 -m        - multithreading on\n\
 ";
 
-void __prn_opts(void) {
-  cerr
-    << "= Options: =" << endl
-    << "From:" << TAB << ((OPTS.from == MAX_UINT32) ? string("<not set") : to_string(OPTS.from)) << endl
-    << "Num:" << TAB << OPTS.num << endl
-    << "Dat dir:" << TAB << OPTS.datdir << endl
-    << "Locs file:" << TAB << OPTS.locsfile << endl
-    << "Cin:" << TAB << OPTS.fromcin << endl
-    << "K-V dir:" << TAB << OPTS.kvdir << endl
-    << "K-V type:" << TAB << OPTS.kvngin << endl
-    << "K-V tune:" << TAB << OPTS.kvtune << endl
-    << "Out:" << TAB << OPTS.out << endl
-    << "Log by:" << TAB << OPTS.logstep << endl << endl
-    << "Debug:" << TAB << OPTS.verbose << endl
-    << "M/t:" << TAB << OPTS.mt << endl
-  ;
-}
-
 /// Load options from config
 bool load_cfg(void) {
   ifstream f_in(filesystem::path(getenv("HOME")) / cfg_file_name);
@@ -182,8 +164,6 @@ bool        cli(int argc, char *argv[]) {
       }
     }
     // opterr - always 1; optind - 1-st unhandled is argv[optarg] (if argc > optind), so argc_last = argc - optind;
-    if (OPTS.verbose > 1)   // TODO: up v-level
-        __prn_opts();
     return true;
 }
 
