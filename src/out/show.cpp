@@ -38,12 +38,12 @@ void prn_vin(const VIN_T &vin) {
   }
 }
 
-void prn_vout(const VOUT_T &vout) {
+void prn_vout(VOUT_T &vout) {
 #ifndef ADDR_ONLY
-  if (vout.addr->is_full())
-    printf("  >: %u, $: %llu, Addr: %s\n", vout.no, vout.satoshi, vout.addr->repr().c_str());
+  if (vout.addr and vout.addr->is_full())
+    printf("  >: # %u, $: %llu, Addr: %s %s\n", vout.no, vout.satoshi, vout.addr_type().c_str(), vout.addr->repr().c_str());
   else
-    printf("  >: %u, $: %llu, s_size: %lu\n", vout.no, vout.satoshi, vout.script.length());
+    printf("  >: # %u, $: %llu, Addr: %s %lu bytes\n", vout.no, vout.satoshi, vout.addr_type().c_str(), vout.script.length());
 #else
   auto a = vout.addr_repr();
   if (!a.empty())

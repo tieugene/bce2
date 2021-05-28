@@ -26,7 +26,7 @@ void out_vin(const VIN_T &vin) {
 }
 
 void out_vout(const VOUT_T &vout) {
-  if (vout.addr->is_full()) {
+  if (vout.addr and vout.addr->is_full()) {
     out_addr(vout);
     printf("o\t%u\t%u\t%" PRIu64 "\t%u\n", vout.tx->get_id(), vout.no, vout.satoshi, vout.addr_id);
   } else
