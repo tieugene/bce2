@@ -32,7 +32,7 @@ Let's make locs-file for **670k** blocks. Blockchain is stored in `$BTCDIR`.
 1. fix blockchain permissions:
 
    ```bash
-   sudo chmod -R o-w+rX $BTCDIR
+   sudo chmod -R a+rX $BTCDIR
    ```
 
 1. copy LevelDB folder into somewhere (e.g. here):
