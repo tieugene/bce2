@@ -88,6 +88,8 @@ private:
   uint64_t  satoshi = 0;
   std::string_view script;
   ADDR_BASE_T *addr = nullptr;
+  bool addr_is_new = false;   // for out_addr
+  const std::string addr_type(void);
   friend void out_vout(const VOUT_T &);
   friend void prn_vout(VOUT_T &);
   friend void out_addr(const VOUT_T &);
@@ -96,8 +98,7 @@ public:
   ~VOUT_T();
   bool parse(void);
   bool resolve(void);
-  const std::string addr_type(void);
-  const std::string addr_repr(void);
+  //const std::string addr_repr(void);
 };
 
 class WIT_T {

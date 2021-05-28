@@ -6,7 +6,7 @@ using namespace std;
 
 // == VOUT ==
 VOUT_T::VOUT_T(UNIPTR_T &uptr, const uint32_t no, TX_T * const tx)
-    : tx(tx), no(no), addr(nullptr) {
+    : tx(tx), no(no) {
   satoshi = uptr.take_64();
   auto s_size = uptr.take_varuint();
   auto s_body = uptr.take_ch_ptr(s_size);
@@ -41,8 +41,10 @@ bool VOUT_T::resolve(void) {
       if (addr_id >= COUNT.addr) {  // new
         if (addr_id != COUNT.addr)
           retvalue = b_error("new addr has # " + to_string(addr_id) + " instead of expecting " + to_string(COUNT.addr));
-        else
+        else {
+          addr_is_new = true;
           COUNT.addr++;
+        }
       }
     } else
       retvalue = b_error("Vout # " + to_string(no) + " not found nor added");
@@ -58,10 +60,10 @@ const string VOUT_T::addr_type(void) {
   else
     return "nonstandard";
 }
-
+/*
 const string VOUT_T::addr_repr(void) {
   if (addr and addr->is_full())
     return addr->repr();
   else
     return string();
-}
+}*/

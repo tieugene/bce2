@@ -38,8 +38,8 @@ void out_vout(const VOUT_T &vout) {
 }
 
 void out_addr(const VOUT_T &vout) {
-  static uint32_t printed_addrs = 0;  ///< sequential counter (FIXME: фуфель, работает только с 0)
-  if ((vout.addr_id+1) >= printed_addrs) {
+  static uint32_t printed_addrs = 0;  ///< sequential counter
+  if (vout.addr_is_new and (vout.addr_id + 1) > printed_addrs) {
     printf("a\t%u\t%s\t%u\n", vout.addr_id, vout.addr->as_json().c_str(), vout.addr->qty());
     printed_addrs++;
   }
