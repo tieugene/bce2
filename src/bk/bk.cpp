@@ -37,7 +37,7 @@ BK_T::~BK_T() {
 }
 
 void BK_T::mk_hash(void) {
-  hash256(data.begin(), sizeof(BK_HEADER_T), hash);
+  hash256(data.begin(), sizeof(BK_HEAD_T), hash);
 }
 
 bool BK_T::parse(void) {

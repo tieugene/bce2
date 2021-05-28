@@ -3,22 +3,15 @@
 */
 
 #include "bce.h"
-#include "load/bkidx.h"
 #include "misc.h"
+#include "load/bkidx.h"
 #include "bk/bk.h"
-#include "bk/handlers.h"
 #include "out/log.h"
 
 // globals
 OPT_T       OPTS;
-COUNT_T     COUNT;
 STAT_T      STAT;
-LOCAL_T     LOCAL;
-BUSY_T      BUSY;
-BK_OLD_T        CUR_BK;
-TX_OLD_T        CUR_TX;
-VIN_OLD_T       CUR_VIN;
-VOUT_OLD_T      CUR_VOUT;
+COUNT_T     COUNT;
 UNIPTR_T    CUR_PTR;
 long        start_mem;
 time_t      start_time;

@@ -11,7 +11,6 @@
 //#include <filesystem>
 #include "bce.h"
 #include "misc.h"
-#include "bk/script.h" // cur_addr only
 #if defined(__APPLE__)
 #include <mach/mach.h>
 #endif
