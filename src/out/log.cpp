@@ -1,10 +1,11 @@
 #include <iostream>
-#include "out/log.h"
-#include "bce.h"
 #include "misc.h" // memused
+#include "out/log.h"
 
 using namespace std;
 
+time_t     start_time;
+long       start_mem;
 const std::string TAB = "\t";
 
 void log_opts(void) {

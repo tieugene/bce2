@@ -8,7 +8,6 @@
 #include <algorithm>    // sort
 #include "bk/addr.h"
 #include "bk/opcode.h"
-//#include "bce.h"      // STAT, OPTS
 #include "crypt/uintxxx.h"    // hash160
 
 using namespace std;

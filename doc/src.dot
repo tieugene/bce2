@@ -1,0 +1,127 @@
+digraph bce2 {
+	rankdir = LR;
+	node [shape="box"];
+	bce_h;
+	common_h;
+	misc_h;
+	subgraph cluster_h_bk {
+		addr_h;
+		bk_h;
+		opcode_h;
+	}
+	subgraph cluster_h_cfg {
+		config_file_h;
+		opts_h;
+	}
+	subgraph cluster_h_crypt {
+		encode_h;
+		uintxxx_h;
+	}
+	subgraph cluster_h_kv {
+		base_h;
+		bdb_h;
+		kc_h;
+		kv_h;
+		tk_h;
+	}
+	subgraph cluster_h_load {
+		bkidx_h;
+		datfarm_h;
+		fasthex_h;
+	}
+	subgraph cluster_h_out {
+		log_h;
+	}
+	// .h
+	kv_h -> bce_h;
+	bce_h -> misc_h;
+	common_h -> addr_h -> bk_h;
+	common_h -> opcode_h;
+	common_h -> encode_h;
+	common_h -> uintxxx_h;
+	common_h -> base_h;
+	base_h -> bdb_h;
+	base_h -> kc_h;
+	base_h -> tk_h;
+	bdb_h -> kv_h;
+	kc_h -> kv_h;
+	tk_h -> kv_h;
+	common_h -> bkidx_h;
+	// _cpp
+	node [shape="ellipse"];
+	common_h -> common_cpp;
+	misc_h -> misc_cpp;
+	misc_h -> main_cpp;
+	opts_h -> main_cpp;
+	bkidx_h -> main_cpp;
+	bk_h -> main_cpp;
+	log_h -> main_cpp;
+	subgraph cluster_c_bk {
+		addr_cpp;
+		bk_cpp;
+		tx_cpp;
+		vin_cpp;
+		vout_cpp;
+		wit_cpp;
+	}
+	subgraph cluster_c_cfg {
+		opts_cpp;
+	}
+	subgraph cluster_c_crypt {
+		base58_cpp;
+		bech32_cpp;
+		uintxxx_cpp;
+	}
+	subgraph cluster_c_kv {
+		bdb_cpp;
+		kv_common_cpp;
+		kc_cpp;
+		tk_cpp;
+	}
+	subgraph cluster_c_load {
+		bkidx_cpp;
+		datfarm_cpp;
+	}
+	subgraph cluster_c_out {
+		log_cpp;
+		out_cpp;
+		show_cpp;
+	}
+	addr_h -> addr_cpp;
+	opcode_h -> addr_cpp;
+	uintxxx_h -> addr_cpp;
+	bce_h -> bk_cpp;
+	uintxxx_h -> bk_cpp;
+	bk_h -> bk_cpp;
+	bce_h -> tx_cpp;
+	uintxxx_h -> tx_cpp;
+	bk_h -> tx_cpp;
+	misc_h -> vin_cpp;
+	bk_h -> vin_cpp;
+	bce_h -> vout_cpp;
+	bk_h -> vout_cpp;
+	bk_h -> wit_cpp;
+	misc_h -> opts_cpp;
+	opts_h -> opts_cpp;
+	config_file_h -> opts_cpp;
+	encode_h -> base58_cpp;
+	encode_h -> bech32_cpp;
+	encode_h -> uintxxx_cpp;
+	uintxxx_h -> uintxxx_cpp;
+	bce_h -> kv_common_cpp;
+	bce_h -> bdb_cpp;
+	bce_h -> kc_cpp;
+	bce_h -> tk_cpp;
+	misc_h -> bkidx_cpp;
+	bkidx_h -> bkidx_cpp;
+	datfarm_h -> bkidx_cpp;
+	fasthex_h -> bkidx_cpp;
+	misc_h -> datfarm_cpp;
+	datfarm_h -> datfarm_cpp;
+	misc_h -> out_cpp;
+	bk_h -> out_cpp;
+	misc_h -> show_cpp;
+	bk_h -> show_cpp;
+	misc_h -> log_cpp;
+	log_h -> log_cpp;
+}

@@ -5,8 +5,7 @@
 #ifdef USE_KC
 
 #include <cstdlib>
-#include "kv/kc.h"
-#include "misc.h"
+#include "bce.h"
 
 using namespace std;
 

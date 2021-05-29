@@ -1,9 +1,6 @@
 #ifndef BCE_H
 #define BCE_H
 
-// TODO: replace OPTS.cashe+inmem with file || inmem
-// TODO: stacktrace - file, byte, bk[, tx[, vin+n|vout+n]
-
 #include <iostream>
 #include <iomanip>
 #include <ctime>
@@ -55,24 +52,10 @@ struct  COUNT_T {
   uint32_t    addr = 0;   // unique addrs
 };
 
-/// Bk header (80 bytes)
-struct  BK_HEADER_T {
-    uint32_t    ver;    // real head start (80 bytes)
-    uint256_t   p_hash;
-    uint256_t   mroot;
-    uint32_t    time;
-    uint32_t    bits;
-    uint32_t    nonce;  // real head end
-};
-
-extern OPT_T    OPTS;
-extern STAT_T   STAT;
-extern COUNT_T  COUNT;
-extern KV_BASE_T     *TxDB, *AddrDB;
-extern time_t   start_time;
-extern long     start_mem;
-// depricated
-extern UNIPTR_T CUR_PTR;
+extern OPT_T      OPTS;
+extern STAT_T     STAT;
+extern COUNT_T    COUNT;
+extern KV_BASE_T *TxDB, *AddrDB;
 
 /// Coinbase vin source
 const uint32_t COINBASE_vout = 0xFFFFFFFF;

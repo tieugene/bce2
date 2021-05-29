@@ -1,0 +1,42 @@
+digraph DataFlow {
+	rankdir = TB;
+	node [shape="ellipse"] {	// apps
+		btcd [label="bitcoind"];
+		btcd2 [label="bitcoind"];
+		btcbklocs;
+		bce2;
+		txt2sql;
+		txt2tsv;
+		tsv2db;
+		psql;
+	}
+	node [shape="cylinder"] {
+		dat;
+		ldb;
+		locs;
+		kv;
+		SQLDB;
+	}
+	node [shape="note"] {
+		hash;
+		hex;
+		txt;
+		tsv;
+		sql;
+	}
+	plus1 [shape="circle" label="+"];
+	dat -> btcd;
+	ldb -> btcd;
+	btcd -> hash -> btcd2 -> hex;
+	ldb -> btcbklocs -> locs;
+	hash -> btcbklocs;
+	hex -> bce2;
+	dat -> plus1;
+	locs -> plus1;
+	plus1 -> bce2;
+	bce2 -> kv -> bce2;
+	bce2 -> txt;
+	txt -> txt2sql -> sql -> psql;
+	txt -> txt2tsv -> tsv -> tsv2db -> psql;
+	psql -> SQLDB;
+}

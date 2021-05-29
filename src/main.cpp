@@ -2,8 +2,8 @@
  * main.cpp
 */
 
-#include "bce.h"
 #include "misc.h"
+#include "cfg/opts.h"
 #include "load/bkidx.h"
 #include "bk/bk.h"
 #include "out/log.h"
@@ -12,9 +12,8 @@
 OPT_T       OPTS;
 STAT_T      STAT;
 COUNT_T     COUNT;
-UNIPTR_T    CUR_PTR;
-long        start_mem;
-time_t      start_time;
+extern long        start_mem;
+extern time_t      start_time;
 
 using namespace std;
 

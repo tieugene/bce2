@@ -1,13 +1,9 @@
 /*
  * opts.cpp - options processing (cfg, CLI)
  */
-//#include <cstdlib>
-//#include <cstring>
-//#include <filesystem>
-//#include <stdio.h>
 #include <unistd.h> // getopt()
-#include "bce.h"
 #include "misc.h"
+#include "cfg/opts.h"
 #include "cfg/config_file.h"  // https://github.com/fbarberm/SimpleConfigFile
 
 using namespace std;

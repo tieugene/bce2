@@ -4,8 +4,7 @@
  */
 #ifdef USE_TK
 
-#include "kv/tk.h"
-#include "misc.h"
+#include "bce.h"
 
 using namespace std;
 

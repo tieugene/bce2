@@ -1,7 +1,6 @@
 #ifdef USE_BDB
 
-#include "kv/bdb.h"
-#include "misc.h"
+#include "bce.h"
 
 using namespace std;
 
