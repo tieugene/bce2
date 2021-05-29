@@ -33,8 +33,10 @@ enum KVNGIN_T {
  * @brief Set up K-V storages
  * @return True on success
  */
-bool    set_cache(void);
+bool set_cache(void);
 /// Reset k-v storages
-void    stop_cache(void);
+void stop_cache(void);
+/// Update integrity info
+bool update_integrity(void);
 
 #endif // KV_H
