@@ -3,7 +3,7 @@
 #define ADDR_H
 
 #include <string_view>
-#include <stdexcept>
+#include <memory>   // unique_ptr
 #include "common.h"
 
 typedef byte_array<21> short_key;   ///< addr key representation
