@@ -1,8 +1,10 @@
 #include <filesystem>
+#include <fstream>
 
 #include "bce.h"
 
-KV_BASE_T  *TxDB = nullptr, *AddrDB = nullptr;
+KV_BASE_T *TxDB = nullptr, *AddrDB = nullptr;
+static std::fstream chk_file;
 
 using namespace std;
 
@@ -69,16 +71,37 @@ bool    set_cache(void) {
         COUNT.addr = AddrDB->count();
         if (COUNT.addr == NOT_FOUND_U32)
           return b_error("Cannot count addr #2");
+        // integrity
+        auto path = OPTS.kvdir / "bce2.chk";
+        chk_file.open(path);
+        if(!chk_file.is_open()) {
+          chk_file.clear();
+          chk_file.open(path, ios::out); //Create file.
+          chk_file.close();
+          chk_file.open(path);
+        }
+        if (!chk_file.is_open())
+          v_error("Cannot open " + path.string());
     }
     if (OPTS.from == MAX_UINT32)
         OPTS.from = 0;
     return true;
 }
 
-void stop_cache(void)
-{
+void stop_cache(void) {
   if (kv_mode()) {
-      delete TxDB;
-      delete AddrDB;
+    delete TxDB;
+    delete AddrDB;
+    if (chk_file.is_open())
+      chk_file.close();
   }
+}
+
+bool update_integrity(void) {
+  if (chk_file.is_open()) {
+    uint32_t data[3] = {COUNT.bk, COUNT.tx, COUNT.addr};
+    chk_file.seekp(0);
+    chk_file.write((char *) &data, sizeof(data));
+  }
+  return true;
 }

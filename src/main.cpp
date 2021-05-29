@@ -55,6 +55,8 @@ int     main(int argc, char *argv[]) {
       if (kv_mode()) {
         if (!bk.resolve())              // 4. resolve
           break;
+        if (!update_integrity())
+          break;
         if (OPTS.out)                   // 5. out
           out_bk(bk);
       } else {

@@ -41,8 +41,11 @@ bool KV_TK_DISK_T::open(const filesystem::path &dir, KVNAME_T name, uint64_t tun
     if (bnum_found < bnum_need)
       v_error("tkf " + dbpath.string() + " buckets: found " + to_string(bnum_found) + " < " + to_string(bnum_need) + " required.");
   }
-  if (!db->IsHealthy())
+  if (!db->IsHealthy()) {
+    db->Close();
+    delete db;
     return b_error("tkf " + dbpath.string() + ": DB is not healthy.");
+  }
   return true;
 }
 
