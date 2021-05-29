@@ -12,7 +12,7 @@ const uint32_t  MAX_BK_SIZE = 4 << 20;  // 4MB enough
  * @param locsfile Path to locs-file
  * @return Blocks number locations loaded about
  */
-size_t init_bkloader(const std::filesystem::path datdir, const std::filesystem::path locsfile);
+size_t init_bkloader(const std::filesystem::path &datdir, const std::filesystem::path &locsfile);
 /**
  * @brief Load block directly
  * @param dst Buffer load to

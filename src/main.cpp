@@ -45,7 +45,7 @@ int     main(int argc, char *argv[]) {
     }
     start_time = time(nullptr);
     // 2. main loop
-    for (COUNT.bk = OPTS.from; OPTS.num; COUNT.bk++) { // FIXME: cond
+    for (COUNT.bk = OPTS.from; OPTS.num; COUNT.bk++, OPTS.num--) {
       auto buffer = bkloader(COUNT.bk); // 1. load
       if (buffer.empty())
         break;
@@ -63,13 +63,11 @@ int     main(int argc, char *argv[]) {
       }
       if ((OPTS.verbose) and (((COUNT.bk+1) % OPTS.logstep) == 0))  // 7. log
           log_interim();
-      if (OPTS.num)   // not 'untill the end'
-        if (--OPTS.num == 0)
-          break;
     }
+    COUNT.bk--;
     // 3. The end
     if (OPTS.verbose) {
-      //log_tail();
+      // log_tail();
       log_interim();
       if (OPTS.verbose > DBG_MIN)
         log_summary();

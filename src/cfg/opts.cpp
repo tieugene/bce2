@@ -89,13 +89,13 @@ bool        cli(int argc, char *argv[]) {
       switch (opt) {
         case 'f':
           tmp = atoi(optarg);
-          if (tmp < 0 or tmp > 700000)
+          if (tmp < 0 or tmp > 999999)
             return b_error("Bad -f: " + string(optarg));
           OPTS.from = tmp;
           break;
         case 'n':
           tmp = atoi(optarg);
-          if (tmp < 0 or tmp > 700000)
+          if (tmp < 0 or tmp > 999999)
             return b_error("Bad -i: " + string(optarg));
           OPTS.num = tmp;
           if (OPTS.num == 0)  // ?
