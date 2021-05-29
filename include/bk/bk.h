@@ -86,7 +86,7 @@ private:
   uint32_t addr_id = MAX_UINT32;  // aka NOT_FOUND
   uint64_t  satoshi = 0;
   std::string_view script;
-  ADDR_BASE_T *addr = nullptr;
+  std::unique_ptr<ADDR_BASE_T> addr = nullptr;
   bool addr_is_new = false;   // for out_addr
   const std::string addr_type(void);
   friend void out_vout(const VOUT_T &);
@@ -94,7 +94,6 @@ private:
   friend void out_addr(const VOUT_T &);
 public:
   VOUT_T(UNIPTR_T &, const uint32_t, TX_T * const);
-  ~VOUT_T();
   bool parse(void);
   bool resolve(void);
   //const std::string addr_repr(void);

@@ -13,11 +13,6 @@ VOUT_T::VOUT_T(UNIPTR_T &uptr, const uint32_t no, TX_T * const tx)
   // cerr << "+VO " << to_string(no) << endl;
 }
 
-VOUT_T::~VOUT_T() {
-  delete addr;
-  // cerr << "-VO " << to_string(no) << endl;
-}
-
 bool VOUT_T::parse(void) {
   if (script.length()) {
     try {
