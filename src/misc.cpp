@@ -10,6 +10,7 @@
 #include <unistd.h>
 //#include <filesystem>
 #include "misc.h"
+#include "uniptr.h"
 #if defined(__APPLE__)
 #include <mach/mach.h>
 #endif

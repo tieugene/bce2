@@ -4,6 +4,7 @@ digraph bce2 {
 	bce_h;
 	common_h;
 	misc_h;
+	uniptr_h;
 	subgraph cluster_h_bk {
 		addr_h;
 		bk_h;
@@ -35,7 +36,9 @@ digraph bce2 {
 	// .h
 	kv_h -> bce_h;
 	bce_h -> misc_h;
+	common_h -> uniptr_h;
 	common_h -> addr_h -> bk_h;
+	uniptr_h -> bk_h;
 	common_h -> opcode_h;
 	common_h -> encode_h;
 	common_h -> uintxxx_h;
@@ -50,6 +53,8 @@ digraph bce2 {
 	// _cpp
 	node [shape="ellipse"];
 	common_h -> common_cpp;
+	uniptr_h -> uniptr_cpp;
+	uniptr_h -> misc_cpp;
 	misc_h -> misc_cpp;
 	misc_h -> main_cpp;
 	opts_h -> main_cpp;
