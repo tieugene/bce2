@@ -39,8 +39,10 @@ bool KV_TK_DISK_T::open(const filesystem::path &dir, KVNAME_T name, uint64_t tun
   if (OPTS.verbose and bnum_need) { // chk tune
     auto bnum_found = db->CountBuckets();
     if (bnum_found < bnum_need)
-      v_error(dbpath.string() + " buckets: found " + to_string(bnum_found) + " < " + to_string(bnum_need) + " required.");
+      v_error("tkf " + dbpath.string() + " buckets: found " + to_string(bnum_found) + " < " + to_string(bnum_need) + " required.");
   }
+  if (!db->IsHealthy())
+    return b_error("tkf " + dbpath.string() + ": DB is not healthy.");
   return true;
 }
 
