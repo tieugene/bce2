@@ -120,6 +120,6 @@ public:
   const std::string_view as_key(void);
 };
 
-ADDR_BASE_T *addr_decode(std::string_view);
+std::unique_ptr<ADDR_BASE_T> addr_decode(std::string_view);
 
 #endif // ADDR_H

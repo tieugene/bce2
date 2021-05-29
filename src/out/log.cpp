@@ -29,7 +29,7 @@ void log_opts(void) {
 
 void    log_head(void) {
   cerr << "Bk\tTx\tVins\tVouts\tAddrs\tUAddrs\tMem,M\tTime\n";
-  log_tail();
+  // log_tail();
 }
 
 void    log_tail(void) {
@@ -37,6 +37,9 @@ void    log_tail(void) {
 }
 
 void    log_interim(void) {
+  static uint32_t bk_printed = MAX_UINT32;
+  if (COUNT.bk == bk_printed)
+    return;
   cerr <<
     COUNT.bk+1 <<
     TAB << COUNT.tx <<
@@ -47,10 +50,10 @@ void    log_interim(void) {
     TAB << ((memused() - start_mem) >> 10) <<
     TAB << time(nullptr) - start_time <<
     endl;
+  bk_printed = COUNT.bk;
 }
 
-void    log_summary(void)
-{
+void    log_summary(void) {
   cerr
     << "= Summary =" << endl
     << "Blocks:"    << TAB << COUNT.bk+1 << endl

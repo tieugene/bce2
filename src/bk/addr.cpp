@@ -233,40 +233,40 @@ const string_view ADDR_MS_T::as_key(void) {
     return string_view((const char *) key1.data(), sizeof(key1));
 }
 
-ADDR_BASE_T *addr_decode(string_view data) {  // sript, size
+unique_ptr<ADDR_BASE_T> addr_decode(string_view data) {  // sript, size
   if (data.length() == 0)
     return nullptr;
-  ADDR_BASE_T *retvalue = nullptr;
+  unique_ptr<ADDR_BASE_T> retvalue = nullptr;
   u8_t opcode = data[0];
   if (opcode == OP_RETURN)
-    return new ADDR_NULL_T();
+    return make_unique<ADDR_NULL_T>();
   if (data.length() < 22)             // P2WPKH is smallest script
     return nullptr;
   switch (opcode) {
     case 0x41: // uncompressed
     case 0x21: // compressed
-      retvalue = new ADDR_PK_T(data);
+      retvalue = make_unique<ADDR_PK_T>(data);
       break;
     case OP_DUP:
-      retvalue = new ADDR_PKH_T(data);
+      retvalue = make_unique<ADDR_PKH_T>(data);
       break;
     case OP_HASH160:
-      retvalue = new ADDR_SH_T(data);
+      retvalue = make_unique<ADDR_SH_T>(data);
       break;
     case OP_0:                          // P2W* ver.0 (BIP-141)
       switch (data[1]) {
         case 0x14:
-          retvalue = new ADDR_WPKH_T(data); // uint160_t
+          retvalue = make_unique<ADDR_WPKH_T>(data); // uint160_t
           break;
         case 0x20:
-          retvalue = new ADDR_WSH_T(data);  // uint256_t
+          retvalue = make_unique<ADDR_WSH_T>(data);  // uint256_t
           break;
         default:
           throw AddrException("Bad P2Wx");
       }
       break;
     case OP_1 ... OP_16:
-      retvalue = new ADDR_MS_T(data);
+      retvalue = make_unique<ADDR_MS_T>(data);
       break;
     default:
       ;

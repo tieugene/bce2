@@ -38,8 +38,9 @@ int     main(int argc, char *argv[]) {
     if (!set_cache())
         return u32_error("Set_cache oops.", 3);
     // 1.4. last prestart
-    if (OPTS.verbose > DBG_MIN) {
-      log_opts();
+    if (OPTS.verbose) {
+      if (OPTS.verbose > DBG_MIN)
+        log_opts();
       log_head();
     }
     start_time = time(nullptr);
@@ -67,10 +68,11 @@ int     main(int argc, char *argv[]) {
           break;
     }
     // 3. The end
-    if (OPTS.verbose > DBG_MIN) {
-      log_tail();
+    if (OPTS.verbose) {
+      //log_tail();
       log_interim();
-      log_summary();
+      if (OPTS.verbose > DBG_MIN)
+        log_summary();
     }
     stop_cache();
     return 0;

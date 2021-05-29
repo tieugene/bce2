@@ -7,7 +7,7 @@ void out_bk(const BK_T &bk) {
   char dt[20];
   strftime(dt, 20, "%Y-%m-%d %OH:%OM:%OS", localtime(&t));   ///FUTURE: back into gmtime
   printf("b\t%u\t'%s'\t'%s'\n", bk.height, dt, hash2hex(bk.hash).c_str()); ///FUTURE: s/'hash'/hash/
-  for (auto tx : bk.txs)
+  for (auto &tx : bk.txs)
     out_tx(*tx);
 }
 
@@ -15,9 +15,9 @@ void out_tx(const TX_T &tx) {
   // FIXME: through tx counter
   if (tx.bk)
     printf("t\t%u\t%u\t%s\n", tx.id, tx.bk->get_id(), hash2hex(tx.hash).c_str());
-  for (auto vin : tx.vins)
+  for (auto &vin : tx.vins)
     out_vin(*vin);
-  for (auto vout : tx.vouts)
+  for (auto &vout : tx.vouts)
     out_vout(*vout);
 }
 
