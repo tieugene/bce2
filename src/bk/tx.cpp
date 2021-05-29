@@ -24,7 +24,7 @@ TX_T::TX_T(UNIPTR_T &uptr, const uint32_t no, BK_T * const bk)
   wit_offset = uptr.ch_ptr - tx_beg;
   if (segwit)                             // wits
     for (uint32_t i = 0; i < vin_count; i++)
-      wits.push_back(new WIT_T(uptr, i, this));
+      wits.push_back(make_unique<WIT_T>(uptr, i, this));
   uptr.take_32();                         // skip locktime
   data = string_view(tx_beg, uptr.ch_ptr - tx_beg);
   // Counters
@@ -40,8 +40,8 @@ TX_T::~TX_T() {
     delete vin;
   for (auto vout: vouts)
     delete vout;
-  for (auto wit: wits)
-    delete wit;
+  //for (auto wit: wits)
+  //  delete wit;
   // cerr << "-TX " << to_string(no) << endl;
 }
 
