@@ -22,7 +22,7 @@ void prn_tx(const TX_T &tx) {
   for (auto vin : tx.vins)
     prn_vin(*vin);
 #endif
-  for (auto vout : tx.vouts)
+  for (auto &vout : tx.vouts)
     prn_vout(*vout);
 }
 

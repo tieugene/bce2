@@ -47,7 +47,7 @@ private:
   bool segwit = false;
   uint32_t wit_offset = 0; ///< cut off for hash calc
   std::vector<VIN_T*> vins;
-  std::vector<VOUT_T*> vouts;
+  std::vector<std::unique_ptr<VOUT_T>> vouts;
   std::vector<std::unique_ptr<WIT_T>> wits;
   void mk_hash(void);
   friend void out_tx(const TX_T &);

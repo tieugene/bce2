@@ -17,7 +17,7 @@ void out_tx(const TX_T &tx) {
     printf("t\t%u\t%u\t%s\n", tx.id, tx.bk->get_id(), hash2hex(tx.hash).c_str());
   for (auto vin : tx.vins)
     out_vin(*vin);
-  for (auto vout : tx.vouts)
+  for (auto &vout : tx.vouts)
     out_vout(*vout);
 }
 

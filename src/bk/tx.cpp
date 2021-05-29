@@ -20,7 +20,7 @@ TX_T::TX_T(UNIPTR_T &uptr, const uint32_t no, BK_T * const bk)
     vins.push_back(new VIN_T(uptr, i, this));
   auto vout_count = uptr.take_varuint();  // vouts
   for (uint32_t i = 0; i < vout_count; i++)
-    vouts.push_back(new VOUT_T(uptr, i, this));
+    vouts.push_back(make_unique<VOUT_T>(uptr, i, this));
   wit_offset = uptr.ch_ptr - tx_beg;
   if (segwit)                             // wits
     for (uint32_t i = 0; i < vin_count; i++)
@@ -38,8 +38,8 @@ TX_T::TX_T(UNIPTR_T &uptr, const uint32_t no, BK_T * const bk)
 TX_T::~TX_T() {
   for (auto vin: vins)
     delete vin;
-  for (auto vout: vouts)
-    delete vout;
+  //for (auto vout: vouts)
+  //  delete vout;
   //for (auto wit: wits)
   //  delete wit;
   // cerr << "-TX " << to_string(no) << endl;
@@ -64,7 +64,7 @@ bool TX_T::parse(void) {
   bool retvalue(true);
   // for (auto vin ; vins)
   //  revalue &= vin.parse();
-  for (auto vout : vouts)
+  for (auto &vout : vouts)
     retvalue &= vout->parse();
   if (retvalue and !kv_mode())
     COUNT.tx++;   // session counter
@@ -80,7 +80,7 @@ bool TX_T::resolve(void) {
       if (!(retvalue &= vin->resolve()))
         break;
   if (retvalue)
-    for (auto vout : vouts)
+    for (auto &vout : vouts)
       if (!(retvalue &= vout->resolve()))
         break;
   if (retvalue)
