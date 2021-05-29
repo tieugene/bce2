@@ -45,6 +45,7 @@ void TX_T::mk_hash(void) {  // const u8_t *tx_beg
     hash_src.erase(cut_off, cut_off + sizeof (uint16_t));               // ...and wit signature
     hash_src.shrink_to_fit();
     hash256(string_view(hash_src.data(), hash_src.size()), hash);
+    // hash256(hash_src, hash);
   }
 }
 

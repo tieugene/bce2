@@ -10,11 +10,11 @@
 
 using namespace std;
 
-const string  ripe2addr(const u8_t *src, const u8_t pfx) {
+const string  ripe2addr(const uint160_t &src, const u8_t pfx) {  // was const u8_t *src
   // TODO: src (u8* => &u160)
   u8_t tmp1[sizeof(uint160_t)+5];
   tmp1[0] = pfx;
-  memcpy(tmp1+1, src, sizeof (uint160_t));   // 1. add leading 0
+  memcpy(tmp1+1, src.begin(), sizeof (uint160_t));   // 1. add leading 0
   uint256_t tmp2;
   hash256(tmp1, sizeof (uint160_t)+1, tmp2);  // 2. 2 x sha256
   memcpy(tmp1+21, &(tmp2[0]), 4);             // 3. add crc
@@ -52,19 +52,17 @@ bool  __ConvertBits(const O& outfn, I it, I end) {
   return true;
 }
 
-const string  wpkh2addr(const u8_t *v) {
-  // TODO: src (u8* => &u160)
+const string  wpkh2addr(const uint160_t &src) {  // was const u8_t *v
   u8vector data = {0};
   data.reserve(33);
-  __ConvertBits<8, 5, true>([&](unsigned char c) { data.push_back(c); }, v, v + sizeof (uint160_t));
+  __ConvertBits<8, 5, true>([&](unsigned char c) { data.push_back(c); }, src.begin(), src.end());
   return Bech32Encode(data);
 }
 
-const string  wsh2addr(const u8_t *src) {
-  // TODO: src (u8* => &u256)
+const string  wsh2addr(const uint256_t &src) { // was const u8_t *src
   u8vector data = {0};
   data.reserve(53);
-  __ConvertBits<8, 5, true>([&](unsigned char c) { data.push_back(c); }, src, src + sizeof (uint256_t));
+  __ConvertBits<8, 5, true>([&](unsigned char c) { data.push_back(c); }, src.begin(), src.end());
   return Bech32Encode(data);
 }
 
@@ -102,9 +100,9 @@ void  __ripe160(const uint256_t &src, u8_t *dst) {
   RIPEMD160_Final(dst, &context);
 }
 
-void  hash160(const void *src, const uint32_t size, u8_t *dst) {
+void  hash160(const void *src, const uint32_t size, uint160_t &dst) {
   // TODO: src+size => string_view
   uint256_t tmp;
   __sha256(src, size, tmp);
-  __ripe160(tmp, dst);
+  __ripe160(tmp, (u8_t *) &dst);
 }

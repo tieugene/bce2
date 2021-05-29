@@ -35,7 +35,7 @@ size_t  load_fileoffsets(const filesystem::path &fn) {
   return blocks;
 }
 
-size_t  init_bkloader(const std::filesystem::path datdir, const std::filesystem::path locsfile) {
+size_t  init_bkloader(const std::filesystem::path &datdir, const std::filesystem::path &locsfile) {
   auto bk_qty = load_fileoffsets(locsfile);
   if (bk_qty)
     datfarm = new DATFARM_T(bk_qty, datdir);
