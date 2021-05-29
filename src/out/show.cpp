@@ -10,7 +10,7 @@ void prn_bk(const BK_T &bk) {
   printf("B: # %u, Time: %u, Txs: %lu, Hash: %s\n",
     bk.height, bk.time, bk.txs.size(), hash2hex(bk.hash).c_str());
 #endif
-  for (auto tx : bk.txs)
+  for (auto &tx : bk.txs)
     prn_tx(*tx);
 }
 
@@ -19,7 +19,7 @@ void prn_tx(const TX_T &tx) {
 #ifndef ADDR_ONLY
   printf(" T: # %u, Ins: %lu, Outs: %lu, SegWit: %d, Hash: %s\n",
     tx.no, tx.vins.size(), tx.vouts.size(), tx.segwit, hash2hex(tx.hash).c_str());
-  for (auto vin : tx.vins)
+  for (auto &vin : tx.vins)
     prn_vin(*vin);
 #endif
   for (auto &vout : tx.vouts)

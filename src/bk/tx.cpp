@@ -17,7 +17,7 @@ TX_T::TX_T(UNIPTR_T &uptr, const uint32_t no, BK_T * const bk)
   if (vin_count == 0)
     throw BCException("Vins == 0");
   for (uint32_t i = 0; i < vin_count; i++)
-    vins.push_back(new VIN_T(uptr, i, this));
+    vins.push_back(make_unique<VIN_T>(uptr, i, this));
   auto vout_count = uptr.take_varuint();  // vouts
   for (uint32_t i = 0; i < vout_count; i++)
     vouts.push_back(make_unique<VOUT_T>(uptr, i, this));
@@ -33,16 +33,6 @@ TX_T::TX_T(UNIPTR_T &uptr, const uint32_t no, BK_T * const bk)
   STAT.max_vins = max(STAT.max_vins, vin_count);
   STAT.max_vouts = max(STAT.max_vouts, vout_count);
   // cerr << "+TX " << to_string(no) << endl;
-}
-
-TX_T::~TX_T() {
-  for (auto vin: vins)
-    delete vin;
-  //for (auto vout: vouts)
-  //  delete vout;
-  //for (auto wit: wits)
-  //  delete wit;
-  // cerr << "-TX " << to_string(no) << endl;
 }
 
 void TX_T::mk_hash(void) {  // const u8_t *tx_beg
@@ -62,7 +52,7 @@ bool TX_T::parse(void) {
   if (OPTS.out or kv_mode())
     mk_hash();  // TODO: on demand/mt
   bool retvalue(true);
-  // for (auto vin ; vins)
+  // for (auto &vin ; vins)
   //  revalue &= vin.parse();
   for (auto &vout : vouts)
     retvalue &= vout->parse();
@@ -76,7 +66,7 @@ bool TX_T::resolve(void) {
   if (retvalue and (id != COUNT.tx))
     retvalue = b_error("new tx has # " + to_string(id) + " instead of expecting " + to_string(COUNT.tx));
   if (retvalue)
-    for (auto vin : vins)
+    for (auto &vin : vins)
       if (!(retvalue &= vin->resolve()))
         break;
   if (retvalue)
