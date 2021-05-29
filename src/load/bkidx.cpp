@@ -6,10 +6,10 @@
 #include <filesystem>
 #include <stdio.h>
 
+#include "misc.h"
 #include "load/bkidx.h"
 #include "load/datfarm.h"
 #include "load/fasthex.h"
-#include "misc.h"
 
 using namespace std;
 

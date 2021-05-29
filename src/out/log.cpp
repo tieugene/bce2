@@ -1,7 +1,6 @@
 #include <iostream>
-#include "out/log.h"
-#include "bce.h"
 #include "misc.h" // memused
+#include "out/log.h"
 
 using namespace std;
 

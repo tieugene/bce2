@@ -11,7 +11,6 @@
 
 #include <string_view>
 #include <vector>
-#include "common.h"
 #include "addr.h"
 
 class TX_T;

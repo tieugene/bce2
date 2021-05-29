@@ -1,6 +1,5 @@
-#include "bk/bk.h"
-#include "bce.h"      // TxDB
 #include "misc.h"  // hash2hex
+#include "bk/bk.h"
 
 using namespace std;
 

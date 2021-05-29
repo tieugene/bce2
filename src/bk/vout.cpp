@@ -1,6 +1,5 @@
-#include "bk/bk.h"
 #include "bce.h"      // STAT, OPTS
-//#include "uintxxx.h"  // hash
+#include "bk/bk.h"
 
 using namespace std;
 

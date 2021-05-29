@@ -2,8 +2,8 @@
  * main.cpp
 */
 
-#include "bce.h"
 #include "misc.h"
+#include "cfg/opts.h"
 #include "load/bkidx.h"
 #include "bk/bk.h"
 #include "out/log.h"

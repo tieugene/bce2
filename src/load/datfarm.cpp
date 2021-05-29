@@ -3,8 +3,8 @@
 #include <sstream>
 #include <queue>
 
-#include "load/datfarm.h"
 #include "common.h"
+#include "load/datfarm.h"
 
 using namespace std;
 
