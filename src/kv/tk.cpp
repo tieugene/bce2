@@ -13,16 +13,10 @@ KV_TK_DISK_T::KV_TK_DISK_T(const filesystem::path &dir, KVNAME_T name, uint64_t 
     throw BCException("tkf: Cannot init DB");
 }
 
-KV_TK_DISK_T::~KV_TK_DISK_T() {
-  if (db)
-    close();
-  delete db;
-}
-
 bool KV_TK_DISK_T::open(const filesystem::path &dir, KVNAME_T name, uint64_t tune) {
   dbpath = dir / (kv_name[name] + ".tkh");
   auto bnum_need = 0;
-  db = new tkrzw::HashDBM();
+  db = make_unique<tkrzw::HashDBM>();
   tkrzw::HashDBM::TuningParameters tuning_params;
   tuning_params.offset_width = 5;
   if (tune) {
@@ -43,7 +37,6 @@ bool KV_TK_DISK_T::open(const filesystem::path &dir, KVNAME_T name, uint64_t tun
   }
   if (!db->IsHealthy()) {
     db->Close();
-    delete db;
     return b_error("tkf " + dbpath.string() + ": DB is not healthy.");
   }
   return true;
@@ -117,10 +110,10 @@ bool    KV_TK_INMEM_T::open(KVNAME_T name, uint64_t tune) {
     if (tune > 30)
       return b_error("tkm " + dbname + ": Tuning parameter is too big: " + to_string(tune));
     else
-      db = new tkrzw::TinyDBM(1<<tune);
+      db = make_unique<tkrzw::TinyDBM>(1<<tune);
   } else
-    db = new tkrzw::TinyDBM();
-  return (db);
+    db = make_unique<tkrzw::TinyDBM>();
+  return bool(db);
 }
 
 uint32_t    KV_TK_INMEM_T::add(const string_view &key) {
