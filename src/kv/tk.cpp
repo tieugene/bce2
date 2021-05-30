@@ -103,6 +103,13 @@ uint32_t    KV_TK_DISK_T::get_or_add(const std::string_view &key) {
   return value;
 }
 
+bool        KV_TK_DISK_T::del(const std::string_view &key) {
+  auto s = db->Remove(key);
+  if (!s.IsOK())
+    return b_error("tkf " + dbpath.string() + ": Cannot delete record.");
+  return true;
+}
+
 /// In-mem
 bool    KV_TK_INMEM_T::open(void) {
   if (tune) {
@@ -156,6 +163,13 @@ uint32_t    KV_TK_INMEM_T::get_or_add(const std::string_view &key) {
       return u32_error("tkm " + dbname + ": Can not get nor add record - " + s.GetMessage());
   }
   return value;
+}
+
+bool        KV_TK_INMEM_T::del(const std::string_view &key) {
+  auto s = db->Remove(key);
+  if (!s.IsOK())
+    return b_error("tkm " + dbname + ": Cannot delete record.");
+  return true;
 }
 
 #endif

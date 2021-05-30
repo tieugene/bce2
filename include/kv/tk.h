@@ -21,9 +21,10 @@ public:
   bool        close(void);
   void        clear(void) { db->Clear(); }
   uint32_t    count(void);
-  uint32_t    add(const std::string_view &key);
-  uint32_t    get(const std::string_view &key);
-  uint32_t    get_or_add(const std::string_view &key);
+  uint32_t    add(const std::string_view &);
+  uint32_t    get(const std::string_view &);
+  uint32_t    get_or_add(const std::string_view &);
+  bool        del(const std::string_view &);
 };
 
 class KV_TK_INMEM_T : public KV_BASE_T {
@@ -37,9 +38,10 @@ public:
   bool        close(void);
   void        clear(void) { db->Clear(); }
   uint32_t    count(void) { return db->CountSimple(); }
-  uint32_t    add(const std::string_view &key);
-  uint32_t    get(const std::string_view &key);
-  uint32_t    get_or_add (const std::string_view &key);
+  uint32_t    add(const std::string_view &);
+  uint32_t    get(const std::string_view &);
+  uint32_t    get_or_add (const std::string_view &);
+  bool        del(const std::string_view &);
 };
 
 #endif // USE_TK
