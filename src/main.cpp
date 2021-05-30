@@ -35,8 +35,10 @@ int     main(int argc, char *argv[]) {
     }
     // 1.3. prepare k-v storages (and normalize OPTS.from)
     start_mem = memused();
-    if (!set_cache())
-        return u32_error("Set_cache oops.", 3);
+    if (!set_cache()) {
+      stop_cache();
+      return u32_error("Set_cache oops.", 3);
+    }
     // 1.4. last prestart
     if (OPTS.verbose) {
       if (OPTS.verbose > DBG_MIN)
@@ -66,6 +68,7 @@ int     main(int argc, char *argv[]) {
       if ((OPTS.verbose) and (((COUNT.bk+1) % OPTS.logstep) == 0))  // 7. log
           log_interim();
     }
+    stop_cache();
     COUNT.bk--;
     // 3. The end
     if (OPTS.verbose) {
@@ -74,6 +77,5 @@ int     main(int argc, char *argv[]) {
       if (OPTS.verbose > DBG_MIN)
         log_summary();
     }
-    stop_cache();
     return 0;
 }

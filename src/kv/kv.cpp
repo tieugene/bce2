@@ -53,6 +53,12 @@ bool    set_cache(void) {
           default:
             return b_error("k-v not implemented");
         }
+        if (!TxDB->open())
+          return b_error("Cannot open Tx.");
+        if (!AddrDB->open()) {
+          TxDB->close();
+          return b_error("Cannot open Addr.");
+        }
         auto tx_count = TxDB->count();
         auto addr_count = AddrDB->count();
         if (!chk_kv(tx_count, "tx") or !chk_kv(addr_count, "addr"))
@@ -90,8 +96,8 @@ bool    set_cache(void) {
 
 void stop_cache(void) {
   if (kv_mode()) {
-    // delete TxDB;
-    // delete AddrDB;
+    TxDB->close();
+    AddrDB->close();
     if (chk_file.is_open())
       chk_file.close();
   }
