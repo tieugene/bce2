@@ -3,10 +3,10 @@
 
 #include "bce.h"
 
-KV_BASE_T *TxDB = nullptr, *AddrDB = nullptr;
-static std::fstream chk_file;
-
 using namespace std;
+
+unique_ptr<KV_BASE_T> TxDB = nullptr, AddrDB = nullptr;
+static fstream chk_file;
 
 bool chk_kv(uint32_t count, const string &name) {
   if (count == NOT_FOUND_U32)
@@ -36,12 +36,12 @@ bool    set_cache(void) {
 #endif
 #ifdef USE_TK
           case KVTYPE_TKFILE:
-            TxDB = new KV_TK_DISK_T(OPTS.kvdir, KV_NAME_TX, OPTS.kvtune);
-            AddrDB = new KV_TK_DISK_T(OPTS.kvdir, KV_NAME_ADDR, OPTS.kvtune);
+            TxDB = make_unique<KV_TK_DISK_T>(OPTS.kvdir, KV_NAME_TX, OPTS.kvtune);
+            AddrDB = make_unique<KV_TK_DISK_T>(OPTS.kvdir, KV_NAME_ADDR, OPTS.kvtune);
             break;
           case KVTYPE_TKMEM:
-            TxDB = new KV_TK_INMEM_T(KV_NAME_TX, OPTS.kvtune);
-            AddrDB = new KV_TK_INMEM_T(KV_NAME_ADDR, OPTS.kvtune);
+            TxDB = make_unique<KV_TK_INMEM_T>(KV_NAME_TX, OPTS.kvtune);
+            AddrDB = make_unique<KV_TK_INMEM_T>(KV_NAME_ADDR, OPTS.kvtune);
             break;
 #endif
 #ifdef USE_BDB
@@ -90,8 +90,8 @@ bool    set_cache(void) {
 
 void stop_cache(void) {
   if (kv_mode()) {
-    delete TxDB;
-    delete AddrDB;
+    // delete TxDB;
+    // delete AddrDB;
     if (chk_file.is_open())
       chk_file.close();
   }
