@@ -17,8 +17,7 @@
 class TX_T;
 class BK_T {
 private:
-  const char *data;
-  uint32_t size;
+  const std::unique_ptr<char[]> data;
   uint32_t height;
   uint32_t time = 0;
   uint256_t hash = {0};
@@ -28,8 +27,7 @@ private:
   friend void prn_bk(const BK_T &);
 public:
   // TODO: delete data in destructor
-  BK_T(const char *, const uint32_t, const uint32_t);
-  ~BK_T();
+  BK_T(std::unique_ptr<char[]>, const uint32_t);
   bool parse(void);
   bool resolve(void);
   inline uint32_t get_id(void) { return height; };

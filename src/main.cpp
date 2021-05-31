@@ -51,7 +51,7 @@ int     main(int argc, char *argv[]) {
       auto buffer = bkloader(COUNT.bk); // 1. load
       if (!buffer.first or (buffer.second == 0))
         break;
-      auto bk = BK_T(buffer.first, buffer.second, COUNT.bk); // 2. create objects
+      auto bk = BK_T(move(buffer.first), COUNT.bk); // 2. create objects
       if (!bk.parse())                  // 3. parse
         break;
       if (kv_mode()) {

@@ -15,9 +15,8 @@ struct  BK_HEAD_T {
   uint32_t    nonce;
 };
 
-BK_T::BK_T(const char *src, const uint32_t size, uint32_t bk_no) : data(src), size(size), height(bk_no) {
-  UNIPTR_T uptr(data);
-  //uptr.take_u8_ptr(sizeof(BK_HEAD_T)); // skip header
+BK_T::BK_T(std::unique_ptr<char[]> src, uint32_t bk_no) : data(move(src)), height(bk_no) {
+  UNIPTR_T uptr(data.get());
   const BK_HEAD_T* head_ptr = static_cast<const BK_HEAD_T*> ((const void *) uptr.take_u8_ptr(sizeof (BK_HEAD_T)));
   time = head_ptr->time;
   auto tx_count = uptr.take_varuint();
@@ -29,15 +28,8 @@ BK_T::BK_T(const char *src, const uint32_t size, uint32_t bk_no) : data(src), si
   // cerr << "+BK " << to_string(height) << endl;
 }
 
-BK_T::~BK_T() {
-  //for (auto tx: txs)
-  //  delete tx;
-  delete []data; // PVS warning
-  // cerr << "-BK " << to_string(height) << endl;
-}
-
 void BK_T::mk_hash(void) {
-  hash256(data, sizeof(BK_HEAD_T), hash);
+  hash256(data.get(), sizeof(BK_HEAD_T), hash);
 }
 
 bool BK_T::parse(void) {
