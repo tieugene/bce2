@@ -58,11 +58,13 @@ bool VOUT_T::resolve(void) {
 bool VOUT_T::rollback(void) { // FIXME: tune counter
   bool retvalue(true);
   if ((addr_id != MAX_UINT32) and (addr_is_new)) {
+    if (OPTS.verbose == DBG_MAX)
+      v_error("Vout # " + to_string(no) + ": rolling back...");
     retvalue = AddrDB->del(addr->as_key());
     if (retvalue)
       addr_id = MAX_UINT32;
     else
-      v_error("Vout # " + to_string(no) + ": Cannot del addr " + addr->repr());
+      v_error("Vout # " + to_string(no) + ": Rolling back oops: " + addr->repr());
   }
   return retvalue;
 }
