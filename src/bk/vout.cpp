@@ -13,6 +13,10 @@ VOUT_T::VOUT_T(UNIPTR_T &uptr, const uint32_t no, TX_T * const tx)
   // cerr << "+VO " << to_string(no) << endl;
 }
 
+const string VOUT_T::addr_type(void) {
+  return (addr) ? addr->name() : "nonstandard";
+}
+
 bool VOUT_T::parse(void) {
   if (script.length()) {
     try {
@@ -34,32 +38,31 @@ bool VOUT_T::resolve(void) {
     retvalue = ((addr_id = AddrDB->get_or_add(key)) != MAX_UINT32);
     if (retvalue) {
       if (addr_id >= COUNT.addr) {  // new
-        if (addr_id != COUNT.addr)
-          retvalue = b_error("new addr has # " + to_string(addr_id) + " instead of expecting " + to_string(COUNT.addr));
-        else {
-          addr_is_new = true;
+        addr_is_new = true;
+        if (addr_id != COUNT.addr) {
+          retvalue = b_error("Vout # " + to_string(no) + ": new addr has # " + to_string(addr_id) + " instead of expecting " + to_string(COUNT.addr));
+          rollback();
+        } else {
           COUNT.addr++;
           STAT.addr_lens[key.length()]++;
         }
       }
     } else
-      retvalue = b_error("Vout # " + to_string(no) + " not found nor added");
+      retvalue = b_error("Vout # " + to_string(no) + " not found nor added.");
   }
   if (!retvalue)
     v_error("Vout # " + to_string(no) + " resolve error");
   return retvalue;
 }
 
-const string VOUT_T::addr_type(void) {
-  if (addr)
-    return addr->name();
-  else
-    return "nonstandard";
+bool VOUT_T::rollback(void) { // FIXME: tune counter
+  bool retvalue(true);
+  if ((addr_id != MAX_UINT32) and (addr_is_new)) {
+    retvalue = AddrDB->del(addr->as_key());
+    if (retvalue)
+      addr_id = MAX_UINT32;
+    else
+      v_error("Vout # " + to_string(no) + ": Cannot del addr " + addr->repr());
+  }
+  return retvalue;
 }
-/*
-const string VOUT_T::addr_repr(void) {
-  if (addr and addr->is_full())
-    return addr->repr();
-  else
-    return string();
-}*/

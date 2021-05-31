@@ -57,6 +57,7 @@ public:
   TX_T(UNIPTR_T &, const uint32_t, BK_T * const);
   bool parse(void);
   bool resolve(void);
+  bool rollback(bool = true);
   inline uint32_t get_no(void) { return no; };
   inline uint32_t get_id(void) { return id; };
   inline BK_T * get_bk(void) { return bk; }
@@ -96,7 +97,7 @@ public:
   VOUT_T(UNIPTR_T &, const uint32_t, TX_T * const);
   bool parse(void);
   bool resolve(void);
-  //const std::string addr_repr(void);
+  bool rollback(void);
 };
 
 class WIT_T {
