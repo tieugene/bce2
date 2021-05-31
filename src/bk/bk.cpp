@@ -28,6 +28,10 @@ BK_T::BK_T(std::unique_ptr<char[]> src, uint32_t bk_no) : data(move(src)), heigh
   // cerr << "+BK " << to_string(height) << endl;
 }
 
+const string BK_T::err_prefix(void) {
+  return "Bk # " + std::to_string(height) + ": ";
+}
+
 void BK_T::mk_hash(void) {
   hash256(data.get(), sizeof(BK_HEAD_T), hash);
 }
@@ -37,16 +41,32 @@ bool BK_T::parse(void) {
     mk_hash();
   for (auto &tx : txs)
     if (!tx->parse())
-      return b_error("Bk # " + to_string(height) + " parse error");
+      return b_error(err_prefix() + "Parse error");
   return true;
 }
 
-bool BK_T::resolve(void) {  // FIXME: rollback
+bool BK_T::resolve(void) {
   bool retvalue(true);
+  uint32_t qty(0);
   for (auto &tx : txs) {
-    retvalue &= tx->resolve();
-    if (!retvalue)
-      return b_error("Bk # " + to_string(height) + " resolve error");
+    if (!(retvalue &= tx->resolve()))
+      break;
+    else
+      qty++;
+  }
+  if (!retvalue) {
+    v_error(err_prefix() + "Resolve oops.");
+    rollback();  // TODO: 1st qty
   }
   return retvalue;
+}
+
+void BK_T::rollback(void) {
+  bool retvalue(true);
+  if (OPTS.verbose == DBG_MAX)
+    v_error(err_prefix() + "Rolling back...");
+  for (auto &tx : txs)
+    retvalue &= tx->rollback();
+  if (!retvalue)
+    v_error(err_prefix() + "Rolling back oops.");
 }

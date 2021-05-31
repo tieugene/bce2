@@ -38,6 +38,7 @@ TX_T::TX_T(UNIPTR_T &uptr, const uint32_t no, BK_T * const bk)
 const string TX_T::err_prefix(void) {
   return "Tx # " + std::to_string(no) + ": ";
 }
+
 void TX_T::mk_hash(void) {  // const u8_t *tx_beg
   if (!segwit)
     hash256(data, hash);
@@ -93,14 +94,15 @@ bool TX_T::rollback(bool recur) {
   if (id != MAX_UINT32) {
     if (OPTS.verbose == DBG_MAX)
       v_error(err_prefix() + "Rolling back...");
-    retvalue = TxDB->del(u256string_view(hash));
-    if (retvalue)
-      id = MAX_UINT32;
-    else
-      v_error(err_prefix() + "Cannot rollback itself.");
     if (recur)
       for (auto &vout : vouts)
         retvalue &= vout->rollback();
+    if (retvalue) {
+      if ((retvalue &= TxDB->del(u256string_view(hash))))
+        id = MAX_UINT32;
+      else
+        v_error(err_prefix() + "Cannot rollback itself.");
+    }
   }
   if (!retvalue)
     v_error(err_prefix() + "Rolling back oops.");

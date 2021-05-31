@@ -23,6 +23,8 @@ private:
   uint256_t hash = {0};
   std::vector<std::unique_ptr<TX_T>> txs;
   void mk_hash(void);
+  const std::string err_prefix(void);
+  void rollback(void);
   friend void out_bk(const BK_T &);
   friend void prn_bk(const BK_T &);
 public:
