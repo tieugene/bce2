@@ -23,6 +23,8 @@ private:
   uint256_t hash = {0};
   std::vector<std::unique_ptr<TX_T>> txs;
   void mk_hash(void);
+  const std::string err_prefix(void);
+  void rollback(void);
   friend void out_bk(const BK_T &);
   friend void prn_bk(const BK_T &);
 public:
@@ -50,6 +52,7 @@ private:
   std::vector<std::unique_ptr<VOUT_T>> vouts;
   std::vector<std::unique_ptr<WIT_T>> wits;
   void mk_hash(void);
+  const std::string err_prefix(void);
   friend void out_tx(const TX_T &);
   friend void prn_tx(const TX_T &);
 public:
@@ -71,11 +74,12 @@ private:
   std::string_view  script;
   uint32_t          seq = 0;
   uint32_t          tx_id = MAX_UINT32;  // resolving
+  const std::string err_prefix(void);
   friend void out_vin(const VIN_T &);
   friend void prn_vin(const VIN_T &);
 public:
   VIN_T(UNIPTR_T &, const uint32_t, TX_T * const);
-  bool parse(void);
+  // bool parse(void);
   bool resolve(void);
 };
 
@@ -87,8 +91,9 @@ private:
   uint64_t  satoshi = 0;
   std::string_view script;
   std::unique_ptr<ADDR_BASE_T> addr = nullptr;
-  bool addr_is_new = false;   // for out_addr
+  bool addr_is_new = false;       // for out_addr
   const std::string addr_type(void);
+  const std::string err_prefix(void);
   friend void out_vout(const VOUT_T &);
   friend void prn_vout(VOUT_T &);
   friend void out_addr(const VOUT_T &);
@@ -96,7 +101,7 @@ public:
   VOUT_T(UNIPTR_T &, const uint32_t, TX_T * const);
   bool parse(void);
   bool resolve(void);
-  bool rollback(void);
+  bool rollback(void);   ///< Return true on success or skipped
 };
 
 class WIT_T {

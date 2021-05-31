@@ -17,12 +17,17 @@ const string VOUT_T::addr_type(void) {
   return (addr) ? addr->name() : "nonstandard";
 }
 
+const string VOUT_T::err_prefix(void) {
+  return "Vout # " + std::to_string(no) + ": ";
+}
+
+
 bool VOUT_T::parse(void) {
   if (script.length()) {
     try {
       addr = addr_decode(script);
     } catch (const AddrException &e) {
-      if (OPTS.verbose > DBG_MIN)  // FIXME: DBG_MAX
+      if (OPTS.verbose > DBG_MAX)
         cerr << "Vout " << to_string(tx->get_bk()->get_id()) << "/" << to_string(tx->get_no()) << "/" << to_string(no) << ": " << e.what() << endl;
     }
   }
@@ -40,10 +45,10 @@ bool VOUT_T::resolve(void) {
       if (addr_id >= COUNT.addr) {  // new
         addr_is_new = true;
         if (addr_id != COUNT.addr) {
-          retvalue = b_error("Vout # " + to_string(no) + ": new addr has # " + to_string(addr_id) + " instead of expecting " + to_string(COUNT.addr));
+          retvalue = b_error(err_prefix() + "new addr has # " + to_string(addr_id) + " instead of expecting " + to_string(COUNT.addr));
           rollback();
         } else {
-          COUNT.addr++;
+          COUNT.addr++; // lies after rollback()
           STAT.addr_lens[key.length()]++;
         }
       }
@@ -51,18 +56,20 @@ bool VOUT_T::resolve(void) {
       retvalue = b_error("Vout # " + to_string(no) + " not found nor added.");
   }
   if (!retvalue)
-    v_error("Vout # " + to_string(no) + " resolve error");
+    v_error(err_prefix() + "Resolve oops");
   return retvalue;
 }
 
-bool VOUT_T::rollback(void) { // FIXME: tune counter
+bool VOUT_T::rollback(void) {
   bool retvalue(true);
   if ((addr_id != MAX_UINT32) and (addr_is_new)) {
+    if (OPTS.verbose == DBG_MAX)
+      v_error(err_prefix() + "Rolling back...");
     retvalue = AddrDB->del(addr->as_key());
     if (retvalue)
       addr_id = MAX_UINT32;
     else
-      v_error("Vout # " + to_string(no) + ": Cannot del addr " + addr->repr());
+      v_error(err_prefix() + "Rolling back oops: " + addr->repr());
   }
   return retvalue;
 }

@@ -35,6 +35,10 @@ TX_T::TX_T(UNIPTR_T &uptr, const uint32_t no, BK_T * const bk)
   // cerr << "+TX " << to_string(no) << endl;
 }
 
+const string TX_T::err_prefix(void) {
+  return "Tx # " + std::to_string(no) + ": ";
+}
+
 void TX_T::mk_hash(void) {  // const u8_t *tx_beg
   if (!segwit)
     hash256(data, hash);
@@ -65,8 +69,8 @@ bool TX_T::parse(void) {
 bool TX_T::resolve(void) {
   bool retvalue = ((id = TxDB->add(u256string_view(hash))) != MAX_UINT32);
   if (retvalue and (id != COUNT.tx)) {
+    retvalue = b_error(err_prefix() + "new tx is # " + to_string(id) + " instead of expecting " + to_string(COUNT.tx));
     rollback(false);
-    retvalue = b_error("new tx has # " + to_string(id) + " instead of expecting " + to_string(COUNT.tx));
   }
   if (retvalue)
     for (auto &vin : vins)
@@ -79,25 +83,28 @@ bool TX_T::resolve(void) {
   if (retvalue)
     COUNT.tx++;
   else {
-    v_error("Tx # " + to_string(no) + " resolve error");
+    v_error(err_prefix() + "Resolve oops");
     rollback();
   }
   return retvalue;
 }
 
-bool TX_T::rollback(bool recur) { // FIXME: tune counter
+bool TX_T::rollback(bool recur) {
   bool retvalue(true);
   if (id != MAX_UINT32) {
-    retvalue = TxDB->del(u256string_view(hash));
-    if (retvalue)
-      id = MAX_UINT32;
-    else
-      v_error("Tx # " + to_string(no) + ": Cannot delete tx itself.");
+    if (OPTS.verbose == DBG_MAX)
+      v_error(err_prefix() + "Rolling back...");
     if (recur)
       for (auto &vout : vouts)
         retvalue &= vout->rollback();
+    if (retvalue) {
+      if ((retvalue &= TxDB->del(u256string_view(hash))))
+        id = MAX_UINT32;
+      else
+        v_error(err_prefix() + "Cannot rollback itself.");
+    }
   }
   if (!retvalue)
-    v_error("Tx # " + to_string(no) + ": Error rolling back tx.");
+    v_error(err_prefix() + "Rolling back oops.");
   return retvalue;
 }
