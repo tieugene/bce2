@@ -17,17 +17,18 @@
 class TX_T;
 class BK_T {
 private:
+  const char *data;
+  uint32_t size;
   uint32_t height;
   uint32_t time = 0;
   uint256_t hash = {0};
-  std::string_view data;
   std::vector<std::unique_ptr<TX_T>> txs;
   void mk_hash(void);
   friend void out_bk(const BK_T &);
   friend void prn_bk(const BK_T &);
 public:
   // TODO: delete data in destructor
-  BK_T(std::string_view, const uint32_t);
+  BK_T(const char *, const uint32_t, const uint32_t);
   ~BK_T();
   bool parse(void);
   bool resolve(void);

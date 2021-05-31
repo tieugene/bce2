@@ -43,24 +43,24 @@ size_t  init_bkloader(const std::filesystem::path &datdir, const std::filesystem
 }
 
 /// Load bk to buffer
-string_view load_bk(const uint32_t bk_no) {
+uniq_view load_bk(const uint32_t bk_no) {
   uint32_t sig, size;
   uint32_t fileno=FOFF[bk_no].fileno, offset=FOFF[bk_no].offset;
   if (!datfarm->read(fileno, offset-8, sizeof(sig), &sig))
-    return sv_error("Bk #" + to_string(bk_no) + ": Can't read bk signature.");
+    return cs_error("Bk # " + to_string(bk_no) + ": Can't read bk signature.");
   if (sig != BK_SIGN)
-    return sv_error("Bk #" + to_string(bk_no) + ": Bad block signature found: " + ptr2hex(string_view((char *) &sig, sizeof(sig))));
+    return cs_error("Bk # " + to_string(bk_no) + ": Bad block signature found: " + ptr2hex(string_view((char *) &sig, sizeof(sig))));
   if (!datfarm->read(fileno, offset-4, sizeof(size), &size))
-    return sv_error("Bk #" + to_string(bk_no) + ": Can't read bk size.");
+    return cs_error("Bk # " + to_string(bk_no) + ": Can't read bk size.");
   if (size > MAX_BK_SIZE)
-    return sv_error("Bk #" + to_string(bk_no) + ": Block too big: " + to_string(size));
+    return cs_error("Bk # " + to_string(bk_no) + ": Block too big: " + to_string(size));
   // simple
   char *buffer = new char[size];
   if (!datfarm->read(fileno, offset, size, buffer)) {
     delete []buffer;
-    return sv_error("Bk #" + to_string(bk_no) + ": Cannot read block itself.");
+    return cs_error("Bk # " + to_string(bk_no) + ": Cannot read block itself.");
   }
-  return string_view(buffer, size);
+  return make_pair(buffer, size);
   /* uniq
   unique_ptr<char[]> buffer = make_unique<char[]>(size);
   if (!datfarm->read(fileno, offset, size, buffer.get()))
@@ -84,7 +84,7 @@ size_t hex2bytes(string_view src, char *const dst) {
   return dst_ptr - dst;
 }
 
-string_view stdin_bk(const uint32_t bk_no) {
+uniq_view stdin_bk(const uint32_t bk_no) {
   const int BUF_SIZE = (MAX_BK_SIZE << 1) + 3;  ///< bk + \n + \0 + reserved
   if (!line)
     line = new char[BUF_SIZE];
@@ -92,21 +92,21 @@ string_view stdin_bk(const uint32_t bk_no) {
   if (std::fgets(line, BUF_SIZE, stdin)) {
     auto line_len = strlen(line);
     if (line_len < 2)
-      return sv_error("Bk #" + to_string(bk_no) + ": Hex-line too small: " + to_string(line_len));
+      return cs_error("Bk # " + to_string(bk_no) + ": Hex-line too small: " + to_string(line_len));
     if (line_len >= (BUF_SIZE - 1))   ///< max_bk_size exceeded
-      return sv_error("Bk #" + to_string(bk_no) + ": Hex-line too big: " + to_string(line_len));
+      return cs_error("Bk # " + to_string(bk_no) + ": Hex-line too big: " + to_string(line_len));
     if (line[line_len - 1] == '\n')
       line[--line_len] = '\0';   // rtrim line
     if (line_len & 1)
-      return sv_error("Bk #" + to_string(bk_no) + ": Hex-line has odd symbols: " + to_string(line_len));
+      return cs_error("Bk # " + to_string(bk_no) + ": Hex-line has odd symbols: " + to_string(line_len));
     auto buffer_len = line_len / 2;
     char *buffer = new char[buffer_len];
     auto done = hex2bytes(string_view(line, line_len), buffer);
     if (done != buffer_len) {
       delete []buffer;
-      return sv_error(to_string(done) + "/" + to_string(buffer_len) + " bytes converted");
+      return cs_error(to_string(done) + "/" + to_string(buffer_len) + " bytes converted");
     }
-    return string_view(buffer, buffer_len);
+    return make_pair(buffer, buffer_len);
   } else
-    return string_view();
+    return make_pair(nullptr, 0);
 }

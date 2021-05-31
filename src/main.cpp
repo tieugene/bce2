@@ -18,7 +18,7 @@ extern time_t      start_time;
 using namespace std;
 
 int     main(int argc, char *argv[]) {
-  string_view (*bkloader)(const uint32_t) = &stdin_bk;
+  uniq_view (*bkloader)(const uint32_t) = &stdin_bk;
 
     // 1. prepare
     // 1.1. handle options
@@ -49,9 +49,9 @@ int     main(int argc, char *argv[]) {
     // 2. main loop
     for (COUNT.bk = OPTS.from; OPTS.num; COUNT.bk++, OPTS.num--) {
       auto buffer = bkloader(COUNT.bk); // 1. load
-      if (buffer.empty())
+      if (!buffer.first or (buffer.second == 0))
         break;
-      auto bk = BK_T(buffer, COUNT.bk); // 2. create objects
+      auto bk = BK_T(buffer.first, buffer.second, COUNT.bk); // 2. create objects
       if (!bk.parse())                  // 3. parse
         break;
       if (kv_mode()) {
@@ -66,7 +66,7 @@ int     main(int argc, char *argv[]) {
           prn_bk(bk);
       }
       if ((OPTS.verbose) and (((COUNT.bk+1) % OPTS.logstep) == 0))  // 7. log
-          log_interim();
+        log_interim();
     }
     stop_cache();
     COUNT.bk--;
