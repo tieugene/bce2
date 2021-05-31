@@ -13,12 +13,12 @@ VIN_T::VIN_T(UNIPTR_T &uptr, const uint32_t no, TX_T * const tx)
   script = string_view(s_body, s_size);
   seq = uptr.take_32();
 }
-
+/*
 bool VIN_T::parse(void) {
   // TODO: mt: start resolve
   return true;
 }
-
+*/
 bool VIN_T::resolve(void) {
   if (vout != COINBASE_vout)
     if ((tx_id = TxDB->get(u256string_view(*tx_hash))) == NOT_FOUND_U32)
