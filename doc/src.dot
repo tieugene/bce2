@@ -79,7 +79,7 @@ digraph bce2 {
 	}
 	subgraph cluster_c_kv {
 		bdb_cpp;
-		kv_common_cpp;
+		kv_cpp;
 		kc_cpp;
 		tk_cpp;
 	}
@@ -113,7 +113,7 @@ digraph bce2 {
 	encode_h -> bech32_cpp;
 	encode_h -> uintxxx_cpp;
 	uintxxx_h -> uintxxx_cpp;
-	bce_h -> kv_common_cpp;
+	bce_h -> kv_cpp;
 	bce_h -> bdb_cpp;
 	bce_h -> kc_cpp;
 	bce_h -> tk_cpp;

@@ -17,18 +17,17 @@
 class TX_T;
 class BK_T {
 private:
+  const std::unique_ptr<char[]> data;
   uint32_t height;
   uint32_t time = 0;
   uint256_t hash = {0};
-  std::string_view data;
   std::vector<std::unique_ptr<TX_T>> txs;
   void mk_hash(void);
   friend void out_bk(const BK_T &);
   friend void prn_bk(const BK_T &);
 public:
   // TODO: delete data in destructor
-  BK_T(std::string_view, const uint32_t);
-  ~BK_T();
+  BK_T(std::unique_ptr<char[]>, const uint32_t);
   bool parse(void);
   bool resolve(void);
   inline uint32_t get_id(void) { return height; };
@@ -57,6 +56,7 @@ public:
   TX_T(UNIPTR_T &, const uint32_t, BK_T * const);
   bool parse(void);
   bool resolve(void);
+  bool rollback(bool = true);
   inline uint32_t get_no(void) { return no; };
   inline uint32_t get_id(void) { return id; };
   inline BK_T * get_bk(void) { return bk; }
@@ -96,7 +96,7 @@ public:
   VOUT_T(UNIPTR_T &, const uint32_t, TX_T * const);
   bool parse(void);
   bool resolve(void);
-  //const std::string addr_repr(void);
+  bool rollback(void);
 };
 
 class WIT_T {

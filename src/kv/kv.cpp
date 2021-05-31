@@ -1,10 +1,12 @@
 #include <filesystem>
+#include <fstream>
 
 #include "bce.h"
 
-KV_BASE_T  *TxDB = nullptr, *AddrDB = nullptr;
-
 using namespace std;
+
+unique_ptr<KV_BASE_T> TxDB = nullptr, AddrDB = nullptr;
+static fstream chk_file;
 
 bool chk_kv(uint32_t count, const string &name) {
   if (count == NOT_FOUND_U32)
@@ -34,12 +36,12 @@ bool    set_cache(void) {
 #endif
 #ifdef USE_TK
           case KVTYPE_TKFILE:
-            TxDB = new KV_TK_DISK_T(OPTS.kvdir, KV_NAME_TX, OPTS.kvtune);
-            AddrDB = new KV_TK_DISK_T(OPTS.kvdir, KV_NAME_ADDR, OPTS.kvtune);
+            TxDB = make_unique<KV_TK_DISK_T>(OPTS.kvdir, KV_NAME_TX, OPTS.kvtune);
+            AddrDB = make_unique<KV_TK_DISK_T>(OPTS.kvdir, KV_NAME_ADDR, OPTS.kvtune);
             break;
           case KVTYPE_TKMEM:
-            TxDB = new KV_TK_INMEM_T(KV_NAME_TX, OPTS.kvtune);
-            AddrDB = new KV_TK_INMEM_T(KV_NAME_ADDR, OPTS.kvtune);
+            TxDB = make_unique<KV_TK_INMEM_T>(KV_NAME_TX, OPTS.kvtune);
+            AddrDB = make_unique<KV_TK_INMEM_T>(KV_NAME_ADDR, OPTS.kvtune);
             break;
 #endif
 #ifdef USE_BDB
@@ -50,6 +52,12 @@ bool    set_cache(void) {
 #endif
           default:
             return b_error("k-v not implemented");
+        }
+        if (!TxDB->open())
+          return b_error("Cannot open Tx.");
+        if (!AddrDB->open()) {
+          TxDB->close();
+          return b_error("Cannot open Addr.");
         }
         auto tx_count = TxDB->count();
         auto addr_count = AddrDB->count();
@@ -69,16 +77,37 @@ bool    set_cache(void) {
         COUNT.addr = AddrDB->count();
         if (COUNT.addr == NOT_FOUND_U32)
           return b_error("Cannot count addr #2");
+        // integrity
+        auto path = OPTS.kvdir / "bce2.chk";
+        chk_file.open(path);
+        if(!chk_file.is_open()) {
+          chk_file.clear();
+          chk_file.open(path, ios::out); //Create file.
+          chk_file.close();
+          chk_file.open(path);
+        }
+        if (!chk_file.is_open())
+          v_error("Cannot open " + path.string());
     }
     if (OPTS.from == MAX_UINT32)
         OPTS.from = 0;
     return true;
 }
 
-void stop_cache(void)
-{
+void stop_cache(void) {
   if (kv_mode()) {
-      delete TxDB;
-      delete AddrDB;
+    TxDB->close();
+    AddrDB->close();
+    if (chk_file.is_open())
+      chk_file.close();
   }
+}
+
+bool update_integrity(void) {
+  if (chk_file.is_open()) {
+    uint32_t data[3] = {COUNT.bk, COUNT.tx, COUNT.addr};
+    chk_file.seekp(0);
+    chk_file.write((char *) &data, sizeof(data));
+  }
+  return true;
 }

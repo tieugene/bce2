@@ -8,21 +8,18 @@
 
 using namespace std;
 
-KV_TK_DISK_T::KV_TK_DISK_T(const filesystem::path &dir, KVNAME_T name, uint64_t tune) {
-  if (!open(dir, name, tune))
-    throw BCException("tkf: Cannot init DB");
+KV_TK_DISK_T::KV_TK_DISK_T(const std::filesystem::path &dir, KVNAME_T name, uint64_t tune) : tune(tune) {
+  dbpath = dir / (kv_name[name] + ".tkh");
+  db = make_unique<tkrzw::HashDBM>();
 }
 
 KV_TK_DISK_T::~KV_TK_DISK_T() {
-  if (db)
-    close();
-  delete db;
+  if (db->IsOpen())
+    db->Close();
 }
 
-bool KV_TK_DISK_T::open(const filesystem::path &dir, KVNAME_T name, uint64_t tune) {
-  dbpath = dir / (kv_name[name] + ".tkh");
+bool KV_TK_DISK_T::open(void) {
   auto bnum_need = 0;
-  db = new tkrzw::HashDBM();
   tkrzw::HashDBM::TuningParameters tuning_params;
   tuning_params.offset_width = 5;
   if (tune) {
@@ -41,19 +38,23 @@ bool KV_TK_DISK_T::open(const filesystem::path &dir, KVNAME_T name, uint64_t tun
     if (bnum_found < bnum_need)
       v_error("tkf " + dbpath.string() + " buckets: found " + to_string(bnum_found) + " < " + to_string(bnum_need) + " required.");
   }
-  if (!db->IsHealthy())
+  if (!db->IsHealthy()) {
+    db->Close();
     return b_error("tkf " + dbpath.string() + ": DB is not healthy.");
+  }
   return true;
 }
 
 bool KV_TK_DISK_T::close(void) {
   bool retvalue = true;
-  auto s = db->Synchronize(true);
-  if (!s.IsOK())
-    retvalue = b_error("tkf " + dbpath.string() + ": Cannot sync DB - " + s.GetMessage());
-  s = db->Close();
-  if (!s.IsOK())
-    retvalue = b_error("tkf " + dbpath.string() + ": Cannot close DB - " + s.GetMessage());
+  if (db->IsOpen()) {
+    auto s = db->Synchronize(true);
+    if (!s.IsOK())
+      retvalue = b_error("tkf " + dbpath.string() + ": Cannot sync DB - " + s.GetMessage());
+    s = db->Close();
+    if (!s.IsOK())
+      retvalue = b_error("tkf " + dbpath.string() + ": Cannot close DB - " + s.GetMessage());
+  }
   return retvalue;
 }
 
@@ -102,22 +103,29 @@ uint32_t    KV_TK_DISK_T::get_or_add(const std::string_view &key) {
   return value;
 }
 
-/// In-mem
-KV_TK_INMEM_T::KV_TK_INMEM_T(KVNAME_T name, uint64_t tune) {
-  if (!open(name, tune))
-    throw BCException("tkm " + dbname + ": Cannot init DB.");
+bool        KV_TK_DISK_T::del(const std::string_view &key) {
+  auto s = db->Remove(key);
+  if (!s.IsOK())
+    return b_error("tkf " + dbpath.string() + ": Cannot delete record.");
+  return true;
 }
 
-bool    KV_TK_INMEM_T::open(KVNAME_T name, uint64_t tune) {
-  dbname = kv_name[name];
+/// In-mem
+bool    KV_TK_INMEM_T::open(void) {
   if (tune) {
     if (tune > 30)
       return b_error("tkm " + dbname + ": Tuning parameter is too big: " + to_string(tune));
     else
-      db = new tkrzw::TinyDBM(1<<tune);
+      db = make_unique<tkrzw::TinyDBM>(1<<tune);
   } else
-    db = new tkrzw::TinyDBM();
-  return (db);
+    db = make_unique<tkrzw::TinyDBM>();
+  return bool(db);
+}
+
+bool    KV_TK_INMEM_T::close(void) {
+  if (db and db->IsOpen())
+    db->Close();
+  return true;
 }
 
 uint32_t    KV_TK_INMEM_T::add(const string_view &key) {
@@ -155,6 +163,13 @@ uint32_t    KV_TK_INMEM_T::get_or_add(const std::string_view &key) {
       return u32_error("tkm " + dbname + ": Can not get nor add record - " + s.GetMessage());
   }
   return value;
+}
+
+bool        KV_TK_INMEM_T::del(const std::string_view &key) {
+  auto s = db->Remove(key);
+  if (!s.IsOK())
+    return b_error("tkm " + dbname + ": Cannot delete record.");
+  return true;
 }
 
 #endif

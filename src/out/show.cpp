@@ -15,7 +15,6 @@ void prn_bk(const BK_T &bk) {
 }
 
 void prn_tx(const TX_T &tx) {
-  // TODO: through no (COUNT.tx/tx.id)
 #ifndef ADDR_ONLY
   printf(" T: # %u, Ins: %lu, Outs: %lu, SegWit: %d, Hash: %s\n",
     tx.no, tx.vins.size(), tx.vouts.size(), tx.segwit, hash2hex(tx.hash).c_str());
@@ -27,7 +26,6 @@ void prn_tx(const TX_T &tx) {
 }
 
 void prn_vin(const VIN_T &vin) {
-  // TODO: if vin.vout == 0xFFFFFFFF ? <coinbase> : tx+no.vout
   if (vin.vout == COINBASE_vout)
     printf("  <: # %u, Src: <coinbase>\n", vin.no);
   else {
@@ -41,9 +39,9 @@ void prn_vin(const VIN_T &vin) {
 void prn_vout(VOUT_T &vout) {
 #ifndef ADDR_ONLY
   if (vout.addr and vout.addr->is_full())
-    printf("  >: # %u, $: %llu, Addr: %s %s\n", vout.no, vout.satoshi, vout.addr_type().c_str(), vout.addr->repr().c_str());
+    printf("  >: # %u, $: %" PRIu64 ", Addr: %s %s\n", vout.no, vout.satoshi, vout.addr_type().c_str(), vout.addr->repr().c_str());
   else
-    printf("  >: # %u, $: %llu, Addr: %s %lu bytes\n", vout.no, vout.satoshi, vout.addr_type().c_str(), vout.script.length());
+    printf("  >: # %u, $: %" PRIu64 ", Addr: %s %lu bytes\n", vout.no, vout.satoshi, vout.addr_type().c_str(), vout.script.length());
 #else
   auto a = vout.addr_repr();
   if (!a.empty())

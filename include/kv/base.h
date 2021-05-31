@@ -10,8 +10,17 @@ const uint32_t NOT_FOUND_U32 = MAX_UINT32;
 class KV_BASE_T {
 public:
     virtual ~KV_BASE_T() {}
-    virtual void        clear(void) = 0;
-    virtual uint32_t    count(void) = 0;
+    /// Open DB; return true on success
+    virtual bool     open(void) = 0;
+    /// Close DB; return true on success
+    virtual bool     close(void) = 0;
+    /// Clean DB
+    virtual void     clear(void) = 0;
+    /**
+     * @brief Count records
+     * @return Record number on success or NOT_FOUND_U32 on error
+     */
+    virtual uint32_t count(void) = 0;
     /**
      * @brief Add new key
      * @param key Key to add
@@ -31,6 +40,12 @@ public:
      * @return Found or added value or NOT_FOUND_U32 on error (not found nor added)
      */
     virtual uint32_t    get_or_add(const std::string_view &key) = 0;
+    /**
+     * @brief Delete record
+     * @param key Key of record to delete
+     * @return true on success or false on error
+     */
+    virtual bool        del(const std::string_view &key) = 0;
 };
 
 enum KVNAME_T {

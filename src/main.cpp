@@ -18,7 +18,7 @@ extern time_t      start_time;
 using namespace std;
 
 int     main(int argc, char *argv[]) {
-  string_view (*bkloader)(const uint32_t) = &stdin_bk;
+  uniq_view (*bkloader)(const uint32_t) = &stdin_bk;
 
     // 1. prepare
     // 1.1. handle options
@@ -35,8 +35,10 @@ int     main(int argc, char *argv[]) {
     }
     // 1.3. prepare k-v storages (and normalize OPTS.from)
     start_mem = memused();
-    if (!set_cache())
-        return u32_error("Set_cache oops.", 3);
+    if (!set_cache()) {
+      stop_cache();
+      return u32_error("Set_cache oops.", 3);
+    }
     // 1.4. last prestart
     if (OPTS.verbose) {
       if (OPTS.verbose > DBG_MIN)
@@ -47,13 +49,15 @@ int     main(int argc, char *argv[]) {
     // 2. main loop
     for (COUNT.bk = OPTS.from; OPTS.num; COUNT.bk++, OPTS.num--) {
       auto buffer = bkloader(COUNT.bk); // 1. load
-      if (buffer.empty())
+      if (!buffer.first or (buffer.second == 0))
         break;
-      auto bk = BK_T(buffer, COUNT.bk); // 2. create objects
+      auto bk = BK_T(move(buffer.first), COUNT.bk); // 2. create objects
       if (!bk.parse())                  // 3. parse
         break;
       if (kv_mode()) {
         if (!bk.resolve())              // 4. resolve
+          break;
+        if (!update_integrity())
           break;
         if (OPTS.out)                   // 5. out
           out_bk(bk);
@@ -62,8 +66,9 @@ int     main(int argc, char *argv[]) {
           prn_bk(bk);
       }
       if ((OPTS.verbose) and (((COUNT.bk+1) % OPTS.logstep) == 0))  // 7. log
-          log_interim();
+        log_interim();
     }
+    stop_cache();
     COUNT.bk--;
     // 3. The end
     if (OPTS.verbose) {
@@ -72,6 +77,5 @@ int     main(int argc, char *argv[]) {
       if (OPTS.verbose > DBG_MIN)
         log_summary();
     }
-    stop_cache();
     return 0;
 }

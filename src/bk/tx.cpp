@@ -64,8 +64,10 @@ bool TX_T::parse(void) {
 
 bool TX_T::resolve(void) {
   bool retvalue = ((id = TxDB->add(u256string_view(hash))) != MAX_UINT32);
-  if (retvalue and (id != COUNT.tx))
+  if (retvalue and (id != COUNT.tx)) {
+    rollback(false);
     retvalue = b_error("new tx has # " + to_string(id) + " instead of expecting " + to_string(COUNT.tx));
+  }
   if (retvalue)
     for (auto &vin : vins)
       if (!(retvalue &= vin->resolve()))
@@ -76,7 +78,26 @@ bool TX_T::resolve(void) {
         break;
   if (retvalue)
     COUNT.tx++;
-  else
+  else {
     v_error("Tx # " + to_string(no) + " resolve error");
+    rollback();
+  }
+  return retvalue;
+}
+
+bool TX_T::rollback(bool recur) { // FIXME: tune counter
+  bool retvalue(true);
+  if (id != MAX_UINT32) {
+    retvalue = TxDB->del(u256string_view(hash));
+    if (retvalue)
+      id = MAX_UINT32;
+    else
+      v_error("Tx # " + to_string(no) + ": Cannot delete tx itself.");
+    if (recur)
+      for (auto &vout : vouts)
+        retvalue &= vout->rollback();
+  }
+  if (!retvalue)
+    v_error("Tx # " + to_string(no) + ": Error rolling back tx.");
   return retvalue;
 }
