@@ -46,8 +46,8 @@ bool VOUT_T::resolve(void) {
         addr_is_new = true;
         COUNT.addr++;               // it is already saved
         STAT.addr_lens[key.length()]++;
-        if (addr_id != COUNT.addr) {
-          retvalue = b_error(err_prefix() + "new addr has # " + to_string(addr_id) + " instead of expecting " + to_string(COUNT.addr));
+        if (addr_id != (COUNT.addr-1)) {
+          retvalue = b_error(err_prefix() + "new addr has # " + to_string(addr_id) + " instead of expecting " + to_string(COUNT.addr-1));
           rollback();
         }
       }
