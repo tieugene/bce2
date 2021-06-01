@@ -14,6 +14,7 @@ private:
   uint64_t    tune = 0;
   std::filesystem::path dbpath;
   std::unique_ptr<tkrzw::HashDBM> db = nullptr;
+  const std::string err_prefix(void);
 public:
   KV_TK_DISK_T(const std::filesystem::path &, KVNAME_T, uint64_t = 0);
   ~KV_TK_DISK_T();
@@ -32,6 +33,7 @@ private:
   uint64_t    tune;
   std::string dbname;
   std::unique_ptr<tkrzw::TinyDBM> db = nullptr;
+  const std::string err_prefix(void);
 public:
   KV_TK_INMEM_T(KVNAME_T name, uint64_t tune = 0) : tune(tune), dbname(kv_name[name]) {}
   bool        open(void);
