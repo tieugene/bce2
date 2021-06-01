@@ -117,3 +117,5 @@ message(STATUS "PVS-Studio: ${USE_PVS}")
 
 # add_executable(test_cin tools/test_cin.cpp)
 # install(TARGETS test_cin RUNTIME DESTINATION bin)
+
+# include_directories(TESTS)
