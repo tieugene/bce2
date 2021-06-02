@@ -12,8 +12,8 @@
 OPT_T       OPTS;
 STAT_T      STAT;
 COUNT_T     COUNT;
-extern long        start_mem;
-extern time_t      start_time;
+extern long        start_mem;   // out/log.cpp
+extern time_t      start_time;  // out/log.cpp
 
 using namespace std;
 
@@ -57,7 +57,7 @@ int     main(int argc, char *argv[]) {
       if (kv_mode()) {
         if (!bk.resolve())              // 4. resolve
           break;
-        if (!update_integrity())
+        if (!StampDB->update())
           break;
         if (OPTS.out)                   // 5. out
           out_bk(bk);

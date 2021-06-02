@@ -10,6 +10,7 @@ const uint32_t NOT_FOUND_U32 = MAX_UINT32;
 class KV_BASE_T {
 public:
     virtual ~KV_BASE_T() {}
+    virtual bool     infile(void) = 0;  // TODO: static attribute
     /// Open DB; return true on success
     virtual bool     open(void) = 0;
     /// Close DB; return true on success
