@@ -44,12 +44,11 @@ bool VOUT_T::resolve(void) {
     if (retvalue) {
       if (addr_id >= COUNT.addr) {  // new
         addr_is_new = true;
-        if (addr_id != COUNT.addr) {
-          retvalue = b_error(err_prefix() + "new addr has # " + to_string(addr_id) + " instead of expecting " + to_string(COUNT.addr));
+        COUNT.addr++;               // it is already saved
+        STAT.addr_lens[key.length()]++;
+        if (addr_id != (COUNT.addr-1)) {
+          retvalue = b_error(err_prefix() + "new addr has # " + to_string(addr_id) + " instead of expecting " + to_string(COUNT.addr-1));
           rollback();
-        } else {
-          COUNT.addr++; // lies after rollback()
-          STAT.addr_lens[key.length()]++;
         }
       }
     } else
@@ -65,10 +64,13 @@ bool VOUT_T::rollback(void) {
   if ((addr_id != MAX_UINT32) and (addr_is_new)) {
     if (OPTS.verbose == DBG_MAX)
       v_error(err_prefix() + "Rolling back...");
-    retvalue = AddrDB->del(addr->as_key());
-    if (retvalue)
+    auto key = addr->as_key();
+    retvalue = AddrDB->del(key);
+    if (retvalue) {
       addr_id = MAX_UINT32;
-    else
+      COUNT.addr--;
+      STAT.addr_lens[key.length()]--;
+    } else
       v_error(err_prefix() + "Rolling back oops: " + addr->repr());
   }
   return retvalue;

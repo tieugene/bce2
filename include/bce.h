@@ -52,10 +52,11 @@ struct  COUNT_T {
   uint32_t    addr = 0;   // unique addrs
 };
 
-extern OPT_T      OPTS;
-extern STAT_T     STAT;
-extern COUNT_T    COUNT;
-extern std::unique_ptr<KV_BASE_T> TxDB, AddrDB;
+extern OPT_T      OPTS;   // main.cpp
+extern STAT_T     STAT;   // main.cpp
+extern COUNT_T    COUNT;  // main.cpp
+extern std::unique_ptr<KV_BASE_T> TxDB, AddrDB; // kv/kv.cpp
+extern std::unique_ptr<DBSTAMP_T> StampDB;
 
 /// Coinbase vin source
 const uint32_t COINBASE_vout = 0xFFFFFFFF;

@@ -29,6 +29,18 @@ enum KVNGIN_T {
 #endif
 };
 
+class DBSTAMP_T {
+private:
+  std::filesystem::path dbpath;
+  std::fstream file;
+  bool infile = false;
+public:
+  DBSTAMP_T(const std::filesystem::path &);
+  bool check(void);
+  bool update(void);
+  bool close();
+};
+
 /**
  * @brief Set up K-V storages
  * @return True on success
@@ -36,7 +48,5 @@ enum KVNGIN_T {
 bool set_cache(void);
 /// Reset k-v storages
 void stop_cache(void);
-/// Update integrity info
-bool update_integrity(void);
 
 #endif // KV_H

@@ -6,7 +6,7 @@
 using namespace std;
 
 unique_ptr<KV_BASE_T> TxDB = nullptr, AddrDB = nullptr;
-static fstream chk_file;
+unique_ptr<DBSTAMP_T> StampDB = nullptr;
 
 bool chk_kv(uint32_t count, const string &name) {
   if (count == NOT_FOUND_U32)
@@ -53,6 +53,7 @@ bool    set_cache(void) {
           default:
             return b_error("k-v not implemented");
         }
+        StampDB = make_unique<DBSTAMP_T>(OPTS.kvdir);
         if (!TxDB->open())
           return b_error("Cannot open Tx.");
         if (!AddrDB->open()) {
@@ -78,16 +79,8 @@ bool    set_cache(void) {
         if (COUNT.addr == NOT_FOUND_U32)
           return b_error("Cannot count addr #2");
         // integrity
-        auto path = OPTS.kvdir / "bce2.chk";
-        chk_file.open(path);
-        if(!chk_file.is_open()) {
-          chk_file.clear();
-          chk_file.open(path, ios::out); //Create file.
-          chk_file.close();
-          chk_file.open(path);
-        }
-        if (!chk_file.is_open())
-          v_error("Cannot open " + path.string());
+        if (!StampDB->check())
+          return b_error("Integrity check error.");
     }
     if (OPTS.from == MAX_UINT32)
         OPTS.from = 0;
@@ -98,16 +91,61 @@ void stop_cache(void) {
   if (kv_mode()) {
     TxDB->close();
     AddrDB->close();
-    if (chk_file.is_open())
-      chk_file.close();
+    StampDB->close();
   }
 }
 
-bool update_integrity(void) {
-  if (chk_file.is_open()) {
-    uint32_t data[3] = {COUNT.bk, COUNT.tx, COUNT.addr};
-    chk_file.seekp(0);
-    chk_file.write((char *) &data, sizeof(data));
+DBSTAMP_T::DBSTAMP_T(const std::filesystem::path &dir) {
+  dbpath = dir / "bce2.chk";
+  infile = TxDB->infile() and AddrDB->infile();
+}
+
+bool DBSTAMP_T::check(void) {
+  bool retvalue(true);
+  if (infile and OPTS.from) {  // don't check from scratch
+    if (filesystem::exists(dbpath)) {
+      file.open(dbpath, ios::in | ios::binary);
+      if (file.is_open()) {
+        uint32_t data[3];
+        if (file.read((char *) data, sizeof(data))) {
+          if ((data[0] != OPTS.from) or (data[1] != COUNT.tx) or (data[2] != COUNT.addr))
+            retvalue = b_error(
+              "Saved: Bk: " + to_string(data[0]) + ", Tx: " + to_string(data[1]) + ", Addr: " + to_string(data[2]) +
+              "\nReal:  Bk: " + to_string(OPTS.from) + ", Tx: " + to_string(COUNT.tx) + ", Addr: " + to_string(COUNT.addr) + "\n");
+        } else
+          retvalue = b_error("Cannot read " + dbpath.string());
+        file.close();
+      } else
+        retvalue = b_error("Cannot open " + dbpath.string() + " to read.");
+    }
   }
-  return true;
+  return retvalue;
+}
+
+bool DBSTAMP_T::update(void) {
+  bool retvalue(true);
+  if (infile) {
+    if(!file.is_open()) {
+      file.clear();
+      file.open(dbpath, ios::out | ios::binary); //Create file.
+    }
+    if (file.is_open()) {
+      uint32_t data[3] = {COUNT.bk+1, COUNT.tx, COUNT.addr};
+      file.seekp(0);
+      if (!file.write((char *) &data, sizeof(data)))
+        retvalue = b_error("Cannot write to file " + dbpath.string());
+    } else
+      retvalue = b_error("Cannot open " + dbpath.string());
+  }
+  return retvalue;
+}
+
+bool DBSTAMP_T::close(void) {
+  bool retvalue(true);
+  if (infile) {
+    if (file.is_open())
+      file.close();
+    retvalue = !file.is_open();
+  }
+  return retvalue;
 }

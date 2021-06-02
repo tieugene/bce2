@@ -68,22 +68,22 @@ bool TX_T::parse(void) {
 
 bool TX_T::resolve(void) {
   bool retvalue = ((id = TxDB->add(u256string_view(hash))) != MAX_UINT32);
-  if (retvalue and (id != COUNT.tx)) {
-    retvalue = b_error(err_prefix() + "new tx is # " + to_string(id) + " instead of expecting " + to_string(COUNT.tx));
-    rollback(false);
-  }
-  if (retvalue)
-    for (auto &vin : vins)
-      if (!(retvalue &= vin->resolve()))
-        break;
-  if (retvalue)
-    for (auto &vout : vouts)
-      if (!(retvalue &= vout->resolve()))
-        break;
-  if (retvalue)
+  if (retvalue) {
     COUNT.tx++;
-  else {
-    v_error(err_prefix() + "Resolve oops");
+    if (id != (COUNT.tx-1)) {
+      retvalue = b_error(err_prefix() + "new tx is # " + to_string(id) + " instead of expecting " + to_string(COUNT.tx-1));
+    } else {
+      for (auto &vin : vins)
+        if (!(retvalue &= vin->resolve()))
+          break;
+      if (retvalue)
+        for (auto &vout : vouts)
+          if (!(retvalue &= vout->resolve()))
+            break;
+    }
+  }
+  if (!retvalue) {
+    v_error(err_prefix() + "Resolve oops.");
     rollback();
   }
   return retvalue;
@@ -98,9 +98,10 @@ bool TX_T::rollback(bool recur) {
       for (auto &vout : vouts)
         retvalue &= vout->rollback();
     if (retvalue) {
-      if ((retvalue &= TxDB->del(u256string_view(hash))))
+      if ((retvalue &= TxDB->del(u256string_view(hash)))) {
         id = MAX_UINT32;
-      else
+        COUNT.tx--;
+      } else
         v_error(err_prefix() + "Cannot rollback itself.");
     }
   }
