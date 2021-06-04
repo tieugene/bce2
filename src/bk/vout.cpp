@@ -27,7 +27,7 @@ bool VOUT_T::parse(void) {
     try {
       addr = addr_decode(script);
     } catch (const AddrException &e) {
-      if (OPTS.verbose > DBG_MAX)
+      if (OPTS.verbose == DBG_MAX)
         cerr << "Vout " << to_string(tx->get_bk()->get_id()) << "/" << to_string(tx->get_no()) << "/" << to_string(no) << ": " << e.what() << endl;
     }
   }
@@ -52,7 +52,7 @@ bool VOUT_T::resolve(void) {
         }
       }
     } else
-      retvalue = b_error("Vout # " + to_string(no) + " not found nor added.");
+      v_error("Vout # " + to_string(no) + " not found nor added.");
   }
   if (!retvalue)
     v_error(err_prefix() + "Resolve oops");
