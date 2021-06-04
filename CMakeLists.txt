@@ -105,13 +105,17 @@ if (BUILD_TOOLS)
 endif ()
 
 # ==== PVS-Studio
-option(USE_PVS "PVS-Studio" OFF)
+option(USE_PVS "PVS-Studio" ON)
 if (USE_PVS)
   # not helps with QtCreator
   include("cmake/PVS-Studio.cmake")
   pvs_studio_add_target(TARGET ${PROJECT_NAME}.analyze ALL
+                        OUTPUT
+                        FORMAT errorfile
                         ANALYZE ${PROJECT_NAME}
-                        MODE GA:1,2 OP)
+                        MODE GA:1,2
+                        LOG target.err
+                        HIDE_HELP)
 endif()
 message(STATUS "PVS-Studio: ${USE_PVS}")
 

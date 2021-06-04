@@ -1,4 +1,5 @@
 #include <vector>
+#include <thread>
 #include "bce.h"      // STAT, OPTS
 #include "crypt/uintxxx.h"  // hash
 #include "bk/bk.h"
@@ -54,8 +55,13 @@ void TX_T::mk_hash(void) {  // const u8_t *tx_beg
 }
 
 bool TX_T::parse(void) {
-  if (OPTS.out or kv_mode())
-    mk_hash();  // TODO: on demand/mt
+  thread *t = nullptr;
+  if (OPTS.out or kv_mode()) {
+    if (OPTS.mt)
+      t = new thread(&TX_T::mk_hash, this);
+    else
+      mk_hash();  // TODO: on demand/mt
+  }
   bool retvalue(true);
   // for (auto &vin ; vins)
   //  revalue &= vin.parse();
@@ -63,6 +69,8 @@ bool TX_T::parse(void) {
     retvalue &= vout->parse();
   if (retvalue and !kv_mode())
     COUNT.tx++;   // session counter
+  if (t)
+    t->join();
   return retvalue;
 }
 
