@@ -105,7 +105,7 @@ if (BUILD_TOOLS)
 endif ()
 
 # ==== PVS-Studio
-option(USE_PVS "PVS-Studio" ON)
+option(USE_PVS "PVS-Studio" OFF)
 if (USE_PVS)
   # not helps with QtCreator
   include("cmake/PVS-Studio.cmake")
