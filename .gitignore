@@ -78,4 +78,4 @@ CMakeLists.txt.user
 _*
 doc/*.1
 doc/*.5
-tests/
+tests

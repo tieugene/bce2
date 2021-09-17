@@ -86,7 +86,7 @@ message(STATUS "BDB: ${USE_BDB}")
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 
 # ====
-option(BUILD_TOOLS "Tools" OFF)
+option(BUILD_TOOLS "Tools" ON)
 if (BUILD_TOOLS)
   add_executable(btcbklocs tools/btcbklocs.cpp)
   add_executable(btclocview tools/btclocview.cpp)

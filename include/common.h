@@ -7,6 +7,7 @@
 #include <string_view>
 #include <stdexcept>
 #include <tuple>
+#include <memory>
 
 const uint32_t MAX_UINT32 = 0xFFFFFFFF;
 typedef unsigned char u8_t;
