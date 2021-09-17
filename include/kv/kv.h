@@ -34,11 +34,15 @@ private:
   std::filesystem::path dbpath;
   std::fstream file;
   bool infile = false;
+  uint32_t data[3] = {0, 0, 0};
 public:
   DBSTAMP_T(const std::filesystem::path &);
   bool check(void);
   bool update(void);
   bool close();
+  uint32_t get_bk(void) {return data[0];}
+  uint32_t get_tx(void) {return data[1];}
+  uint32_t get_ad(void) {return data[2];}
 };
 
 /**

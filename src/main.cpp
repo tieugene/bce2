@@ -39,12 +39,15 @@ int     main(int argc, char *argv[]) {
       stop_cache();
       return u32_error("Set_cache oops.", 3);
     }
-    // 1.4. last prestart
-    if (OPTS.verbose) {
-      if (OPTS.verbose > DBG_MIN)
-        log_opts();
-      log_head();
+    if (OPTS.verbose > DBG_MIN)
+      log_opts();
+    if (OPTS.info) {
+      stop_cache();
+      return 0;
     }
+    // 1.4. last prestart
+    if (OPTS.verbose)
+      log_head();
     start_time = time(nullptr);
     // 2. main loop
     for (COUNT.bk = OPTS.from; OPTS.num; COUNT.bk++, OPTS.num--) {

@@ -1,3 +1,4 @@
+// Logging during process
 #include <iostream>
 #include "misc.h" // memused
 #include "out/log.h"
@@ -69,4 +70,14 @@ void    log_summary(void) {
   for (auto i = 0; i < 321; i++)
     if (STAT.addr_lens[i])
       cerr << i << " : " << STAT.addr_lens[i] << endl;
+}
+
+void    info(void) {
+  cout
+        << "Kv_tx:"   << TAB << TxDB->count() << endl
+        << "Kv_ad:"   << TAB << AddrDB->count() << endl
+        << "Chk_bk:"  << TAB << StampDB->get_bk() << endl
+        << "Chk_tx:"  << TAB << StampDB->get_tx() << endl
+        << "Chk_ad:"  << TAB << StampDB->get_ad() << endl
+      ;
 }

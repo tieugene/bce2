@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include "bce.h"
+#include "out/log.h"
 
 using namespace std;
 
@@ -11,12 +12,14 @@ unique_ptr<DBSTAMP_T> StampDB = nullptr;
 bool chk_kv(uint32_t count, const string &name) {
   if (count == NOT_FOUND_U32)
     return b_error("Cannot count" + name);
-  if (count) {
-    if (OPTS.from == MAX_UINT32)
-      return b_error(name + " is not empty. Set -f option properly.");
-  } else {
-    if (OPTS.from > 0 and OPTS.from != MAX_UINT32)
-      return b_error("-f > 0 but " + name + " k-v is empty. Use '-f 0' or ommit it.");
+  if (!OPTS.info) {
+    if (count) {
+      if (OPTS.from == MAX_UINT32)
+        return b_error(name + " is not empty. Set -f option properly.");
+    } else {
+      if (OPTS.from > 0 and OPTS.from != MAX_UINT32)
+        return b_error("-f > 0 but " + name + " k-v is empty. Use '-f 0' or ommit it.");
+    }
   }
   return true;
 }
@@ -106,8 +109,11 @@ bool DBSTAMP_T::check(void) {
     if (filesystem::exists(dbpath)) {
       file.open(dbpath, ios::in | ios::binary);
       if (file.is_open()) {
-        uint32_t data[3];
         if (file.read((char *) data, sizeof(data))) {
+          if (OPTS.info) {
+            info();
+            return true;
+          }
           if ((data[0] != OPTS.from) or (data[1] != COUNT.tx) or (data[2] != COUNT.addr))
             retvalue = b_error(
               "Saved: Bk: " + to_string(data[0]) + ", Tx: " + to_string(data[1]) + ", Addr: " + to_string(data[2]) +
@@ -130,7 +136,9 @@ bool DBSTAMP_T::update(void) {
       file.open(dbpath, ios::out | ios::binary); //Create file.
     }
     if (file.is_open()) {
-      uint32_t data[3] = {COUNT.bk+1, COUNT.tx, COUNT.addr};
+      data[0] = COUNT.bk+1;
+      data[1] = COUNT.tx;
+      data[2] = COUNT.addr;
       file.seekp(0);
       if (!file.write((char *) &data, sizeof(data)))
         retvalue = b_error("Cannot write to file " + dbpath.string());

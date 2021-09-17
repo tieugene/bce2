@@ -40,9 +40,10 @@ Options:\n\
 -s n      - logging step (default=1)\n\
 -v[n]     - verbosity (0..3, to stderr)\n\
 -m        - multithreading on\n\
+-i        - info\n\
 ";
 
-/// Load options from config
+/// Load options from config file
 bool load_cfg(void) {
   ifstream f_in(filesystem::path(getenv("HOME")) / cfg_file_name);
   if(f_in) {
@@ -79,13 +80,13 @@ bool load_cfg(void) {
 }
 
 /// Handle CLI. Return 0 if error, argv's index of 1st filename on success.
-bool        cli(int argc, char *argv[]) {
+bool cli(int argc, char *argv[]) {
     int opt, tmp;
     long tmp_l;
     auto kt = kv_type_name.begin();
     bool direct = false;
 
-    while ((opt = getopt(argc, argv, "hf:n:d:l:k:e:t:s:comv::")) != -1) {  // FIXME: v?
+    while ((opt = getopt(argc, argv, "hf:n:d:l:k:e:t:s:comiv::")) != -1) {  // FIXME: v?
       switch (opt) {
         case 'f':
           tmp = atoi(optarg);
@@ -96,7 +97,7 @@ bool        cli(int argc, char *argv[]) {
         case 'n':
           tmp = atoi(optarg);
           if (tmp < 0 or tmp > 999999)
-            return b_error("Bad -i: " + string(optarg));
+            return b_error("Bad -n: " + string(optarg));
           OPTS.num = tmp;
           if (OPTS.num == 0)  // ?
               OPTS.num = 999999;
@@ -150,6 +151,9 @@ bool        cli(int argc, char *argv[]) {
           if (tmp < 1 or tmp > 100000)
             return b_error("Bad -s: " + string(optarg));
           OPTS.logstep = tmp;
+          break;
+        case 'i':
+          OPTS.info = true;
           break;
         case 'h':
           cout << help_txt << endl;
