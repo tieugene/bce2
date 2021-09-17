@@ -10,8 +10,6 @@ BuildRequires:	cmake
 BuildRequires:	asciidoctor
 # openssl-devel
 BuildRequires:	pkgconfig(libcrypto)
-# kyotocabinet-devel
-BuildRequires:	pkgconfig(kyotocabinet)
 # tkrzw-devel
 BuildRequires:	pkgconfig(tkrzw) >= 0.9.9
 BuildRequires:	libdb-cxx-devel
