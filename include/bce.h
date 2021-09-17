@@ -31,6 +31,7 @@ struct  OPT_T {
   bool        fromcin = false;      // input from stdin
   bool        out = false;          // produce output
   bool        mt = false;           // multithreading
+  bool        info = false;         // info
 };
 
 /// Session counters

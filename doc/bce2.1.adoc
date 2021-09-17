@@ -47,6 +47,8 @@ Intermediate data is storing in key-value DB.
   Verbosity (0..3, default=0, to stderr)
 *-m*::
   Multithreading on
+*-i*::
+  Info: print current k-v state and exit
 
 === Key-value engines:
 

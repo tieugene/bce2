@@ -6,5 +6,6 @@ void log_head(void);
 void log_interim(void);
 void log_tail(void);
 void log_summary(void);
+void info(void);
 
 #endif // LOG_H
