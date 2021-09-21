@@ -12,18 +12,18 @@ const std::string TAB = "\t";
 void log_opts(void) {
   cerr
       << "= Options: =" << endl
-      << "From:" << TAB << ((OPTS.from == MAX_UINT32) ? string("<not set>") : to_string(OPTS.from)) << endl
-      << "Num:" << TAB << OPTS.num << endl
-      << "Dat dir:" << TAB << OPTS.datdir << endl
+      << "BK From:" << TAB << ((OPTS.from == MAX_UINT32) ? string("<not set>") : to_string(OPTS.from)) << endl
+      << "BK Number:" << TAB << OPTS.num << endl
+      << "BK from cin:" << TAB << OPTS.fromcin << endl
+      << "*.dat dir:" << TAB << OPTS.datdir << endl
       << "Locs file:" << TAB << OPTS.locsfile << endl
-      << "Cin:" << TAB << OPTS.fromcin << endl
       << "K-V dir:" << TAB << OPTS.kvdir << endl
       << "K-V type:" << TAB << OPTS.kvngin << endl
       << "K-V tune:" << TAB << OPTS.kvtune << endl
-      << "Out:" << TAB << OPTS.out << endl
-      << "Log by:" << TAB << OPTS.logstep << endl
-      << "Debug:" << TAB << OPTS.verbose << endl
-      << "M/t:" << TAB << OPTS.mt << endl
+      << "Out result:" << TAB << OPTS.out << endl
+      << "Logging by:" << TAB << OPTS.logstep << endl
+      << "Verbosity:" << TAB << OPTS.verbose << endl
+      << "Multithread:" << TAB << OPTS.mt << endl
       << endl;
       ;
 }
